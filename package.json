@@ -1,0 +1,6 @@
+{
+  "name": "app",
+  "private": true,
+  "type": "module",
+  "prettier": "@cloud-cli/prettier-config"
+}
