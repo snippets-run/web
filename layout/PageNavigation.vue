@@ -2,11 +2,13 @@
   <nav role="navigation" aria-label="pagination" class="mx-auto flex w-full justify-center">
     <ul class="flex flex-row items-center gap-1">
       <li>
-        <a
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-1 pl-2.5"
+        <button
+          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-1"
           aria-label="Go to previous page"
-          href="/?page=1"
-          ><svg
+          :disabled="current == 1"
+          @click="onNavigate(current - 1)"
+        >
+          <svg
             width="15"
             height="15"
             viewBox="0 0 15 15"
@@ -21,23 +23,26 @@
               clip-rule="evenodd"
             ></path>
           </svg>
-          <span>Previous</span></a
-        >
+          <span>Previous</span>
+        </button>
       </li>
-      <li>
-        <a
+      <li v-for="p in pages">
+        <button
           aria-current="page"
           class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9"
-          href="/?page=1"
-          >1</a
+          @click="onNavigate(p)"
         >
+          {{ p }}
+        </button>
       </li>
       <li>
-        <a
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-1 pr-2.5"
+        <button
+          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-1"
           aria-label="Go to next page"
-          href="/?page=1"
-          ><span>Next</span>
+          :disabled="current >= max"
+          @click="onNavigate(current + 1)"
+        >
+          <span>Next</span>
           <svg
             width="15"
             height="15"
@@ -53,8 +58,29 @@
               clip-rule="evenodd"
             ></path>
           </svg>
-        </a>
+        </button>
       </li>
     </ul>
   </nav>
 </template>
+
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+  max: { type: Number, default: 1 },
+  current: { type: Number, default: 1 },
+});
+
+const emit = defineEmits(['navigate']);
+
+const pages = computed(() =>
+  Array(props.max)
+    .fill(0)
+    .map((_, i) => i + 1),
+);
+
+function onNavigate(page) {
+  emit('navigate', page);
+}
+</script>
