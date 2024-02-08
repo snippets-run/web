@@ -9,6 +9,6 @@ jobs:
   build:
     uses: cloud-cli/workflows/.github/workflows/docker-ghcr-build.yml@main
     with:
-      name: cloudy-apps/
+      name: snippets-run/web
       baseImage: cloud-cli/node:latest
       type: vite
