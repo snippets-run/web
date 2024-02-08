@@ -9,13 +9,13 @@
           <a
             class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary underline-offset-4 hover:underline px-0 py-0 h-fit"
             href="/me"
-            >me</a
+            >{{ snippet.owner }}</a
           >
           <div>/</div>
           <a
             class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary underline-offset-4 hover:underline px-0 py-0 h-fit"
             href="/me/gobblet"
-            >gobblet</a
+            >{{ snippet.name }}</a
           >
           <div class="pl-1">
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,19 +45,16 @@
               <polyline points="4 17 10 11 4 5"></polyline>
               <line x1="12" x2="20" y1="19" y2="19"></line>
             </svg>
-            Shell
+            {{ snippet.platform }}
           </div>
         </div>
-        <div class="text-xs text-muted-foreground">
-          Updated
-          <!-- -->28 days ago
-        </div>
+        <div class="text-xs text-muted-foreground">...</div>
       </div>
     </div>
     <div class="flex items-center space-x-2">
       <div class="hidden md:flex items-center">
-        <div class="flex items-center h-8 px-2 rounded-l-md border text-sm __className_a26a16">
-          snippet run me/gobblet
+        <div class="flex items-center h-8 px-2 rounded-l-md border text-sm">
+          run {{ snippet.owner }}/{{ snippet.name }}
         </div>
         <div class="flex items-center justify-center h-8 w-8 rounded-r-md border border-l-0 cursor-pointer">
           <svg
@@ -93,10 +90,16 @@
           <rect width="18" height="18" x="3" y="3" rx="2"></rect>
           <path d="m9 8 6 4-6 4Z"></path>
         </svg>
-        0<!-- -->
-        Runs
+        {{ stats.runs }} runs
       </div>
     </div>
   </div>
   <div class="ml-12 text-sm text-muted-foreground mt-1"></div>
 </template>
+
+<script setup>
+defineProps({
+  snippet: { type: Object },
+  stats: { type: Object },
+});
+</script>
