@@ -9,7 +9,7 @@
         decoding="async"
         data-nimg="1"
         style="color: transparent"
-        src="assets/icon.svg"
+        src="../assets/icon.svg"
       />
       <div class="font-semibold">snippets.run</div>
     </div>
