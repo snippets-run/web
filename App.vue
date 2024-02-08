@@ -1,7 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen">
-    <SnippetList></SnippetList>
-  </div>
+  <SnippetList></SnippetList>
 </template>
 
 <script setup>
