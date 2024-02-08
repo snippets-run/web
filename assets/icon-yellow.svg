@@ -1,0 +1,15 @@
+<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+ <title/>
+
+ <g>
+  <title>Layer 1</title>
+  <rect id="svg_1" height="256" width="256" y="0" x="0" fill="#e3b23c"/>
+  <g id="svg_7">
+   <path d="m187.27937,93.73888a64.58523,64.58523 0 0 0 -127.05676,11.0382a35.22831,35.22831 0 0 0 5.87138,69.9869l46.97108,0l0,-11.74277l-46.97108,0a23.48554,23.48554 0 0 1 0,-46.97108a5.87138,5.87138 0 0 0 5.87138,-5.87138a52.84246,52.84246 0 0 1 104.68679,-10.27492a5.87138,5.87138 0 0 0 4.99068,4.69711a29.35692,29.35692 0 0 1 25.36438,29.06335l11.74277,0a41.09969,41.09969 0 0 0 -31.47062,-39.92542l0,0.00001z" id="svg_2" stroke="null"/>
+   <g id="svg_6" stroke="null">
+    <polyline fill="none" points="134.75,131 171.97726440429688,164.09092712402344 134.75,197.1818084716797 " stroke-linecap="round" stroke-linejoin="round" stroke-width="8" id="svg_3" stroke="#000"/>
+    <line fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="8" x1="176.11362" x2="225.74999" y1="197.18182" y2="197.18182" id="svg_4" stroke="#000"/>
+   </g>
+  </g>
+ </g>
+</svg>
