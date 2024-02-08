@@ -1,6 +1,6 @@
 <template>
-  <Header></Header>
-  <div class="container max-w-6xl p-4 md:px-8 pb-16">
+  <div class="flex flex-col min-h-screen">
+    <Header></Header>
     <Main></Main>
     <Footer></Footer>
   </div>
