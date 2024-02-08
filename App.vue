@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import SnippetList from './SnippetList.vue';
+import SnippetList from './components/SnippetList.vue';
 </script>
