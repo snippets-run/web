@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 border-b sticky top-0 bg-white z-50">
     <div class="flex items-center justify-items-stretch space-x-4 w-full">
-      <a class="w-16 h-11 block" href="/home"><img alt="/logo" src="/assets/icon-a0698e3a.svg" /></a>
+      <a class="w-16 h-11 block" href="/home"><img alt="/logo" src="../assets/icon.svg" /></a>
       <div class="w-full">
         <h1 class="font-semibold">snippets.run</h1>
         <p class="text-sm">A repository for runnable code snippets</p>
