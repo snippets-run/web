@@ -2,5 +2,8 @@
   "name": "app",
   "private": true,
   "type": "module",
-  "prettier": "@cloud-cli/prettier-config"
+  "prettier": "@cloud-cli/prettier-config",
+  "devDependencies": {
+    "@cloud-cli/prettier-config": "^1.0.0"
+  }
 }
