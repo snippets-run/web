@@ -1,4 +1,4 @@
-class Ref<RefValue> {
+export class Ref<RefValue> {
   private _value: RefValue | undefined;
   private _obs: any[] = [];
 

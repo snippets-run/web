@@ -1,17 +1,18 @@
 import createRouter from './src/router.mjs';
-import './src/pages/Home.mjs';
-import './src/pages/SnippetList.mjs';
-import './src/pages/SnippetView.mjs';
+import './src/pages/HomePage.mjs';
+import './src/pages/SnippetListPage.mjs';
+import './src/pages/SnippetViewPage.mjs';
+
 import { dispatch } from './src/state.mts';
 
 const route = createRouter({
   '/': 'p-home',
   '/me': 'p-snippetlist',
-  '/s/:name': 'p-snippet',
   '/s/:owner/:name': 'p-snippet',
+  '/s/:name': 'p-snippet',
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  dispatch('startup');
   route(document.querySelector('main')!);
-  dispatch('startup')
 });

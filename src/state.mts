@@ -8,7 +8,7 @@ const initialState = {
   currentSnippet: {} as Snippet | undefined,
 };
 
-const { react, select, dispatch, watch } = useState(initialState, (set, get, commit) => {
+const { react, select, dispatch, watch, commit } = useState(initialState, (set, get, commit) => {
   return {
     async startup() {
       set('profileId', '');
@@ -30,4 +30,4 @@ const { react, select, dispatch, watch } = useState(initialState, (set, get, com
   };
 });
 
-export { dispatch, select, watch, react };
+export { dispatch, select, watch, react, commit };

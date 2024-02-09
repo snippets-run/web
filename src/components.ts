@@ -1,5 +1,5 @@
 import { parse, materialize, normalize } from '@homebots/parse-html';
-import { dispatch, select, watch } from './state.mjs';
+import { dispatch, select, watch, commit } from './state.mjs';
 import { isRef, ref } from './store.mjs';
 
 type DetachFn = () => void;
@@ -166,8 +166,32 @@ export function defineComponent(
 
     disconnect && disconnect.call(this);
 
-    Object.values(this).forEach((v) => v && isRef(v) && v.detach());
+    Object.values(this).forEach((v) => v && isRef(v) && v.detach && v.detach());
   };
 
   Promise.resolve().then(() => customElements.define(Target.tag, Target));
+}
+
+export function defineProps(Target, props) {
+  Object.entries(props).forEach(([name]) => {
+    const refName = '$' + name;
+
+    function ensureProperty(target) {
+      if (target[refName]) return;
+
+      target[refName] = ref(null);
+      target[refName].observe(() => target.onChange?.());
+    }
+
+    Object.defineProperty(Target.prototype, name, {
+      get() {
+        ensureProperty(this);
+        return this[refName];
+      },
+      set(value) {
+        ensureProperty(this);
+        this[refName].value = value;
+      },
+    });
+  });
 }

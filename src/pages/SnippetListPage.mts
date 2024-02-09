@@ -2,10 +2,10 @@ import { defineComponent, html } from '../components';
 import { dispatch, select, watch } from '../state.mts';
 import '../components/Snippet.mjs';
 
-const template = html`<h2 class="font-bold">My snippets</h2>`;
-const item = html`<x-snippet :snippet="snippet" />`;
+const template = html`<h2 class="font-bold mb-4 px-2">My snippets</h2>`;
+const item = html`<x-snippet :snippet="snippet" class="mb-4 block" />`;
 
-class SnippetList extends HTMLElement {
+class SnippetListPage extends HTMLElement {
   static tag = 'p-snippetlist';
   list = select((s) => s.snippets);
 
@@ -13,6 +13,7 @@ class SnippetList extends HTMLElement {
 
   onEnter() {
     dispatch('loadSnippets');
+
     watch(this.list, (list) => {
       this.innerHTML = '';
       this.append(template(this)[0]);
@@ -26,4 +27,4 @@ class SnippetList extends HTMLElement {
   }
 }
 
-defineComponent(SnippetList);
+defineComponent(SnippetListPage);

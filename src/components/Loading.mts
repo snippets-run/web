@@ -1,4 +1,6 @@
-<template>
+import { html } from '../components';
+
+const t = html`<template>
   <div>
     <div>
       <div class="flex items-center justify-between">
@@ -22,4 +24,4 @@
     </div>
     <div class="animate-pulse rounded-md bg-primary/10 mt-4 w-full h-40"></div>
   </div>
-</template>
+</template> `;

@@ -7,6 +7,7 @@ const template = html`<div>
 
 class HomePage extends HTMLElement {
   static tag = 'p-home';
+
   onEnter() {
     dispatch('loadSnippets');
   }
