@@ -8,6 +8,7 @@ import { highlight } from 'https://highlight.jsfn.run/index.mjs';
 const template = html`
   <div class="flex items-center justify-between bg-gray-100 p-2 rounded-t-md">
     <div class="flex items-center space-x-2">
+      <div class="rounded-full border p-1 bg-white"><img class="w-4 h-4 aspect-square" :src="'/assets/platform-' + snippet?.platform + '.svg'" :alt="snippet?.platform" /></div>
       <a
         class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium "
         .hidden="!showOwner(snippet?.owner)"
@@ -20,7 +21,6 @@ const template = html`
         :href="'#/s/' + snippet?.owner + '/' + snippet?.name"
         >$[snippet?.name]</a
       >
-      <div class="border p-1 bg-white"><img class="w-4 h-4 aspect-square" :src="'/assets/platform-' + snippet?.platform + '.svg'" :alt="snippet?.platform" /></div>
     </div>
     <div class="flex items-center space-x-2">
       <div class="flex items-center shadow rounded-md flex-nowrap">
@@ -43,9 +43,11 @@ const template = html`
           <img src="assets/copy.svg" class="w-4 h-4" />
         </button>
       </div>
+      <!--
       <div class="hidden md:flex items-center h-8 px-2 rounded-md border text-xs font-medium bg-white" .hidden="!snippet?.runs">
         $[(snippet?.runs||0) + ' runs']
       </div>
+      -->
     </div>
   </div>
   <div class="text-xs font-mono rounded-b-md border border-t-0 overflow-hidden p-4 p-2">
