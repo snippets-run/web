@@ -1,7 +1,17 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import { router } from './composables/useRouter.js';
+import createRouter from './src/router.mjs';
+import './src/pages/Home.mjs';
+import './src/pages/SnippetList.mjs';
+import './src/pages/SnippetView.mjs';
+import { dispatch } from './src/state.mts';
 
-if (localStorage.getItem('key')) {
-  createApp(App).use(router).mount('#app');
-}
+const route = createRouter({
+  '/': 'p-home',
+  '/me': 'p-snippetlist',
+  '/s/:name': 'p-snippet',
+  '/s/:owner/:name': 'p-snippet',
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  route(document.querySelector('main')!);
+  dispatch('startup')
+});

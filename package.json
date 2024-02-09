@@ -5,5 +5,8 @@
   "prettier": "@cloud-cli/prettier-config",
   "devDependencies": {
     "@cloud-cli/prettier-config": "^1.0.0"
+  },
+  "dependencies": {
+    "@homebots/parse-html": "^1.1.5"
   }
 }
