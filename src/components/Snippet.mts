@@ -20,7 +20,7 @@ const template = html`
         :href="'#/s/' + snippet?.owner + '/' + snippet?.name"
         >$[snippet?.name]</a
       >
-      <div class="inline-flex items-center rounded-md border p-1 text-xs font-semibold bg-white">$[snippet?.platform]</div>
+      <div class="border p-1 bg-white"><img class="w-4 h-4 aspect-square" :src="'/assets/platform-' + snippet?.platform + '.svg'" :alt="snippet?.platform" /></div>
     </div>
     <div class="flex items-center space-x-2">
       <div class="flex items-center shadow rounded-md flex-nowrap">
