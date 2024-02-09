@@ -6,7 +6,7 @@ import './src/pages/SnippetViewPage.mjs';
 import { dispatch } from './src/state.mts';
 
 const route = createRouter({
-  '/': 'p-home',
+  '/': 'p-snippetlist',
   '/me': 'p-snippetlist',
   '/s/:owner/:name': 'p-snippet',
   '/s/:name': 'p-snippet',

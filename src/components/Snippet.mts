@@ -6,7 +6,7 @@ import type { Snippet } from '../types';
 import { highlight } from 'https://highlight.jsfn.run/index.mjs';
 
 const template = html`
-  <div class="flex items-center justify-between bg-gray-100 mb-2 p-2 rounded-md">
+  <div class="flex items-center justify-between bg-gray-100 p-2 rounded-t-md">
     <div class="flex items-center space-x-2">
       <a
         class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary underline-offset-4 hover:underline px-0 py-0 h-fit"
@@ -42,9 +42,8 @@ const template = html`
       </div>
     </div>
   </div>
-
-  <div class="text-xs font-mono rounded-md overflow-hidden mt-4">
-    <pre aria-hidden="true" class="p-2"></pre>
+  <div class="text-xs font-mono rounded-b-md border border-t-0 overflow-hidden p-4 p-2">
+    <pre></pre>
   </div>
 `;
 
