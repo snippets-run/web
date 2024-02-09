@@ -23,7 +23,7 @@ const template = html`
       <div class="inline-flex items-center rounded-md border p-1 text-xs font-semibold">$[snippet?.platform]</div>
     </div>
     <div class="flex items-center space-x-2">
-      <div class="hidden md:flex items-center shadow rounded-md">
+      <div class="flex items-center shadow rounded-md flex-nowrap">
         <div class="flex items-center h-8 px-2 rounded-l-md border text-sm bg-white" .hidden="!snippet?.owner">
           run $[snippet?.owner]/$[snippet?.name]
         </div>
@@ -37,7 +37,7 @@ const template = html`
           <img src="assets/copy.svg" class="w-4 h-4" />
         </button>
       </div>
-      <div class="hidden md:flex items-center h-8 px-2 rounded-md border text-xs font-medium">
+      <div class="hidden md:flex items-center h-8 px-2 rounded-md border text-xs font-medium" .hidden="!snippet?.runs">
         $[(snippet?.runs||0) + ' runs']
       </div>
     </div>
