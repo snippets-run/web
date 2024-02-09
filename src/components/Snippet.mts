@@ -20,7 +20,7 @@ const template = html`
         :href="'#/s/' + snippet?.owner + '/' + snippet?.name"
         >$[snippet?.name]</a
       >
-      <div class="inline-flex items-center rounded-md border p-1 text-xs font-semibold">$[snippet?.platform]</div>
+      <div class="inline-flex items-center rounded-md border p-1 text-xs font-semibold bg-white">$[snippet?.platform]</div>
     </div>
     <div class="flex items-center space-x-2">
       <div class="flex items-center shadow rounded-md flex-nowrap">
@@ -49,6 +49,7 @@ const template = html`
     </div>
   </div>
   <div class="text-xs font-mono rounded-b-md border border-t-0 overflow-hidden p-4 p-2">
+    <p class="mb-2 pb-2 border-b" .hidden="!snippet?.description" :innerText="snippet?.description"></p>
     <pre></pre>
   </div>
 `;

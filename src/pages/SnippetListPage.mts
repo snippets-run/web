@@ -2,7 +2,7 @@ import { defineComponent, html } from '../components';
 import { dispatch, select, watch } from '../state.mts';
 import '../components/Snippet.mjs';
 
-const template = html`<h2 class="font-bold mb-4 px-2">My snippets</h2>`;
+const template = html`<h2 class="font-bold mb-4 px-2">Snippets</h2>`;
 const item = html`<x-snippet :snippet="snippet" class="mb-4 block" />`;
 
 class SnippetListPage extends HTMLElement {
