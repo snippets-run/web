@@ -11,24 +11,23 @@ const template = html`<div class="container p-8 mx-auto">
   <h3 class="mb-4 font-semibold">With NPM</h3>
   <p class="mb-4">Install a runner from an NPM package:</p>
 
-  <pre class="text-sm mb-4 p-2 rounded text-white bg-gray-700 md:w-2/3">npm i -g @snippets.run/node</pre>
+  <pre class="overflow-auto text-sm mb-4 p-2 rounded text-white bg-gray-700 lg:w-2/3">npm i -g @snippets.run/node</pre>
   <p class="mb-4">Now you should be able to run a snippet:</p>
 
-  <pre class="text-sm mb-4 p-2 rounded text-white bg-gray-700 md:w-2/3">run hello-node</pre>
+  <pre class="overflow-auto text-sm mb-4 p-2 rounded text-white bg-gray-700 lg:w-2/3">run hello-node</pre>
   <p class="mb-4">If that fails, make sure the globally installed NPM packages are in your terminal $PATH.</p>
 
   <h3 class="mb-4 font-semibold">With bash</h3>
   <p class="mb-4">Download the runner script and link it locally.</p>
 
-  <pre
-    class="text-sm mb-4 p-2 rounded text-white bg-gray-700 md:w-2/3"
+  <pre class="overflow-auto text-sm mb-4 p-2 rounded text-white bg-gray-700 lg:w-2/3"
   ><code>curl https://raw.githubusercontent.com/snippets-run/runners/main/bash/run.sh > run.sh
 chmod +x run.sh
 ln -s $PWD/run.sh /usr/bin/run</code>
 </pre>
 
   <p class="mb-4">Now you can just call a snippet:</p>
-  <pre class="text-sm mb-4 p-2 rounded text-white bg-gray-700 md:w-2/3">run hello-bash</pre>
+  <pre class="overflow-auto text-sm mb-4 p-2 rounded text-white bg-gray-700 lg:w-2/3">run hello-bash</pre>
 
   <blockquote class="mb-4">
     <p>Support for other runners and environments, like Deno or python, is coming soon!</p>
