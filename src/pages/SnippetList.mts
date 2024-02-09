@@ -1,5 +1,5 @@
 import { defineComponent, html } from '../components';
-import { select, watch } from '../state.mts';
+import { dispatch, select, watch } from '../state.mts';
 import '../components/Snippet.mjs';
 
 const template = html`<h2 class="font-bold">My snippets</h2>`;
@@ -12,6 +12,7 @@ class SnippetList extends HTMLElement {
   private previous: any[] = [];
 
   onEnter() {
+    dispatch('loadSnippets');
     watch(this.list, (list) => {
       this.innerHTML = '';
       this.append(template(this)[0]);

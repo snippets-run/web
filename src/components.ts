@@ -20,7 +20,7 @@ function createScopeProxy(scope) {
 
 function addEventListener(scope: any, el: HTMLElement, name: string, value: string) {
   const event = name.slice(1);
-  const fn = Function('scope', '$event', `with (scope) { console.log('${event}'); return (${value}) }`);
+  const fn = Function('scope', '$event', `with (scope) { return (${value}) }`);
   el.addEventListener(event, (e) => fn(scope, e));
 }
 

@@ -30,9 +30,12 @@ const template = html`
         <div class="flex items-center h-8 px-2 rounded-l-md border text-sm" .hidden="snippet?.owner">
           run $[snippet?.name]
         </div>
-        <div class="flex items-center justify-center h-8 w-8 rounded-r-md border border-l-0 cursor-pointer">
+        <button
+          @click="onCopy()"
+          class="flex items-center justify-center h-8 w-8 rounded-r-md border border-l-0 cursor-pointer"
+        >
           <img src="assets/copy.svg" class="w-4 h-4" />
-        </div>
+        </button>
       </div>
       <div class="hidden md:flex items-center h-8 px-2 rounded-md border text-xs font-medium">
         $[(stats?.runs||0) + ' runs']
@@ -49,6 +52,14 @@ class SnippetView extends HTMLElement {
   static tag = 'x-snippet';
   snippet: Snippet | null = null;
   stats: SnippetStats | null = null;
+
+  onCopy() {
+    const command = this.snippet?.owner
+      ? `run ${this.snippet?.owner}/${this.snippet?.name}`
+      : `run ${this.snippet?.name}`;
+
+    navigator.clipboard.writeText(command);
+  }
 }
 
 defineComponent(SnippetView, { template });

@@ -67,7 +67,7 @@ export default (routes) => {
     const onHashChange = (event: HashChangeEvent) => onRouteChange(new URL(event.newURL).hash);
     window.addEventListener('hashchange', onHashChange);
 
-    onRouteChange(location.hash);
+    onRouteChange(location.hash || '/');
     return () => window.removeEventListener('hashchange', onHashChange);
   };
 };
