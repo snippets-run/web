@@ -70,7 +70,7 @@ class SnippetView extends HTMLElement {
 
   onCopy() {
     const s = this.snippet.value;
-    const command = s?.owner ? `run ${s?.owner}/${s?.name}` : `run ${s?.name}`;
+    const command = this.showOwner(s?.owner) ? `run ${s?.owner}/${s?.name}` : `run ${s?.name}`;
 
     navigator.clipboard.writeText(command);
   }
