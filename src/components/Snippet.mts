@@ -77,9 +77,9 @@ class SnippetView extends HTMLElement {
 
   async onChange() {
     const s = this.snippet.value;
-    const lang = platformToLanguage[s?.platform || ''];
+    const language = platformToLanguage[s?.platform || ''];
     const pre = this.querySelector('pre')!;
-    pre.innerHTML = await highlight(s?.script, { lang });
+    pre.innerHTML = await highlight(s?.script, { language });
   }
 
   showOwner(owner) {
