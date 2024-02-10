@@ -28,13 +28,13 @@ const template = html`
       <div class="flex items-center shadow rounded-md flex-nowrap">
         <div
           class="hidden md:flex items-center h-8 px-2 rounded-l-md border text-sm bg-white"
-          .hidden="!showOwner(snippet?.owner)"
+          .md:hidden="!showOwner(snippet?.owner)"
         >
           run $[snippet?.owner]/$[snippet?.name]
         </div>
         <div
           class="hidden md:flex items-center h-8 px-2 rounded-l-md border text-sm bg-white"
-          .hidden="showOwner(snippet?.owner)"
+          .md:hidden="showOwner(snippet?.owner)"
         >
           run $[snippet?.name]
         </div>
