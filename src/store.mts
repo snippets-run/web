@@ -16,13 +16,22 @@ export class Ref<RefValue> {
   get value() {
     return this._value;
   }
-
-  observe(fn: (value: RefValue) => void) {
-    this._obs.push(fn);
-  }
-
+  
   toString() {
     return String(this._value);
+  }
+
+  watch(observer: (v: RefValue, p: RefValue | undefined) => void) {
+    let lastValue: RefValue;
+    lastValue = this.value!;
+    observer(lastValue, undefined);
+
+    this._obs.push((value) => {
+      if (value !== lastValue) {
+        observer(value, lastValue);
+        lastValue = value;
+      }
+    });
   }
 }
 
@@ -72,19 +81,6 @@ export function useState<T extends object, A extends string>(
     return state[key];
   }
 
-  function watch<V extends any>(input: Ref<V>, observer: (v: V, p: V | undefined) => void) {
-    let lastValue: V;
-    lastValue = input.value!;
-    observer(lastValue, undefined);
-
-    input.observe((value) => {
-      if (value !== lastValue) {
-        observer(value, lastValue);
-        lastValue = value;
-      }
-    });
-  }
-
   function react(fn: (state: T) => any) {
     const handler = (e: any) => fn(e.detail);
     events.addEventListener(stateChangeEvent, handler);
@@ -110,5 +106,5 @@ export function useState<T extends object, A extends string>(
     return ref;
   }
 
-  return { react, select, dispatch, set, get, watch, commit };
+  return { react, select, dispatch, set, get, commit };
 }

@@ -45,7 +45,7 @@ export default (routes) => {
 
   return (routeView: HTMLElement) => {
     function onRouteChange(newUrl) {
-      const pathname = newUrl.replace('#', '');
+      const pathname = newUrl.replace('#', '') || '/';
       const match = matchers.find((m) => m.test(pathname));
 
       const previousEl = routeView.firstElementChild as any;
@@ -53,7 +53,7 @@ export default (routes) => {
       routeView.innerHTML = '';
 
       if (!match) {
-        routeView.innerHTML = 'Not found';
+        routeView.innerHTML = 'Not found: ' + pathname;
         return;
       }
 
@@ -67,7 +67,7 @@ export default (routes) => {
     const onHashChange = (event: HashChangeEvent) => onRouteChange(new URL(event.newURL).hash);
     window.addEventListener('hashchange', onHashChange);
 
-    onRouteChange(location.hash || '/');
+    onRouteChange(location.hash);
     return () => window.removeEventListener('hashchange', onHashChange);
   };
 };

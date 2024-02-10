@@ -14,7 +14,7 @@ class SnippetListPage extends HTMLElement {
   onEnter() {
     dispatch('loadSnippets');
 
-    watch(this.list, (list) => {
+    this.list.watch((list) => {
       this.innerHTML = '';
       this.append(template(this)[0]);
       this.previous.forEach((f) => f());

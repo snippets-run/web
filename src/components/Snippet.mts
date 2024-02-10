@@ -9,12 +9,16 @@ const template = html`
   <div class="flex items-center justify-between bg-gray-100 p-2 rounded-t-md border border-gray-300">
     <div class="flex items-center space-x-2">
       <div class="rounded-full border p-1 bg-white">
-        <img class="w-4 h-4 aspect-square" :src="'/assets/platform-' + snippet?.platform + '.svg'" :alt="snippet?.platform" />
+        <img
+          class="w-4 h-4 aspect-square"
+          :src="'/assets/platform-' + snippet?.platform + '.svg'"
+          :alt="snippet?.platform"
+        />
       </div>
       <a
         class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium "
         .hidden="!showOwner(snippet?.owner)"
-        href="#/me"
+        href="#/explore"
         >$[snippet?.owner]</a
       >
       <span .hidden="!showOwner(snippet?.owner)">/</span>
@@ -53,8 +57,12 @@ const template = html`
     </div>
   </div>
   <div class="text-xs font-mono rounded-b-md border border-t-0 border-gray-300 overflow-hidden p-4 p-2">
-    <p class="mb-2 pb-2 border-b font-semibold text-green-700" .hidden="!snippet?.description" :innerText="'// ' + snippet?.description"></p>
-    <pre></pre>
+    <p
+      class="mb-2 pb-2 border-b font-semibold text-green-700"
+      .hidden="!snippet?.description"
+      :innerText="'// ' + snippet?.description"
+    ></p>
+    <pre>Loading...</pre>
   </div>
 `;
 
@@ -76,9 +84,13 @@ class SnippetView extends HTMLElement {
   }
 
   async onChange() {
+    const pre = this.querySelector('pre')!;
+
+    if (!pre) return;
+
     const s = this.snippet.value;
     const language = platformToLanguage[s?.platform || ''];
-    const pre = this.querySelector('pre')!;
+
     pre.innerHTML = await highlight(s?.script, { language });
   }
 

@@ -1,8 +1,9 @@
 import { parse, materialize, normalize } from '@homebots/parse-html';
-import { dispatch, select, watch, commit } from './state.mjs';
+import { dispatch, select } from './state.mjs';
 import { isRef, ref } from './store.mjs';
 
-type DetachFn = () => void;
+type DetachFn = () => void | undefined;
+const noop = () => {};
 
 function createScopeProxy(scope) {
   return new Proxy(scope, {
@@ -38,42 +39,44 @@ function attachDispatcher(scope: any, el: HTMLElement, name: string, value: stri
   }
 }
 
-function observe(scope: any, expression, apply) {
+function watchExpression(scope: any, expression, apply) {
   try {
     const fn = Function('scope', `with (scope) { return (${expression}) }`);
     const initial = fn(scope);
 
     if (isRef(initial)) {
       apply(initial.value);
-      watch(initial, apply);
-      return;
+      initial.watch(apply);
+      return noop;
     }
 
     const scopeProxy = createScopeProxy(scope);
     const state = select(() => fn(scopeProxy));
-    watch(state, (v) => apply(v));
-
-    return () => state.detach();
+    state.watch((v) => apply(v));
+    apply(initial);
+    return () => state.detach?.();
   } catch (e) {
     console.log(e);
   }
+
+  return noop;
 }
 
 function bindProperty(scope: any, el: HTMLElement, name: string, value: string) {
   const property = name.slice(1);
   const apply = (value) => Promise.resolve(value).then((v) => (el[property] = v));
 
-  return observe(scope, value, apply);
+  return watchExpression(scope, value, apply);
 }
 
 function bindClassName(scope: any, el: HTMLElement, name: string, value: string) {
   const className = name.slice(1);
   const apply = (v) => (v ? el.classList.add(className) : el.classList.remove(className));
 
-  return observe(scope, value, apply);
+  return watchExpression(scope, value, apply);
 }
 
-function bindAttribute(scope: any, el: HTMLElement, name: string, value: string, detachHandlers) {
+function bindAttribute(scope: any, el: HTMLElement, name: string, value: string, detachHandlers: Array<DetachFn>) {
   if (name.startsWith('@')) {
     addEventListener(scope, el, name, value);
     return;
@@ -104,7 +107,7 @@ export const html = (text: string | TemplateStringsArray): TemplateFn => {
   const tree = normalize(parse(text[0] || String(text)));
 
   return (scope: any): HtmlBindings => {
-    const detachHandlers: any[] = [];
+    const detachHandlers: Array<DetachFn> = [];
 
     return [
       materialize(tree, (_el, node) => {
@@ -116,7 +119,7 @@ export const html = (text: string | TemplateStringsArray): TemplateFn => {
           const text = _el as Text;
           const matcher = /\$\[\s*(.*?)\s*\]/g;
           const template = '`' + node.text.replace(matcher, '${$1}').trim() + '`';
-          const fn = observe(scope, template, (v) => (text.textContent = v));
+          const fn = watchExpression(scope, template, (v) => (text.textContent = v));
 
           detachHandlers.push(fn);
         }
@@ -157,6 +160,7 @@ export function defineComponent(
     }
 
     connect && connect.call(this);
+    this.onAppend?.();
   };
 
   Target.prototype.disconnectedCallback = function () {
@@ -165,6 +169,7 @@ export function defineComponent(
     }
 
     disconnect && disconnect.call(this);
+    this.onRemove?.();
 
     Object.values(this).forEach((v) => v && isRef(v) && v.detach && v.detach());
   };
@@ -180,7 +185,7 @@ export function defineProps(Target, props) {
       if (target[refName]) return;
 
       target[refName] = ref(null);
-      target[refName].observe(() => target.onChange?.());
+      target[refName].watch((value) => target.onChange?.(name, value));
     }
 
     Object.defineProperty(Target.prototype, name, {
