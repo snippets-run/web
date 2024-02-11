@@ -1,7 +1,7 @@
 import highlight from 'https://highlight.jsfn.run/index.mjs';
 import { readFileSync } from 'node:fs';
 
-const template = readFileSync('./render.html', 'utf-8');
+const template = readFileSync('./server/render.html', 'utf-8');
 
 export default async function (req, res, next) {
   const url = new URL(req.url, 'http://localhost');
