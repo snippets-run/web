@@ -62,7 +62,7 @@ const template = html`
       .hidden="!snippet?.description"
       :innerText="'// ' + snippet?.description"
     ></p>
-    <pre>Loading...</pre>
+    <pre class="overflow-x-auto">Loading...</pre>
   </div>
 `;
 

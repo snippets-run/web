@@ -2,7 +2,7 @@ import { defineComponent, html } from '../components.js';
 import '../components/CopyBox.mjs';
 
 const template = html`<div class="container p-8 mx-auto">
-  <div class="my-16 flex flex-col items-center">
+  <div class="my-8 md:my-16 flex flex-col items-center">
     <h1 class="mb-6 text-5xl text-center">Stop repeating yourself!</h1>
     <p class="mb-8 text-center">Save your snippts in one place and run them from all your devices.</p>
     <x-copybox :code="'npm i -g @snippets.run/node'" class="block text-lg mb-8" />

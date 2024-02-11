@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>snippets.run</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
+    <script type="module">
+      import { load } from 'https://highlight.jsfn.run/index.mjs';
+      load();
+    </script>
+  </head>
+  <body>
+    <header class="border-b sticky top-0 bg-white z-50">
+      <div class="flex items-center justify-items-stretch space-x-4 w-full px-4">
+        <a href="/"><img alt="logo" class="w-16" style="min-width: 4rem" src="assets/icon.svg" /></a>
+        <div class="w-full">
+          <h1 class="font-semibold">snippets.run</h1>
+          <p class="text-sm">A repository for runnable code snippets</p>
+        </div>
+
+        <nav class="flex space-x-2 font-semibold items-center justify-end">
+          <a href="/" class="hidden sm:block">Explore</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="p-4 md:px-6 pb-8 h-full min-h-screen container mx-auto max-w-6xl">
+      <h1 class="font-bold text-lg">%title%</h1>
+      <p>%description</p>
+      <pre>
+        <code>%snippet%</code>
+      </pre>
+    </main>
+  </body>
+</html>
