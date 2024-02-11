@@ -2,6 +2,7 @@
   "name": "app",
   "private": true,
   "type": "module",
+  "main": "./server/index.mjs",
   "prettier": "@cloud-cli/prettier-config",
   "devDependencies": {
     "@cloud-cli/prettier-config": "^1.0.0",
