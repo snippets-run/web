@@ -1,6 +1,7 @@
 import highlight from 'https://highlight.jsfn.run/index.mjs';
 import { readFileSync } from 'node:fs';
 
+const registry = 'https://registry.snippets.run';
 const template = readFileSync('./server/render.html', 'utf-8');
 const platformToLanguage = {
   node: 'javascript',
@@ -15,9 +16,11 @@ export default async function (req, res, next) {
     const domain = req.headers['x-forwarded-for'];
     const proto = req.headers['x-forwarded-proto'];
     const baseUrl = `${proto}://${domain}`;
+    const indexReq = await fetch(`${registry}/index`);
+    const index = await indexReq.json();
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(baseUrl);
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end(index.map((s) => `${baseUrl}/s/${s.platform}/${s.owner}/${s.name}`));
     return;
   }
 
@@ -30,7 +33,7 @@ export default async function (req, res, next) {
     return next();
   }
 
-  const snippet = await fetch(`https://registry.snippets.run/s/${platform}/${owner}/${name}`);
+  const snippet = await fetch(`${registry}/s/${platform}/${owner}/${name}`);
 
   if (!snippet.ok) {
     return next();
