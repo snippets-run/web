@@ -2,6 +2,10 @@ import highlight from 'https://highlight.jsfn.run/index.mjs';
 import { readFileSync } from 'node:fs';
 
 const template = readFileSync('./server/render.html', 'utf-8');
+const platformToLanguage = {
+  node: 'javascript',
+  shell: 'bash',
+};
 
 export default async function (req, res, next) {
   const url = new URL(req.url, 'http://localhost');
@@ -27,11 +31,16 @@ export default async function (req, res, next) {
   }
 
   const snippet = await fetch(`https://registry.snippets.run/s/${platform}/${owner}/${name}`);
+
+  if (!snippet.ok) {
+    return next();
+  }
+
   const json = await snippet.json();
   const html = template
     .replace('%title%', owner + '/' + name)
     .replace('%description', json.description || '')
-    .replace('%snippet%', await highlight(json.script));
+    .replace('%snippet%', await highlight(json.script, { language: platformToLanguage[platform] }));
 
   res.end(html);
 }
