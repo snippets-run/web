@@ -31,7 +31,7 @@ export default async function (req, res, next) {
   const html = template
     .replace('%title%', owner + '/' + name)
     .replace('%description', json.description || '')
-    .replace('%snippet%', highlight(json.script));
+    .replace('%snippet%', await highlight(json.script));
 
   res.end(html);
 }
