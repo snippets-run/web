@@ -18,9 +18,10 @@ export default async function (req, res, next) {
     const baseUrl = `${proto}://${domain}`;
     const indexReq = await fetch(`${registry}/index`);
     const index = await indexReq.json();
+    const links = index.map((s) => `${baseUrl}/s/${s.platform}/${s.owner}/${s.name}`).join('\n');
 
     res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end(index.map((s) => `${baseUrl}/s/${s.platform}/${s.owner}/${s.name}`));
+    res.end(links);
     return;
   }
 
