@@ -24,7 +24,7 @@ async function onSitemap(req, res) {
 
 async function onSnippetView(res, { platform, owner, name }) {
   const snippet = await fetch(
-    `${registry}/snippet/${platform}/${owner}/${name}`
+    `${registry}/snippets/${platform}/${owner}/${name}`
   );
   const json = await snippet.json();
   const html = template
