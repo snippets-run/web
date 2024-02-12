@@ -8,6 +8,20 @@ const platformToLanguage = {
   shell: "bash",
 };
 
+async function onSitemap(req, res) {
+  const domain = req.headers["x-forwarded-for"];
+  const proto = req.headers["x-forwarded-proto"];
+  const baseUrl = `${proto}://${domain}`;
+  const indexReq = await fetch(`${registry}/index`);
+  const index = await indexReq.json();
+  const links = index
+    .map((s) => `${baseUrl}/s/${s.platform}/${s.owner}/${s.name}`)
+    .join("\n");
+
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end(links);
+}
+
 async function onSnippetView(res, { platform, owner, name }) {
   const snippet = await fetch(
     `${registry}/snippet/${platform}/${owner}/${name}`
@@ -29,18 +43,7 @@ export default async function (req, res, next) {
   const { pathname } = url;
 
   if (pathname === "/sitemap.txt") {
-    const domain = req.headers["x-forwarded-for"];
-    const proto = req.headers["x-forwarded-proto"];
-    const baseUrl = `${proto}://${domain}`;
-    const indexReq = await fetch(`${registry}/index`);
-    const index = await indexReq.json();
-    const links = index
-      .map((s) => `${baseUrl}/s/${s.platform}/${s.owner}/${s.name}`)
-      .join("\n");
-
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end(links);
-    return;
+    return onSitemap(req, res);
   }
 
   if (!pathname.startsWith("/s/")) {
