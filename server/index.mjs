@@ -34,7 +34,7 @@ export default async function (req, res, next) {
     return next();
   }
 
-  const snippet = await fetch(`${registry}/s/${platform}/${owner}/${name}`);
+  const snippet = await fetch(`${registry}/snippet/${platform}/${owner}/${name}`);
 
   if (!snippet.ok) {
     return next();
