@@ -7,13 +7,13 @@ const template = html`<div class="container p-8 mx-auto">
     <p class="mb-8 text-center">Create a snippet and run in all your devices.</p>
   </div>
   <div class="flex flex-col items-start space-y-8">
-    <p>First, make sure you have a runner installed:</p>
+    <p>First, make sure you have Node.js and the runner installed:</p>
     <x-copybox :code="'npm i -g @snippets.run/node'" class="block text-lg mb-8" />
     <p>
       Now, run a snippet that creates a snippet.<br />
       Yes, creating a snippet is also done with... a snippet!
     </p>
-    <x-copybox :code="'run create-snippet'" class="block text-lg mb-8" />
+    <x-copybox :code="'run create'" class="block text-lg mb-8" />
   </div>
 </div>`;
 
