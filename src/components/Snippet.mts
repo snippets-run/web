@@ -29,22 +29,22 @@ const template = html`
       >
     </div>
     <div class="flex items-center space-x-2">
-      <div class="flex items-center shadow rounded-md flex-nowrap">
+      <div class="flex items-center shadow-sm rounded-md flex-nowrap bg-white border">
         <div
-          class="hidden md:flex items-center h-8 px-2 rounded-l-md border text-sm bg-white"
+          class="hidden md:flex items-center h-8 px-2 text-sm"
           .md:hidden="!showOwner(snippet?.owner)"
         >
           run $[snippet?.owner]/$[snippet?.name]
         </div>
         <div
-          class="hidden md:flex items-center h-8 px-2 rounded-l-md border text-sm bg-white"
+          class="hidden md:flex items-center h-8 px-2 text-sm"
           .md:hidden="showOwner(snippet?.owner)"
         >
           run $[snippet?.name]
         </div>
         <button
           @click="onCopy()"
-          class="flex items-center justify-center h-8 w-8 rounded-md md:rounded-r-md border border-l-0 cursor-pointer bg-white"
+          class="flex items-center justify-center h-8 w-8 cursor-pointer bg-white rounded-md overflow-hidden"
         >
           <img src="assets/copy.svg" class="w-4 h-4" />
         </button>
