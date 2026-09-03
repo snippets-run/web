@@ -1,0 +1,16 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: cloud-cli/workflows/.github/workflows/docker-ghcr-build.yml@main
+    with:
+      name: snippets-run/web
