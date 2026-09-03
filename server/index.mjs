@@ -9,7 +9,7 @@ const platformToLanguage = {
 };
 
 async function onSitemap(req, res) {
-  const domain = req.headers["x-forwarded-for"];
+  const domain = req.headers["x-forwarded-host"];
   const proto = req.headers["x-forwarded-proto"];
   const baseUrl = `${proto}://${domain}`;
   const indexReq = await fetch(`${registry}/index`);
