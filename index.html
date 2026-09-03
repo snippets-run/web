@@ -9,8 +9,14 @@
     />
     <title>snippets.run</title>
     <link rel="icon" href="./assets/icon.svg" />
+    <link rel="component" href="https://sodium.static.apphor.de/code-editor.html" />
     <script type="importmap">
-      { "imports": { "@li3/": "https://cdn.li3.dev/@li3/" } }
+      {
+        "imports": {
+          "@li3/": "https://cdn.li3.dev/@li3/",
+          "@sodium/": "https://sodium.static.apphor.de/"
+        }
+      }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script type="module">
@@ -75,6 +81,11 @@
             class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
             href="#/explore"
             >Registry</a
+          >
+          <a
+            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
+            href="#/edit/snippets/hello.sh"
+            >Editor</a
           >
           <a
             class="ml-1 rounded-full border border-[#182019] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#182019] hover:text-white"
@@ -566,6 +577,35 @@
           </section>
         </template>
 
+        <template if="page === 'editor'">
+          <section class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[90rem] py-10 max-md:w-[calc(100%_-_1.75rem)]">
+            <template if="loading"><div class="flex items-center gap-3 border border-[#c8c7bd] bg-[#fffdf7] p-5"><span class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span><p class="m-0 text-[#697069]">Opening workspace...</p></div></template>
+            <template if="error"><div class="border border-[#ff7146] bg-[#fffdf7] p-5"><b>Could not open the editor</b><p class="mt-2 mb-0 text-[#697069]">{{ error }}</p></div></template>
+            <template if="!loading && editor">
+              <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+                <div><p class="mb-2 text-xs font-black tracking-[.15em] uppercase">Private staging workspace</p><h1 class="m-0 font-serif text-4xl font-medium tracking-[-.05em] max-md:text-3xl">{{ editor.owner }}<i class="text-[#ff7146] not-italic">/</i>{{ editor.repo }}</h1></div>
+                <span class="rounded-full border border-[#182019] px-3 py-1.5 font-mono text-xs font-bold" bind-class="editorStatusClass">{{ editorStatus }}</span>
+              </div>
+              <div class="grid min-h-[42rem] grid-cols-[15rem_minmax(0,1fr)_17rem] overflow-hidden rounded-sm border border-[#182019] bg-[#fffdf7] shadow-[8px_8px_0_#d7f34a] max-lg:grid-cols-[13rem_minmax(0,1fr)] max-md:block">
+                <aside class="border-r border-[#c8c7bd] bg-[#f7f5ef] max-md:border-r-0 max-md:border-b">
+                  <div class="border-b border-[#c8c7bd] px-4 py-4"><b class="text-xs font-black tracking-[.12em] uppercase">Files</b></div>
+                  <nav class="p-2" aria-label="Snippet files"><template for="file of editor.files"><button class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left font-mono text-xs hover:bg-[#e7e5dd]" bind-class="fileClass(file)" type="button" on-click="selectFile(file)"><span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ file.path }}</span><span class="size-1.5 shrink-0 rounded-full bg-[#ff7146]" attr-hidden="!file.staged"></span></button></template></nav>
+                </aside>
+                <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
+                  <div class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"><span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span></div>
+                  <code-editor class="min-h-0 flex-1 bg-[#fffdf7]" bind-value="editorContent" bind-language="editorLanguage" status="Editing staged source" on-change="markDirty()"></code-editor>
+                  <div class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3"><span class="font-mono text-xs text-[#aab4aa]">{{ editorContent.split('\n').length }} lines</span><button class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40" type="button" on-click="stageActiveFile()" attr-disabled="!editorDirty || saving">{{ saving ? 'Staging...' : 'Stage file' }}</button></div>
+                </div>
+                <aside class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0">
+                  <div class="border-b border-[#c8c7bd] px-4 py-4"><b class="text-xs font-black tracking-[.12em] uppercase">Change history</b></div>
+                  <ol class="m-0 max-h-72 list-none overflow-auto p-0"><template for="entry of editor.history"><li class="border-b border-[#dedbd2] px-4 py-3"><b class="block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap">{{ entry.message }}</b><span class="mt-1 block font-mono text-[.65rem] text-[#697069]">{{ entry.shortCommit }} · {{ entry.date.slice(0, 10) }}</span></li></template></ol>
+                  <form class="border-t border-[#c8c7bd] p-4" on-submit.prevent="commitChanges($event)"><label class="mb-2 block text-[.65rem] font-black tracking-[.12em] uppercase" for="summary">Change summary <span class="normal-case text-[#697069]">optional</span></label><textarea class="h-20 w-full resize-none border border-[#c8c7bd] bg-[#fffdf7] p-2.5 text-sm outline-none focus:border-[#182019]" id="summary" bind-value="commitMessage" placeholder="Explain this update"></textarea><button class="mt-3 w-full cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-3 py-3 text-xs font-black text-white uppercase disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="!hasStagedFiles || committing">{{ committing ? 'Committing...' : 'Commit staged changes' }}</button></form>
+                </aside>
+              </div>
+            </template>
+          </section>
+        </template>
+
         <template if="page === 'not-found'">
           <section
             class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[56rem] py-36 text-center"
@@ -617,6 +657,13 @@
           const ownerQuery = ref("");
           const snippets = ref([]);
           const snippet = ref(null);
+          const editor = ref(null);
+          const activeFile = ref({ path: "", content: "", staged: false });
+          const editorContent = ref("");
+          const editorDirty = ref(false);
+          const saving = ref(false);
+          const committing = ref(false);
+          const commitMessage = ref("");
           const loading = ref(false);
           const error = ref("");
           let requestId = 0;
@@ -636,6 +683,10 @@
           const shortCommit = computed(
             () => snippet.value?.commit.slice(0, 12) || "",
           );
+          const hasStagedFiles = computed(() => editor.value?.files.some((file) => file.staged) || false);
+          const editorStatus = computed(() => editorDirty.value ? "Unstaged edits" : hasStagedFiles.value ? "Changes staged" : "All changes saved");
+          const editorStatusClass = computed(() => editorDirty.value ? "bg-[#fffdf7]" : hasStagedFiles.value ? "bg-[#d7f34a]" : "bg-[#e7e5dd]");
+          const editorLanguage = computed(() => ({ sh: "bash", js: "javascript", mjs: "javascript", py: "python", json: "json", md: "markdown" }[activeFile.value.path.split(".").at(-1)] || ""));
 
           async function request(path) {
             const response = await fetch(registry + path, {
@@ -648,6 +699,16 @@
               );
             }
             return response.json();
+          }
+
+          async function editorRequest(path, options = {}) {
+            const response = await fetch(registry + path, {
+              headers: { Accept: "application/json", ...options.headers },
+              ...options,
+            });
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(body.error || `Editor request failed (${response.status})`);
+            return body;
           }
 
           function decode(value) {
@@ -695,6 +756,61 @@
             }
           }
 
+          async function showEditor(selectedOwner, name) {
+            const id = ++requestId;
+            editor.value = null;
+            error.value = "";
+            loading.value = true;
+            try {
+              const result = await editorRequest(`/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`);
+              if (id !== requestId) return;
+              editor.value = result;
+              selectFile(result.files[0]);
+            } catch (reason) {
+              if (id === requestId) error.value = reason.message;
+            } finally {
+              if (id === requestId) loading.value = false;
+            }
+          }
+
+          function selectFile(file) {
+            activeFile.value = file;
+            editorContent.value = file.content;
+            editorDirty.value = false;
+          }
+          function markDirty() { editorDirty.value = editorContent.value !== activeFile.value.content; }
+          function fileClass(file) { return file.path === activeFile.value.path ? "bg-[#d7f34a] font-bold" : ""; }
+
+          async function stageActiveFile() {
+            saving.value = true;
+            error.value = "";
+            try {
+              await editorRequest(`/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(activeFile.value.path)}`, {
+                method: "PUT", headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: editorContent.value,
+              });
+              activeFile.value.content = editorContent.value;
+              activeFile.value.staged = true;
+              const file = editor.value.files.find((item) => item.path === activeFile.value.path);
+              file.content = editorContent.value;
+              file.staged = true;
+              editorDirty.value = false;
+            } catch (reason) { error.value = reason.message; } finally { saving.value = false; }
+          }
+
+          async function commitChanges() {
+            committing.value = true;
+            error.value = "";
+            try {
+              await editorRequest(`/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/commit`, {
+                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: commitMessage.value }),
+              });
+              commitMessage.value = "";
+              const owner = editor.value.owner;
+              const repo = editor.value.repo;
+              await showEditor(owner, repo);
+            } catch (reason) { error.value = reason.message; } finally { committing.value = false; }
+          }
+
           function route() {
             requestId++;
             loading.value = false;
@@ -717,6 +833,9 @@
             } else if (parts[0] === "s" && parts.length === 3) {
               page.value = "snippet";
               showSnippet(parts[1], parts[2]);
+            } else if (parts[0] === "edit" && parts.length === 3) {
+              page.value = "editor";
+              showEditor(parts[1], parts[2]);
             } else page.value = "not-found";
             window.scrollTo({ top: 0, behavior: "instant" });
             document.title =
@@ -754,8 +873,21 @@
 
           return {
             browseOwner,
+            activeFile,
+            commitChanges,
+            commitMessage,
+            committing,
+            editor,
+            editorContent,
+            editorDirty,
+            editorLanguage,
+            editorStatus,
+            editorStatusClass,
             error,
+            fileClass,
+            hasStagedFiles,
             loading,
+            markDirty,
             owner,
             ownerHref,
             ownerQuery,
@@ -765,9 +897,12 @@
             runCommand,
             runtimeLabel,
             shortCommit,
+            saving,
+            selectFile,
             snippet,
             snippetHref,
             snippets,
+            stageActiveFile,
           };
         }
       </script>
