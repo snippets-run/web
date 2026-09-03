@@ -141,8 +141,8 @@
                 class="min-h-64 overflow-auto px-8 py-9 font-mono text-[clamp(.76rem,1.4vw,1rem)] leading-8 max-md:min-h-52 max-md:px-5"
               >
                 <p class="m-0 whitespace-nowrap">
-                  <i class="text-[#d7f34a] not-italic">$</i> npm i -g
-                  @snippets.run/node
+                  <i class="text-[#d7f34a] not-italic">$</i> curl -fsSL
+                  https://install.snippets.run | sh
                 </p>
                 <p class="m-0 whitespace-nowrap">
                   <i class="text-[#d7f34a] not-italic">$</i> run
@@ -253,11 +253,11 @@
                 >
                 <div>
                   <h3 class="mt-2 mb-4 text-base font-bold">
-                    Install the Node runner
+                    Install the runner
                   </h3>
                   <copy-box
                     class="block"
-                    code="npm i -g @snippets.run/node"
+                    code="curl -fsSL https://install.snippets.run | sh"
                   ></copy-box>
                 </div>
               </li>
@@ -308,11 +308,11 @@
                     Install the runner
                   </h2>
                   <p class="mt-0 mb-5 text-[#697069]">
-                    Node.js is currently required for publishing.
+                    Install the native runner to publish from your terminal.
                   </p>
                   <copy-box
                     class="block max-w-xl"
-                    code="npm i -g @snippets.run/node"
+                    code="curl -fsSL https://install.snippets.run | sh"
                   ></copy-box>
                 </div>
               </article>
@@ -328,7 +328,10 @@
                     Follow the prompts to connect and publish your Git
                     repository.
                   </p>
-                  <copy-box class="block max-w-xl" code="run create"></copy-box>
+                  <copy-box
+                    class="block max-w-xl"
+                    code="run snippets/create.sh@latest"
+                  ></copy-box>
                 </div>
               </article>
               <article
