@@ -1,4 +1,4 @@
-FROM nginx:1.29-alpine
+FROM ghcr.io/cloud-cli/static:latest
 
-COPY index.html /usr/share/nginx/html/index.html
-COPY assets/ /usr/share/nginx/html/assets/
+COPY --chown=node:node index.html /home/app/dist/index.html
+COPY --chown=node:node assets/ /home/app/dist/assets/
