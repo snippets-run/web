@@ -1,39 +1,13 @@
-# Snippets.run
+# snippets.run web
 
-A registry, a CLI and a web interface to store snippets of code you frequently run in your machines
+The browser interface is a build-free [Lithium](https://li3.dev/) application. Its components, routing,
+application state, and Tailwind CSS utility classes are declared in `index.html`.
 
-## The CLI runners
-
-### With NPM
-
-Install a runner from an NPM package:
+Serve this directory with any static HTTP server. There is no install or build command:
 
 ```bash
-npm i -g @snippets.run/node
+npx serve .
 ```
 
-Now you should be able to run a snippet:
-
-```bash
-run hello-node
-```
-
-If that fails, make sure the globally installed NPM packages are in your terminal $PATH.
-
-### With bash
-
-Download the runner script and link it locally.
-
-```bash
-curl https://raw.githubusercontent.com/snippets-run/runners/main/bash/run.sh > run.sh
-chmod +x run.sh
-ln -s $PWD/run.sh /usr/bin/run
-```
-
-Now you can just call a snippet:
-
-```bash
-run hello-bash
-```
-
-> Support for other runners and environments, like Deno or python, coming soon!
+The browser loads Lithium from `cdn.li3.dev`, Tailwind's browser runtime from jsDelivr, and snippets from
+`registry.snippets.run`.

@@ -1,4 +1,4 @@
-FROM ghcr.io/cloud-cli/node:latest
+FROM nginx:1.29-alpine
 
-COPY . .
-RUN pnpm install && pnpm build
+COPY index.html /usr/share/nginx/html/index.html
+COPY assets/ /usr/share/nginx/html/assets/
