@@ -11,7 +11,7 @@ const route = createRouter({
   '/create': 'p-create',
   '/explore': 'p-snippetlist',
   '/s/:owner/:name': 'p-snippet',
-  '/s/:name': 'p-snippet',
+  '/s/:owner': 'p-snippetlist',
 });
 
 window.addEventListener('DOMContentLoaded', () => {
