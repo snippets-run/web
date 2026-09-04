@@ -3,24 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Keep useful scripts in one place and run them from any machine."
-    />
+    <meta name="description" content="Keep useful scripts in one place and run them from any machine." />
     <title>snippets.run</title>
     <link rel="icon" href="./assets/icon.svg" />
     <link rel="component" href="https://sodium.static.apphor.de/code-editor.html" />
     <script type="importmap">
       {
         "imports": {
-          "@li3/": "https://cdn.li3.dev/@li3/",
+          "@li3/": "https://at-li3.static.apphor.de/",
           "@sodium/": "https://sodium.static.apphor.de/"
         }
       }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script type="module">
-      import "@li3/web";
+      import '@li3/web';
     </script>
   </head>
   <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
@@ -28,9 +25,7 @@
       <div
         class="flex w-full min-w-0 items-center justify-between gap-4 rounded-sm border border-[#090d09] bg-[#242c25] py-1.5 pr-1.5 pl-4 text-[#edf2eb]"
       >
-        <code class="overflow-auto whitespace-nowrap font-mono text-xs"
-          >{{ code }}</code
-        >
+        <code class="overflow-auto whitespace-nowrap font-mono text-xs">{{ code }}</code>
         <button
           class="shrink-0 cursor-pointer rounded-xs border-0 bg-[#d7f34a] px-3 py-2 text-[.68rem] font-black text-[#182019] uppercase"
           type="button"
@@ -41,12 +36,12 @@
         </button>
       </div>
       <script setup>
-        import { computed, defineProp, ref } from "@li3/web";
+        import { computed, defineProp, ref } from '@li3/web';
 
         export default function copyBox() {
-          const code = defineProp("code", { default: "" });
+          const code = defineProp('code', { default: '' });
           const copied = ref(false);
-          const label = computed(() => (copied.value ? "Copied" : "Copy"));
+          const label = computed(() => (copied.value ? 'Copied' : 'Copy'));
 
           async function copy() {
             await navigator.clipboard.writeText(code.value);
@@ -72,14 +67,8 @@
           <span class="max-sm:hidden">snippets.run</span>
         </a>
         <nav class="flex items-center gap-1" aria-label="Main navigation">
-          <a
-            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
-            href="#/"
-            >Start</a
-          >
-          <a
-            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
-            href="#/explore"
+          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/">Start</a>
+          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/explore"
             >Registry</a
           >
           <a
@@ -101,9 +90,7 @@
             class="mx-auto grid min-h-[40rem] w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-[1.05fr_.95fr] items-center gap-[8vw] max-md:w-[calc(100%_-_1.75rem)] max-md:grid-cols-1 max-md:gap-16 max-md:py-20"
           >
             <div>
-              <p
-                class="mb-5 text-xs leading-none font-black tracking-[.15em] uppercase"
-              >
+              <p class="mb-5 text-xs leading-none font-black tracking-[.15em] uppercase">
                 A tiny registry for useful code
               </p>
               <h1
@@ -114,11 +101,9 @@
                   >Run it anywhere.</em
                 >
               </h1>
-              <p
-                class="my-8 max-w-[38rem] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-relaxed text-[#434b44]"
-              >
-                Keep the scripts you trust under version control, then call them
-                from any machine with one memorable command.
+              <p class="my-8 max-w-[38rem] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-relaxed text-[#434b44]">
+                Keep the scripts you trust under version control, then call them from any machine with one memorable
+                command.
               </p>
               <div class="flex flex-wrap gap-3">
                 <a
@@ -137,34 +122,21 @@
               class="rotate-1 overflow-hidden rounded-lg border border-[#070a07] bg-[#1d241e] text-[#e9eee7] shadow-[18px_18px_0_#d7f34a] max-md:mr-3 max-md:shadow-[11px_11px_0_#d7f34a]"
               aria-label="Command line example"
             >
-              <div
-                class="flex h-11 items-center gap-2 border-b border-[#3e493f] px-4"
-              >
+              <div class="flex h-11 items-center gap-2 border-b border-[#3e493f] px-4">
                 <span class="size-2 rounded-full bg-[#ff7146]"></span
                 ><span class="size-2 rounded-full bg-[#627064]"></span
                 ><span class="size-2 rounded-full bg-[#627064]"></span
-                ><b
-                  class="ml-auto font-mono text-[.68rem] font-medium text-[#929c93]"
-                  >~/anywhere</b
-                >
+                ><b class="ml-auto font-mono text-[.68rem] font-medium text-[#929c93]">~/anywhere</b>
               </div>
               <div
                 class="min-h-64 overflow-auto px-8 py-9 font-mono text-[clamp(.76rem,1.4vw,1rem)] leading-8 max-md:min-h-52 max-md:px-5"
               >
                 <p class="m-0 whitespace-nowrap">
-                  <i class="text-[#d7f34a] not-italic">$</i> curl -fsSL
-                  https://install.snippets.run | sh
+                  <i class="text-[#d7f34a] not-italic">$</i> curl -fsSL https://install.snippets.run | sh
                 </p>
-                <p class="m-0 whitespace-nowrap">
-                  <i class="text-[#d7f34a] not-italic">$</i> run
-                  snippets/hello.js
-                </p>
-                <p class="m-0 pl-5 whitespace-nowrap text-[#8f9a90]">
-                  Hello from snippets.run
-                </p>
-                <span
-                  class="mt-2 block h-4 w-2 animate-pulse bg-[#d7f34a]"
-                ></span>
+                <p class="m-0 whitespace-nowrap"><i class="text-[#d7f34a] not-italic">$</i> run snippets/hello.js</p>
+                <p class="m-0 pl-5 whitespace-nowrap text-[#8f9a90]">Hello from snippets.run</p>
+                <span class="mt-2 block h-4 w-2 animate-pulse bg-[#d7f34a]"></span>
               </div>
               <div
                 class="border-t border-[#3e493f] bg-[#293129] px-5 py-3 text-xs font-bold tracking-[.08em] text-[#bac3bb] uppercase"
@@ -178,14 +150,8 @@
             class="bg-[#182019] px-[max(1.25rem,calc((100vw-77.5rem)/2))] py-24 text-[#fffdf7] max-md:py-20"
             aria-labelledby="principles-title"
           >
-            <div
-              class="mb-16 grid grid-cols-[.6fr_1.4fr] gap-10 max-md:mb-12 max-md:grid-cols-1 max-md:gap-5"
-            >
-              <p
-                class="m-0 text-xs leading-none font-black tracking-[.15em] uppercase"
-              >
-                No more mystery files
-              </p>
+            <div class="mb-16 grid grid-cols-[.6fr_1.4fr] gap-10 max-md:mb-12 max-md:grid-cols-1 max-md:gap-5">
+              <p class="m-0 text-xs leading-none font-black tracking-[.15em] uppercase">No more mystery files</p>
               <h2
                 class="m-0 max-w-3xl font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]"
                 id="principles-title"
@@ -193,49 +159,26 @@
                 Your scripts deserve a proper home.
               </h2>
             </div>
-            <div
-              class="grid grid-cols-3 border-t border-[#566057] max-md:grid-cols-1"
-            >
-              <article
-                class="py-9 pr-9 max-md:border-b max-md:border-[#566057] max-md:pr-0"
-              >
+            <div class="grid grid-cols-3 border-t border-[#566057] max-md:grid-cols-1">
+              <article class="py-9 pr-9 max-md:border-b max-md:border-[#566057] max-md:pr-0">
                 <b class="font-mono text-xs text-[#d7f34a]">01</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6"
-                >
-                  Keep the source
-                </h3>
+                <h3 class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">Keep the source</h3>
                 <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Every snippet is a Git repository. Review it, version it, and
-                  know exactly what will run.
+                  Every snippet is a Git repository. Review it, version it, and know exactly what will run.
                 </p>
               </article>
-              <article
-                class="border-l border-[#566057] px-9 py-9 max-md:border-b max-md:border-l-0 max-md:px-0"
-              >
+              <article class="border-l border-[#566057] px-9 py-9 max-md:border-b max-md:border-l-0 max-md:px-0">
                 <b class="font-mono text-xs text-[#d7f34a]">02</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6"
-                >
-                  Skip the setup
-                </h3>
+                <h3 class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">Skip the setup</h3>
                 <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Install the runner once. Use the same command on your laptop,
-                  a server, or a fresh environment.
+                  Install the runner once. Use the same command on your laptop, a server, or a fresh environment.
                 </p>
               </article>
-              <article
-                class="border-l border-[#566057] py-9 pl-9 max-md:border-b max-md:border-l-0 max-md:pl-0"
-              >
+              <article class="border-l border-[#566057] py-9 pl-9 max-md:border-b max-md:border-l-0 max-md:pl-0">
                 <b class="font-mono text-xs text-[#d7f34a]">03</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6"
-                >
-                  Share the fix
-                </h3>
+                <h3 class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">Share the fix</h3>
                 <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Use owner-qualified names to make trusted utilities
-                  discoverable to your team and community.
+                  Use owner-qualified names to make trusted utilities discoverable to your team and community.
                 </p>
               </article>
             </div>
@@ -245,48 +188,30 @@
             class="mx-auto grid w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-[.8fr_1.2fr] gap-[9vw] py-28 max-md:w-[calc(100%_-_1.75rem)] max-md:grid-cols-1 max-md:gap-12 max-md:py-20"
           >
             <div>
-              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                Two-minute setup
-              </p>
-              <h2
-                class="m-0 font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]"
-              >
+              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Two-minute setup</p>
+              <h2 class="m-0 font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]">
                 From zero to reusable.
               </h2>
             </div>
             <ol class="m-0 list-none border-t border-[#182019] p-0">
-              <li
-                class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7"
-              >
+              <li class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7">
                 <span
                   class="grid size-9 place-items-center rounded-full border border-[#182019] bg-[#d7f34a] font-black"
                   >1</span
                 >
                 <div>
-                  <h3 class="mt-2 mb-4 text-base font-bold">
-                    Install the runner
-                  </h3>
-                  <copy-box
-                    class="block"
-                    code="curl -fsSL https://install.snippets.run | sh"
-                  ></copy-box>
+                  <h3 class="mt-2 mb-4 text-base font-bold">Install the runner</h3>
+                  <copy-box class="block" code="curl -fsSL https://install.snippets.run | sh"></copy-box>
                 </div>
               </li>
-              <li
-                class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7"
-              >
+              <li class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7">
                 <span
                   class="grid size-9 place-items-center rounded-full border border-[#182019] bg-[#d7f34a] font-black"
                   >2</span
                 >
                 <div>
-                  <h3 class="mt-2 mb-4 text-base font-bold">
-                    Run your first snippet
-                  </h3>
-                  <copy-box
-                    class="block"
-                    code="run snippets/hello.js"
-                  ></copy-box>
+                  <h3 class="mt-2 mb-4 text-base font-bold">Run your first snippet</h3>
+                  <copy-box class="block" code="run snippets/hello.js"></copy-box>
                 </div>
               </li>
             </ol>
@@ -297,17 +222,14 @@
           <section
             class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20"
           >
-            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-              Publish
-            </p>
+            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Publish</p>
             <h1
               class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]"
             >
               Turn a repository<br />into a command.
             </h1>
             <p class="my-8 max-w-2xl text-xl leading-relaxed text-[#434b44]">
-              Publishing is deliberately simple: the creation workflow is itself
-              a runnable snippet.
+              Publishing is deliberately simple: the creation workflow is itself a runnable snippet.
             </p>
             <div class="mt-20 border-t border-[#182019] max-md:mt-14">
               <article
@@ -315,16 +237,9 @@
               >
                 <span class="font-mono text-xs font-extrabold">01</span>
                 <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">
-                    Install the runner
-                  </h2>
-                  <p class="mt-0 mb-5 text-[#697069]">
-                    Install the native runner to publish from your terminal.
-                  </p>
-                  <copy-box
-                    class="block max-w-xl"
-                    code="curl -fsSL https://install.snippets.run | sh"
-                  ></copy-box>
+                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Install the runner</h2>
+                  <p class="mt-0 mb-5 text-[#697069]">Install the native runner to publish from your terminal.</p>
+                  <copy-box class="block max-w-xl" code="curl -fsSL https://install.snippets.run | sh"></copy-box>
                 </div>
               </article>
               <article
@@ -332,17 +247,9 @@
               >
                 <span class="font-mono text-xs font-extrabold">02</span>
                 <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">
-                    Launch the creator
-                  </h2>
-                  <p class="mt-0 mb-5 text-[#697069]">
-                    Follow the prompts to connect and publish your Git
-                    repository.
-                  </p>
-                  <copy-box
-                    class="block max-w-xl"
-                    code="run snippets/create.sh@latest"
-                  ></copy-box>
+                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Launch the creator</h2>
+                  <p class="mt-0 mb-5 text-[#697069]">Follow the prompts to connect and publish your Git repository.</p>
+                  <copy-box class="block max-w-xl" code="run snippets/create.sh@latest"></copy-box>
                 </div>
               </article>
               <article
@@ -350,17 +257,11 @@
               >
                 <span class="font-mono text-xs font-extrabold">03</span>
                 <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">
-                    Run it everywhere
-                  </h2>
+                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Run it everywhere</h2>
                   <p class="mt-0 mb-5 text-[#697069]">
-                    Your immutable snippet can now be called by owner and
-                    repository name.
+                    Your immutable snippet can now be called by owner and repository name.
                   </p>
-                  <copy-box
-                    class="block max-w-xl"
-                    code="run your-name/tool.sh"
-                  ></copy-box>
+                  <copy-box class="block max-w-xl" code="run your-name/tool.sh"></copy-box>
                 </div>
               </article>
             </div>
@@ -372,9 +273,7 @@
             class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[59rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20"
           >
             <div>
-              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                Registry browser
-              </p>
+              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Registry browser</p>
               <h1
                 class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]"
               >
@@ -387,9 +286,7 @@
                 class="my-14 border border-[#182019] bg-[#fffdf7] p-5 shadow-[7px_7px_0_#182019] max-md:p-4 max-md:shadow-[5px_5px_0_#182019]"
                 on-submit.prevent="browseOwner($event)"
               >
-                <label
-                  class="mb-2.5 block text-xs font-black tracking-[.1em] uppercase"
-                  for="owner"
+                <label class="mb-2.5 block text-xs font-black tracking-[.1em] uppercase" for="owner"
                   >Repository owner</label
                 >
                 <div class="flex">
@@ -411,12 +308,8 @@
             </div>
 
             <template if="loading"
-              ><div
-                class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5"
-              >
-                <span
-                  class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"
-                ></span>
+              ><div class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5">
+                <span class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
                 <p class="m-0 text-[#697069]">Reading the registry...</p>
               </div></template
             >
@@ -429,9 +322,7 @@
             <template if="!loading && !error && owner && snippets.length === 0"
               ><div class="border border-[#c8c7bd] bg-[#fffdf7] p-5">
                 <b>No snippets yet</b>
-                <p class="mt-2 mb-0 text-[#697069]">
-                  This owner has no runnable repositories.
-                </p>
+                <p class="mt-2 mb-0 text-[#697069]">This owner has no runnable repositories.</p>
               </div></template
             >
             <template if="!loading && snippets.length > 0">
@@ -453,15 +344,12 @@
                         >{{ runtimeLabel(item.type) }}</span
                       >
                       <span class="flex min-w-0 flex-col gap-1"
-                        ><small class="text-xs text-[#697069]"
-                          >{{ item.owner }}</small
-                        ><strong
-                          class="overflow-hidden font-mono text-base text-ellipsis"
+                        ><small class="text-xs text-[#697069]">{{ item.owner }}</small
+                        ><strong class="overflow-hidden font-mono text-base text-ellipsis"
                           >{{ item.repo }}</strong
                         ></span
                       >
-                      <span class="text-xs font-bold uppercase max-md:hidden"
-                        >{{ item.type }}</span
+                      <span class="text-xs font-bold uppercase max-md:hidden">{{ item.type }}</span
                       ><span class="text-lg">&#8599;</span>
                     </a>
                   </li>
@@ -476,12 +364,8 @@
             class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[68.75rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20"
           >
             <template if="loading"
-              ><div
-                class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5"
-              >
-                <span
-                  class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"
-                ></span>
+              ><div class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5">
+                <span class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
                 <p class="m-0 text-[#697069]">Fetching the source...</p>
               </div></template
             >
@@ -489,74 +373,40 @@
               ><div class="border border-[#ff7146] bg-[#fffdf7] p-5">
                 <b>Could not load this snippet</b>
                 <p class="mt-2 text-[#697069]">{{ error }}</p>
-                <a class="font-extrabold" bind-href="ownerHref()"
-                  >Back to owner</a
-                >
+                <a class="font-extrabold" bind-href="ownerHref()">Back to owner</a>
               </div></template
             >
             <template if="!loading && snippet">
-              <a
-                class="mb-14 inline-block text-xs font-extrabold no-underline hover:underline"
-                bind-href="ownerHref()"
+              <a class="mb-14 inline-block text-xs font-extrabold no-underline hover:underline" bind-href="ownerHref()"
                 >&larr; All snippets by {{ snippet.owner }}</a
               >
               <div class="flex flex-col gap-9">
                 <div>
-                  <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                    {{ snippet.type }} snippet
-                  </p>
+                  <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">{{ snippet.type }} snippet</p>
                   <h1
                     class="m-0 max-w-3xl [overflow-wrap:anywhere] font-serif text-[clamp(2.7rem,6vw,5.4rem)] leading-[.92] font-medium tracking-[-.05em]"
                   >
-                    {{ snippet.owner }}<i class="text-[#ff7146] not-italic">/</i
-                    >{{ snippet.repo }}
+                    {{ snippet.owner }}<i class="text-[#ff7146] not-italic">/</i>{{ snippet.repo }}
                   </h1>
                 </div>
-                <copy-box
-                  class="block w-full max-w-md self-end max-md:self-stretch"
-                  bind-code="runCommand"
-                ></copy-box>
+                <copy-box class="block w-full max-w-md self-end max-md:self-stretch" bind-code="runCommand"></copy-box>
               </div>
-              <dl
-                class="my-14 grid grid-cols-3 border border-[#c8c7bd] max-md:grid-cols-1"
-              >
+              <dl class="my-14 grid grid-cols-3 border border-[#c8c7bd] max-md:grid-cols-1">
                 <div class="min-w-0 p-5">
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase"
-                  >
-                    Runtime
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap"
-                  >
+                  <dt class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">Runtime</dt>
+                  <dd class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
                     {{ snippet.type }}
                   </dd>
                 </div>
-                <div
-                  class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0"
-                >
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase"
-                  >
-                    Entrypoint
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap"
-                  >
+                <div class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0">
+                  <dt class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">Entrypoint</dt>
+                  <dd class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
                     {{ snippet.entrypoint }}
                   </dd>
                 </div>
-                <div
-                  class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0"
-                >
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase"
-                  >
-                    Commit
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap"
-                  >
+                <div class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0">
+                  <dt class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">Commit</dt>
+                  <dd class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
                     {{ shortCommit }}
                   </dd>
                 </div>
@@ -579,27 +429,114 @@
 
         <template if="page === 'editor'">
           <section class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[90rem] py-10 max-md:w-[calc(100%_-_1.75rem)]">
-            <template if="loading"><div class="flex items-center gap-3 border border-[#c8c7bd] bg-[#fffdf7] p-5"><span class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span><p class="m-0 text-[#697069]">Opening workspace...</p></div></template>
-            <template if="error"><div class="border border-[#ff7146] bg-[#fffdf7] p-5"><b>Could not open the editor</b><p class="mt-2 mb-0 text-[#697069]">{{ error }}</p></div></template>
+            <template if="loading"
+              ><div class="flex items-center gap-3 border border-[#c8c7bd] bg-[#fffdf7] p-5">
+                <span class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
+                <p class="m-0 text-[#697069]">Opening workspace...</p>
+              </div></template
+            >
+            <template if="error"
+              ><div class="border border-[#ff7146] bg-[#fffdf7] p-5">
+                <b>Could not open the editor</b>
+                <p class="mt-2 mb-0 text-[#697069]">{{ error }}</p>
+              </div></template
+            >
             <template if="!loading && editor">
               <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
-                <div><p class="mb-2 text-xs font-black tracking-[.15em] uppercase">Private staging workspace</p><h1 class="m-0 font-serif text-4xl font-medium tracking-[-.05em] max-md:text-3xl">{{ editor.owner }}<i class="text-[#ff7146] not-italic">/</i>{{ editor.repo }}</h1></div>
-                <span class="rounded-full border border-[#182019] px-3 py-1.5 font-mono text-xs font-bold" bind-class="editorStatusClass">{{ editorStatus }}</span>
+                <div>
+                  <p class="mb-2 text-xs font-black tracking-[.15em] uppercase">Private staging workspace</p>
+                  <h1 class="m-0 font-serif text-4xl font-medium tracking-[-.05em] max-md:text-3xl">
+                    {{ editor.owner }}<i class="text-[#ff7146] not-italic">/</i>{{ editor.repo }}
+                  </h1>
+                </div>
+                <span
+                  class="rounded-full border border-[#182019] px-3 py-1.5 font-mono text-xs font-bold"
+                  bind-class="editorStatusClass"
+                  >{{ editorStatus }}</span
+                >
               </div>
-              <div class="grid min-h-[42rem] grid-cols-[15rem_minmax(0,1fr)_17rem] overflow-hidden rounded-sm border border-[#182019] bg-[#fffdf7] shadow-[8px_8px_0_#d7f34a] max-lg:grid-cols-[13rem_minmax(0,1fr)] max-md:block">
+              <div
+                class="grid min-h-[42rem] grid-cols-[15rem_minmax(0,1fr)_17rem] overflow-hidden rounded-sm border border-[#182019] bg-[#fffdf7] shadow-[8px_8px_0_#d7f34a] max-lg:grid-cols-[13rem_minmax(0,1fr)] max-md:block"
+              >
                 <aside class="border-r border-[#c8c7bd] bg-[#f7f5ef] max-md:border-r-0 max-md:border-b">
-                  <div class="border-b border-[#c8c7bd] px-4 py-4"><b class="text-xs font-black tracking-[.12em] uppercase">Files</b></div>
-                  <nav class="p-2" aria-label="Snippet files"><template for="file of editor.files"><button class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left font-mono text-xs hover:bg-[#e7e5dd]" bind-class="fileClass(file)" type="button" on-click="selectFile(file)"><span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ file.path }}</span><span class="size-1.5 shrink-0 rounded-full bg-[#ff7146]" attr-hidden="!file.staged"></span></button></template></nav>
+                  <div class="border-b border-[#c8c7bd] px-4 py-4">
+                    <b class="text-xs font-black tracking-[.12em] uppercase">Files</b>
+                  </div>
+                  <nav class="p-2" aria-label="Snippet files">
+                    <template for="file of editor.files"
+                      ><button
+                        class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left font-mono text-xs hover:bg-[#e7e5dd]"
+                        bind-class="fileClass(file)"
+                        type="button"
+                        on-click="selectFile(file)"
+                      >
+                        <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ file.path }}</span
+                        ><span
+                          class="size-1.5 shrink-0 rounded-full bg-[#ff7146]"
+                          attr-hidden="!file.staged"
+                        ></span></button
+                    ></template>
+                  </nav>
                 </aside>
                 <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
-                  <div class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"><span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span></div>
-                  <code-editor class="min-h-0 flex-1 bg-[#fffdf7]" bind-value="editorContent" bind-language="editorLanguage" status="Editing staged source" on-change="markDirty()"></code-editor>
-                  <div class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3"><span class="font-mono text-xs text-[#aab4aa]">{{ editorContent.split('\n').length }} lines</span><button class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40" type="button" on-click="stageActiveFile()" attr-disabled="!editorDirty || saving">{{ saving ? 'Staging...' : 'Stage file' }}</button></div>
+                  <div
+                    class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"
+                  >
+                    <span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span>
+                  </div>
+                  <code-editor
+                    class="min-h-0 flex-1]"
+                    bind-value="editorContent"
+                    bind-language="editorLanguage"
+                    status="Editing staged source"
+                    on-change="markDirty()"
+                  ></code-editor>
+                  <div class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3">
+                    <span class="font-mono text-xs text-[#aab4aa]">{{ editorContent.split('\n').length }} lines</span
+                    ><button
+                      class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
+                      type="button"
+                      on-click="stageActiveFile()"
+                      attr-disabled="!editorDirty || saving"
+                    >
+                      {{ saving ? 'Staging...' : 'Stage file' }}
+                    </button>
+                  </div>
                 </div>
-                <aside class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0">
-                  <div class="border-b border-[#c8c7bd] px-4 py-4"><b class="text-xs font-black tracking-[.12em] uppercase">Change history</b></div>
-                  <ol class="m-0 max-h-72 list-none overflow-auto p-0"><template for="entry of editor.history"><li class="border-b border-[#dedbd2] px-4 py-3"><b class="block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap">{{ entry.message }}</b><span class="mt-1 block font-mono text-[.65rem] text-[#697069]">{{ entry.shortCommit }} · {{ entry.date.slice(0, 10) }}</span></li></template></ol>
-                  <form class="border-t border-[#c8c7bd] p-4" on-submit.prevent="commitChanges($event)"><label class="mb-2 block text-[.65rem] font-black tracking-[.12em] uppercase" for="summary">Change summary <span class="normal-case text-[#697069]">optional</span></label><textarea class="h-20 w-full resize-none border border-[#c8c7bd] bg-[#fffdf7] p-2.5 text-sm outline-none focus:border-[#182019]" id="summary" bind-value="commitMessage" placeholder="Explain this update"></textarea><button class="mt-3 w-full cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-3 py-3 text-xs font-black text-white uppercase disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="!hasStagedFiles || committing">{{ committing ? 'Committing...' : 'Commit staged changes' }}</button></form>
+                <aside
+                  class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0"
+                >
+                  <div class="border-b border-[#c8c7bd] px-4 py-4">
+                    <b class="text-xs font-black tracking-[.12em] uppercase">Change history</b>
+                  </div>
+                  <ol class="m-0 max-h-72 list-none overflow-auto p-0">
+                    <template for="entry of editor.history"
+                      ><li class="border-b border-[#dedbd2] px-4 py-3">
+                        <b class="block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap"
+                          >{{ entry.message }}</b
+                        ><span class="mt-1 block font-mono text-[.65rem] text-[#697069]"
+                          >{{ entry.shortCommit }} · {{ entry.date.slice(0, 10) }}</span
+                        >
+                      </li></template
+                    >
+                  </ol>
+                  <form class="border-t border-[#c8c7bd] p-4" on-submit.prevent="commitChanges($event)">
+                    <label class="mb-2 block text-[.65rem] font-black tracking-[.12em] uppercase" for="summary"
+                      >Change summary <span class="normal-case text-[#697069]">optional</span></label
+                    ><textarea
+                      class="h-20 w-full resize-none border border-[#c8c7bd] bg-[#fffdf7] p-2.5 text-sm outline-none focus:border-[#182019]"
+                      id="summary"
+                      bind-value="commitMessage"
+                      placeholder="Explain this update"
+                    ></textarea
+                    ><button
+                      class="mt-3 w-full cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-3 py-3 text-xs font-black text-white uppercase disabled:cursor-not-allowed disabled:opacity-40"
+                      type="submit"
+                      attr-disabled="!hasStagedFiles || committing"
+                    >
+                      {{ committing ? 'Committing...' : 'Commit staged changes' }}
+                    </button>
+                  </form>
                 </aside>
               </div>
             </template>
@@ -607,15 +544,9 @@
         </template>
 
         <template if="page === 'not-found'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[56rem] py-36 text-center"
-          >
-            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-              404
-            </p>
-            <h1
-              class="mb-12 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]"
-            >
+          <section class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[56rem] py-36 text-center">
+            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">404</p>
+            <h1 class="mb-12 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
               That command went nowhere.
             </h1>
             <a
@@ -630,16 +561,10 @@
       <footer
         class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"
       >
-        <a
-          class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
-          href="#/"
-          ><img class="size-9" src="./assets/icon.svg" alt="" /><span
-            >snippets.run</span
-          ></a
+        <a class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline" href="#/"
+          ><img class="size-9" src="./assets/icon.svg" alt="" /><span>snippets.run</span></a
         >
-        <p class="font-serif text-[#697069] italic max-sm:hidden">
-          Small scripts. Long memory.
-        </p>
+        <p class="font-serif text-[#697069] italic max-sm:hidden">Small scripts. Long memory.</p>
         <nav class="flex gap-4">
           <a class="text-xs font-extrabold" href="#/explore">Registry</a
           ><a class="text-xs font-extrabold" href="#/create">Publish</a>
@@ -647,63 +572,63 @@
       </footer>
 
       <script setup>
-        import { computed, onDestroy, onInit, ref } from "@li3/web";
+        import { computed, onDestroy, onInit, ref } from '@li3/web';
 
-        const registry = "https://registry.snippets.run";
+        const registry = 'https://registry.snippets.run';
 
         export default function app() {
-          const page = ref("home");
-          const owner = ref("");
-          const ownerQuery = ref("");
+          const page = ref('home');
+          const owner = ref('');
+          const ownerQuery = ref('');
           const snippets = ref([]);
           const snippet = ref(null);
           const editor = ref(null);
-          const activeFile = ref({ path: "", content: "", staged: false });
-          const editorContent = ref("");
+          const activeFile = ref({ path: '', content: '', staged: false });
+          const editorContent = ref('');
           const editorDirty = ref(false);
           const saving = ref(false);
           const committing = ref(false);
-          const commitMessage = ref("");
+          const commitMessage = ref('');
           const loading = ref(false);
-          const error = ref("");
+          const error = ref('');
           let requestId = 0;
 
-          const registryTitle = computed(() =>
-            owner.value ? `Snippets by ${owner.value}` : "Find runnable code.",
-          );
+          const registryTitle = computed(() => (owner.value ? `Snippets by ${owner.value}` : 'Find runnable code.'));
           const resultCount = computed(
-            () =>
-              `${snippets.value.length} snippet${snippets.value.length === 1 ? "" : "s"}`,
+            () => `${snippets.value.length} snippet${snippets.value.length === 1 ? '' : 's'}`,
           );
           const runCommand = computed(() =>
-            snippet.value
-              ? `run ${snippet.value.owner}/${snippet.value.repo}@${snippet.value.commit}`
-              : "",
+            snippet.value ? `run ${snippet.value.owner}/${snippet.value.repo}@${snippet.value.commit}` : '',
           );
-          const shortCommit = computed(
-            () => snippet.value?.commit.slice(0, 12) || "",
-          );
+          const shortCommit = computed(() => snippet.value?.commit.slice(0, 12) || '');
           const hasStagedFiles = computed(() => editor.value?.files.some((file) => file.staged) || false);
-          const editorStatus = computed(() => editorDirty.value ? "Unstaged edits" : hasStagedFiles.value ? "Changes staged" : "All changes saved");
-          const editorStatusClass = computed(() => editorDirty.value ? "bg-[#fffdf7]" : hasStagedFiles.value ? "bg-[#d7f34a]" : "bg-[#e7e5dd]");
-          const editorLanguage = computed(() => ({ sh: "bash", js: "javascript", mjs: "javascript", py: "python", json: "json", md: "markdown" }[activeFile.value.path.split(".").at(-1)] || ""));
+          const editorStatus = computed(() =>
+            editorDirty.value ? 'Unstaged edits' : hasStagedFiles.value ? 'Changes staged' : 'All changes saved',
+          );
+          const editorStatusClass = computed(() =>
+            editorDirty.value ? 'bg-[#fffdf7]' : hasStagedFiles.value ? 'bg-[#d7f34a]' : 'bg-[#e7e5dd]',
+          );
+          const editorLanguage = computed(
+            () =>
+              ({ sh: 'bash', js: 'javascript', mjs: 'javascript', py: 'python', json: 'json', md: 'markdown' })[
+                activeFile.value.path.split('.').at(-1)
+              ] || '',
+          );
 
           async function request(path) {
             const response = await fetch(registry + path, {
-              headers: { Accept: "application/json" },
+              headers: { Accept: 'application/json' },
             });
             if (!response.ok) {
               const body = await response.json().catch(() => ({}));
-              throw new Error(
-                body.error || `Registry request failed (${response.status})`,
-              );
+              throw new Error(body.error || `Registry request failed (${response.status})`);
             }
             return response.json();
           }
 
           async function editorRequest(path, options = {}) {
             const response = await fetch(registry + path, {
-              headers: { Accept: "application/json", ...options.headers },
+              headers: { Accept: 'application/json', ...options.headers },
               ...options,
             });
             const body = await response.json().catch(() => ({}));
@@ -724,12 +649,10 @@
             owner.value = selectedOwner;
             ownerQuery.value = selectedOwner;
             snippets.value = [];
-            error.value = "";
+            error.value = '';
             loading.value = true;
             try {
-              const result = await request(
-                `/api/snippets/${encodeURIComponent(selectedOwner)}`,
-              );
+              const result = await request(`/api/snippets/${encodeURIComponent(selectedOwner)}`);
               if (id === requestId) snippets.value = result;
             } catch (reason) {
               if (id === requestId) error.value = reason.message;
@@ -742,7 +665,7 @@
             const id = ++requestId;
             owner.value = selectedOwner;
             snippet.value = null;
-            error.value = "";
+            error.value = '';
             loading.value = true;
             try {
               const result = await request(
@@ -759,10 +682,12 @@
           async function showEditor(selectedOwner, name) {
             const id = ++requestId;
             editor.value = null;
-            error.value = "";
+            error.value = '';
             loading.value = true;
             try {
-              const result = await editorRequest(`/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`);
+              const result = await editorRequest(
+                `/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`,
+              );
               if (id !== requestId) return;
               editor.value = result;
               selectFile(result.files[0]);
@@ -778,77 +703,89 @@
             editorContent.value = file.content;
             editorDirty.value = false;
           }
-          function markDirty() { editorDirty.value = editorContent.value !== activeFile.value.content; }
-          function fileClass(file) { return file.path === activeFile.value.path ? "bg-[#d7f34a] font-bold" : ""; }
+          function markDirty() {
+            editorDirty.value = editorContent.value !== activeFile.value.content;
+          }
+          function fileClass(file) {
+            return file.path === activeFile.value.path ? 'bg-[#d7f34a] font-bold' : '';
+          }
 
           async function stageActiveFile() {
             saving.value = true;
-            error.value = "";
+            error.value = '';
             try {
-              await editorRequest(`/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(activeFile.value.path)}`, {
-                method: "PUT", headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: editorContent.value,
-              });
+              await editorRequest(
+                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(activeFile.value.path)}`,
+                {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                  body: editorContent.value,
+                },
+              );
               activeFile.value.content = editorContent.value;
               activeFile.value.staged = true;
               const file = editor.value.files.find((item) => item.path === activeFile.value.path);
               file.content = editorContent.value;
               file.staged = true;
               editorDirty.value = false;
-            } catch (reason) { error.value = reason.message; } finally { saving.value = false; }
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              saving.value = false;
+            }
           }
 
           async function commitChanges() {
             committing.value = true;
-            error.value = "";
+            error.value = '';
             try {
-              await editorRequest(`/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/commit`, {
-                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: commitMessage.value }),
-              });
-              commitMessage.value = "";
+              await editorRequest(
+                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/commit`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: commitMessage.value }),
+                },
+              );
+              commitMessage.value = '';
               const owner = editor.value.owner;
               const repo = editor.value.repo;
               await showEditor(owner, repo);
-            } catch (reason) { error.value = reason.message; } finally { committing.value = false; }
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              committing.value = false;
+            }
           }
 
           function route() {
             requestId++;
             loading.value = false;
-            error.value = "";
-            const parts = (location.hash.slice(1) || "/")
-              .split("/")
-              .filter(Boolean)
-              .map(decode);
-            if (parts.length === 0) page.value = "home";
-            else if (parts[0] === "create" && parts.length === 1)
-              page.value = "create";
-            else if (parts[0] === "explore" && parts.length === 1) {
-              page.value = "explore";
-              owner.value = "";
-              ownerQuery.value = "";
+            error.value = '';
+            const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean).map(decode);
+            if (parts.length === 0) page.value = 'home';
+            else if (parts[0] === 'create' && parts.length === 1) page.value = 'create';
+            else if (parts[0] === 'explore' && parts.length === 1) {
+              page.value = 'explore';
+              owner.value = '';
+              ownerQuery.value = '';
               snippets.value = [];
-            } else if (parts[0] === "s" && parts.length === 2) {
-              page.value = "explore";
+            } else if (parts[0] === 's' && parts.length === 2) {
+              page.value = 'explore';
               showOwner(parts[1]);
-            } else if (parts[0] === "s" && parts.length === 3) {
-              page.value = "snippet";
+            } else if (parts[0] === 's' && parts.length === 3) {
+              page.value = 'snippet';
               showSnippet(parts[1], parts[2]);
-            } else if (parts[0] === "edit" && parts.length === 3) {
-              page.value = "editor";
+            } else if (parts[0] === 'edit' && parts.length === 3) {
+              page.value = 'editor';
               showEditor(parts[1], parts[2]);
-            } else page.value = "not-found";
-            window.scrollTo({ top: 0, behavior: "instant" });
-            document.title =
-              page.value === "home"
-                ? "snippets.run"
-                : `${parts.at(-1) || page.value} - snippets.run`;
+            } else page.value = 'not-found';
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            document.title = page.value === 'home' ? 'snippets.run' : `${parts.at(-1) || page.value} - snippets.run`;
           }
 
           function browseOwner(event) {
-            const value = new FormData(event.currentTarget)
-              .get("owner")
-              ?.toString()
-              .trim();
+            const value = new FormData(event.currentTarget).get('owner')?.toString().trim();
             if (value) location.hash = `/s/${encodeURIComponent(value)}`;
           }
 
@@ -859,17 +796,14 @@
             return `#/s/${encodeURIComponent(owner.value)}`;
           }
           function runtimeLabel(type) {
-            return (
-              { bash: "SH", node: "JS", python: "PY" }[type] ||
-              type.slice(0, 2).toUpperCase()
-            );
+            return { bash: 'SH', node: 'JS', python: 'PY' }[type] || type.slice(0, 2).toUpperCase();
           }
 
           onInit(() => {
-            window.addEventListener("hashchange", route);
+            window.addEventListener('hashchange', route);
             route();
           });
-          onDestroy(() => window.removeEventListener("hashchange", route));
+          onDestroy(() => window.removeEventListener('hashchange', route));
 
           return {
             browseOwner,
