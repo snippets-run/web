@@ -229,42 +229,19 @@
               Turn a repository<br />into a command.
             </h1>
             <p class="my-8 max-w-2xl text-xl leading-relaxed text-[#434b44]">
-              Publishing is deliberately simple: the creation workflow is itself a runnable snippet.
+              Start with one source file. The registry creates the typed snippet and keeps repository operations private.
             </p>
-            <div class="mt-20 border-t border-[#182019] max-md:mt-14">
-              <article
-                class="grid grid-cols-[6.25rem_1fr] gap-8 border-b border-[#c8c7bd] py-10 max-md:grid-cols-[3rem_1fr] max-md:gap-2"
-              >
-                <span class="font-mono text-xs font-extrabold">01</span>
-                <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Install the runner</h2>
-                  <p class="mt-0 mb-5 text-[#697069]">Install the native runner to publish from your terminal.</p>
-                  <copy-box class="block max-w-xl" code="curl -fsSL https://install.snippets.run | sh"></copy-box>
-                </div>
-              </article>
-              <article
-                class="grid grid-cols-[6.25rem_1fr] gap-8 border-b border-[#c8c7bd] py-10 max-md:grid-cols-[3rem_1fr] max-md:gap-2"
-              >
-                <span class="font-mono text-xs font-extrabold">02</span>
-                <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Launch the creator</h2>
-                  <p class="mt-0 mb-5 text-[#697069]">Follow the prompts to connect and publish your Git repository.</p>
-                  <copy-box class="block max-w-xl" code="run snippets/create.sh@latest"></copy-box>
-                </div>
-              </article>
-              <article
-                class="grid grid-cols-[6.25rem_1fr] gap-8 border-b border-[#c8c7bd] py-10 max-md:grid-cols-[3rem_1fr] max-md:gap-2"
-              >
-                <span class="font-mono text-xs font-extrabold">03</span>
-                <div>
-                  <h2 class="m-0 mb-2 font-serif text-3xl font-medium">Run it everywhere</h2>
-                  <p class="mt-0 mb-5 text-[#697069]">
-                    Your immutable snippet can now be called by owner and repository name.
-                  </p>
-                  <copy-box class="block max-w-xl" code="run your-name/tool.sh"></copy-box>
-                </div>
-              </article>
-            </div>
+            <form class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4" on-submit.prevent="createSnippet($event)">
+              <template if="createError"><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template>
+              <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+                <label class="block text-xs font-black tracking-[.1em] uppercase">Owner<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createOwner" placeholder="your-name" required /></label>
+                <label class="block text-xs font-black tracking-[.1em] uppercase">Snippet name<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createName" placeholder="greeting" required /></label>
+              </div>
+              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Runtime<select class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createType"><option value="sh">Shell (.sh)</option><option value="js">Node.js (.js)</option><option value="py">Python (.py)</option></select></label>
+              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Source<textarea class="mt-2 block h-64 w-full resize-y border border-[#c8c7bd] bg-[#1a211b] p-4 font-mono text-sm leading-6 text-[#e7ede6] normal-case outline-none focus:border-[#182019]" bind-value="createContent" placeholder="Write your snippet..." required spellcheck="false"></textarea></label>
+              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createMessage" placeholder="Create greeting" /></label>
+              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="creating">{{ creating ? 'Creating...' : 'Create snippet' }}</button>
+            </form>
           </section>
         </template>
 
@@ -589,6 +566,13 @@
           const saving = ref(false);
           const committing = ref(false);
           const commitMessage = ref('');
+          const createOwner = ref('');
+          const createName = ref('');
+          const createType = ref('sh');
+          const createContent = ref('');
+          const createMessage = ref('');
+          const creating = ref(false);
+          const createError = ref('');
           const loading = ref(false);
           const error = ref('');
           let requestId = 0;
@@ -634,6 +618,25 @@
             const body = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(body.error || `Editor request failed (${response.status})`);
             return body;
+          }
+
+          async function createSnippet() {
+            creating.value = true;
+            createError.value = '';
+            const owner = createOwner.value.trim();
+            const name = createName.value.trim();
+            try {
+              await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: createContent.value, message: createMessage.value }),
+              });
+              location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`;
+            } catch (reason) {
+              createError.value = reason.message;
+            } finally {
+              creating.value = false;
+            }
           }
 
           function decode(value) {
@@ -811,6 +814,14 @@
             commitChanges,
             commitMessage,
             committing,
+            createContent,
+            createError,
+            createMessage,
+            createName,
+            createOwner,
+            createSnippet,
+            createType,
+            creating,
             editor,
             editorContent,
             editorDirty,
