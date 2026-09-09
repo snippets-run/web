@@ -81,6 +81,8 @@
             href="#/create"
             >Publish</a
           >
+          <template if="user"><button class="ml-1 cursor-pointer rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold" type="button" on-click="signOut">Sign out</button></template>
+          <template if="!user"><a class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline" bind-href="loginHref()">Sign in</a></template>
         </nav>
       </header>
 
@@ -566,7 +568,8 @@
         const registry = 'https://registry.snippets.run';
 
         export default function app() {
-          const page = ref('home');
+           const page = ref('home');
+           const user = ref(null);
           const owner = ref('');
           const ownerQuery = ref('');
           const snippets = ref([]);
@@ -612,9 +615,10 @@
               ] || '',
           );
 
-          async function request(path) {
-            const response = await fetch(registry + path, {
-              headers: { Accept: 'application/json' },
+           async function request(path) {
+             const response = await fetch(registry + path, {
+               headers: { Accept: 'application/json' },
+               credentials: 'include',
             });
             if (!response.ok) {
               const body = await response.json().catch(() => ({}));
@@ -623,10 +627,11 @@
             return response.json();
           }
 
-          async function editorRequest(path, options = {}) {
+           async function editorRequest(path, options = {}) {
             const response = await fetch(registry + path, {
               headers: { Accept: 'application/json', ...options.headers },
-              ...options,
+               ...options,
+               credentials: 'include',
             });
             const body = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(body.error || `Editor request failed (${response.status})`);
@@ -752,6 +757,23 @@
              }
            }
 
+           async function loadUser() {
+             try {
+               user.value = await request('/auth/me');
+             } catch {
+               user.value = null;
+             }
+           }
+
+           function loginHref() {
+             return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
+           }
+
+           async function signOut() {
+             await fetch(`${registry}/auth/logout`, { method: 'POST', credentials: 'include' });
+             user.value = null;
+           }
+
            async function stageNewFile() {
              saving.value = true;
              error.value = '';
@@ -837,9 +859,10 @@
             return { bash: 'SH', node: 'JS', python: 'PY' }[type] || type.slice(0, 2).toUpperCase();
           }
 
-          onInit(() => {
-            window.addEventListener('hashchange', route);
-            route();
+           onInit(() => {
+             window.addEventListener('hashchange', route);
+             loadUser();
+             route();
           });
           onDestroy(() => window.removeEventListener('hashchange', route));
 
@@ -865,7 +888,8 @@
             error,
             fileClass,
             hasStagedFiles,
-            loading,
+             loading,
+             loginHref,
             markDirty,
             owner,
             ownerHref,
@@ -874,7 +898,8 @@
             registryTitle,
             resultCount,
             runCommand,
-            runtimeLabel,
+             runtimeLabel,
+             signOut,
             shortCommit,
             saving,
             newFileContent,
@@ -882,9 +907,10 @@
             selectFile,
             snippet,
             snippetHref,
-            snippets,
-            stageActiveFile,
-            stageNewFile,
+             snippets,
+             stageActiveFile,
+             stageNewFile,
+             user,
           };
         }
       </script>

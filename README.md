@@ -11,4 +11,5 @@ npx serve .
 
 The browser loads Lithium from `cdn.li3.dev`, Tailwind's browser runtime from jsDelivr, Sodium's Lithium
 `code-editor` component for syntax-highlighted editing, and snippets from `registry.snippets.run`. The editor is
-available at `#/edit/<owner>/<repository>` and uses only the registry's constrained editor API.
+available at `#/edit/<owner>/<repository>` and uses only the registry's constrained editor API. Sign-in is handled by
+the registry's OIDC flow; the browser never receives the OIDC client secret.
