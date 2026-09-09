@@ -746,8 +746,9 @@
               editorDirty.value = false;
             } catch (reason) {
               error.value = reason.message;
-            } finally {
-              saving.value = false;
+             } finally {
+               saving.value = false;
+             }
            }
 
            async function stageNewFile() {
