@@ -239,12 +239,12 @@
             <form class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4" on-submit.prevent="createSnippet($event)">
               <template if="createError"><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template>
               <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-                <label class="block text-xs font-black tracking-[.1em] uppercase">Owner<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createOwner" placeholder="your-name" required /></label>
-                <label class="block text-xs font-black tracking-[.1em] uppercase">Snippet name<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createName" placeholder="greeting" required /></label>
+                <label class="block text-xs font-black tracking-[.1em] uppercase">Owner<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="owner" placeholder="your-name" required /></label>
+                <label class="block text-xs font-black tracking-[.1em] uppercase">Snippet name<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="name" placeholder="greeting" required /></label>
               </div>
-              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Runtime<select class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createType"><option value="sh">Shell (.sh)</option><option value="js">Node.js (.js)</option><option value="py">Python (.py)</option></select></label>
-              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createMessage" placeholder="Create greeting" /></label>
-              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="creating">{{ creating ? 'Opening workspace...' : 'Open new workspace' }}</button>
+              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Runtime<select class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="type"><option value="sh">Shell (.sh)</option><option value="js">Node.js (.js)</option><option value="py">Python (.py)</option></select></label>
+              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="message" placeholder="Create greeting" /></label>
+              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit">{{ creating ? 'Opening workspace...' : 'Open new workspace' }}</button>
             </form>
             </template>
           </section>
@@ -642,19 +642,22 @@
             return body;
           }
 
-          async function createSnippet() {
-            creating.value = true;
-            createError.value = '';
-            const owner = createOwner.value.trim();
-            const name = createName.value.trim();
-            try {
-              await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ message: createMessage.value }),
+           async function createSnippet(event) {
+             creating.value = true;
+             createError.value = '';
+             const form = new FormData(event.currentTarget);
+             const owner = form.get('owner')?.toString().trim() || '';
+             const name = form.get('name')?.toString().trim() || '';
+             const type = form.get('type')?.toString() || 'sh';
+             const message = form.get('message')?.toString() || '';
+             try {
+               await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ message }),
                });
-               newFilePath.value = createType.value === 'js' ? 'index.mjs' : createType.value === 'py' ? 'main.py' : 'main.sh';
-               location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`;
+               newFilePath.value = type === 'js' ? 'index.mjs' : type === 'py' ? 'main.py' : 'main.sh';
+               location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`;
             } catch (reason) {
               createError.value = reason.message;
             } finally {
