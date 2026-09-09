@@ -632,8 +632,8 @@
           }
 
            async function editorRequest(path, options = {}) {
-            const response = await fetch(registry + path, {
-              headers: { Accept: 'application/json', ...options.headers },
+             const response = await fetch(registry + path, {
+               headers: { Accept: 'application/json', ...options.headers },
                ...options,
                credentials: 'include',
             });
