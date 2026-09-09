@@ -229,7 +229,7 @@
               Turn a repository<br />into a command.
             </h1>
             <p class="my-8 max-w-2xl text-xl leading-relaxed text-[#434b44]">
-              Start with one source file. The registry creates the typed snippet and keeps repository operations private.
+              Create a private workspace first, then add and commit the files that make your command useful.
             </p>
             <form class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4" on-submit.prevent="createSnippet($event)">
               <template if="createError"><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template>
@@ -238,9 +238,8 @@
                 <label class="block text-xs font-black tracking-[.1em] uppercase">Snippet name<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createName" placeholder="greeting" required /></label>
               </div>
               <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Runtime<select class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createType"><option value="sh">Shell (.sh)</option><option value="js">Node.js (.js)</option><option value="py">Python (.py)</option></select></label>
-              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Source<textarea class="mt-2 block h-64 w-full resize-y border border-[#c8c7bd] bg-[#1a211b] p-4 font-mono text-sm leading-6 text-[#e7ede6] normal-case outline-none focus:border-[#182019]" bind-value="createContent" placeholder="Write your snippet..." required spellcheck="false"></textarea></label>
               <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createMessage" placeholder="Create greeting" /></label>
-              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="creating">{{ creating ? 'Creating...' : 'Create snippet' }}</button>
+              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="creating">{{ creating ? 'Opening workspace...' : 'Open new workspace' }}</button>
             </form>
           </section>
         </template>
@@ -399,8 +398,7 @@
                 <pre
                   class="m-0 max-h-[37.5rem] overflow-auto p-6 font-mono text-[.8rem] leading-7"
                 ><code>{{ snippet.script }}</code></pre>
-              </div>
-            </template>
+                    </div>
           </section>
         </template>
 
@@ -455,13 +453,25 @@
                     ></template>
                   </nav>
                 </aside>
-                <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
+                 <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
+                   <template if="!activeFile.path">
+                     <form class="flex flex-1 flex-col gap-4 p-6" on-submit.prevent="stageNewFile($event)">
+                       <div>
+                         <p class="mb-2 font-serif text-2xl">Your repository is empty.</p>
+                         <p class="m-0 text-sm text-[#aab4aa]">Add the first entrypoint to start your snippet.</p>
+                       </div>
+                       <input class="border border-[#566057] bg-[#252d26] px-3 py-3 font-mono text-sm text-[#e7ede6] outline-none focus:border-[#d7f34a]" bind-value="newFilePath" placeholder="main.sh" required />
+                       <textarea class="min-h-64 flex-1 resize-y border border-[#566057] bg-[#252d26] p-4 font-mono text-sm leading-6 text-[#e7ede6] outline-none focus:border-[#d7f34a]" bind-value="newFileContent" placeholder="Write your snippet..." required spellcheck="false"></textarea>
+                       <button class="self-start cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-4 py-3 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="saving">{{ saving ? 'Staging...' : 'Stage first file' }}</button>
+                     </form>
+                   </template>
+                   <template if="activeFile.path">
                   <div
                     class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"
                   >
                     <span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span>
-                  </div>
-                  <code-editor
+                    </div>
+                    <code-editor
                     class="min-h-0 flex-1"
                     bind-value="editorContent"
                     bind-language="editorLanguage"
@@ -478,8 +488,9 @@
                     >
                       {{ saving ? 'Staging...' : 'Stage file' }}
                     </button>
+                    </div>
+                    </template>
                   </div>
-                </div>
                 <aside
                   class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0"
                 >
@@ -561,7 +572,9 @@
           const snippet = ref(null);
           const editor = ref(null);
           const activeFile = ref({ path: '', content: '', staged: false });
-          const editorContent = ref('');
+           const editorContent = ref('');
+           const newFilePath = ref('');
+           const newFileContent = ref('');
           const editorDirty = ref(false);
           const saving = ref(false);
           const committing = ref(false);
@@ -569,7 +582,6 @@
           const createOwner = ref('');
           const createName = ref('');
           const createType = ref('sh');
-          const createContent = ref('');
           const createMessage = ref('');
           const creating = ref(false);
           const createError = ref('');
@@ -629,9 +641,10 @@
               await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: createContent.value, message: createMessage.value }),
-              });
-              location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`;
+                 body: JSON.stringify({ message: createMessage.value }),
+               });
+               newFilePath.value = createType.value === 'js' ? 'index.mjs' : createType.value === 'py' ? 'main.py' : 'main.sh';
+               location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${createType.value}`;
             } catch (reason) {
               createError.value = reason.message;
             } finally {
@@ -692,8 +705,8 @@
                 `/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`,
               );
               if (id !== requestId) return;
-              editor.value = result;
-              selectFile(result.files[0]);
+               editor.value = result;
+               selectFile(result.files[0] || { path: '', content: '', staged: false });
             } catch (reason) {
               if (id === requestId) error.value = reason.message;
             } finally {
@@ -713,7 +726,7 @@
             return file.path === activeFile.value.path ? 'bg-[#d7f34a] font-bold' : '';
           }
 
-          async function stageActiveFile() {
+           async function stageActiveFile() {
             saving.value = true;
             error.value = '';
             try {
@@ -735,10 +748,30 @@
               error.value = reason.message;
             } finally {
               saving.value = false;
-            }
-          }
+           }
 
-          async function commitChanges() {
+           async function stageNewFile() {
+             saving.value = true;
+             error.value = '';
+             try {
+               await editorRequest(
+                 `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(newFilePath.value.trim())}`,
+                 {
+                   method: 'PUT',
+                   headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                   body: newFileContent.value,
+                 },
+               );
+               await showEditor(editor.value.owner, editor.value.repo);
+               newFilePath.value = '';
+               newFileContent.value = '';
+             } catch (reason) {
+               error.value = reason.message;
+             } finally {
+               saving.value = false;
+             }
+           }
+           async function commitChanges() {
             committing.value = true;
             error.value = '';
             try {
@@ -814,7 +847,6 @@
             commitChanges,
             commitMessage,
             committing,
-            createContent,
             createError,
             createMessage,
             createName,
@@ -843,11 +875,14 @@
             runtimeLabel,
             shortCommit,
             saving,
+            newFileContent,
+            newFilePath,
             selectFile,
             snippet,
             snippetHref,
             snippets,
             stageActiveFile,
+            stageNewFile,
           };
         }
       </script>
