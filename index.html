@@ -71,16 +71,11 @@
           <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/explore"
             >Registry</a
           >
-          <a
-            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
-            href="#/edit/snippets/hello.sh"
-            >Editor</a
-          >
-          <a
+          <template if="user"><a
             class="ml-1 rounded-full border border-[#182019] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#182019] hover:text-white"
             href="#/create"
             >Publish</a
-          >
+          ></template>
           <template if="user"><button class="ml-1 cursor-pointer rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold" type="button" on-click="signOut">Sign out</button></template>
           <template if="!user"><a class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline" bind-href="loginHref()">Sign in</a></template>
         </nav>
@@ -108,11 +103,11 @@
                 command.
               </p>
               <div class="flex flex-wrap gap-3">
-                <a
+                <template if="user"><a
                   class="rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
                   href="#/create"
                   >Publish a snippet</a
-                >
+                ></template>
                 <a
                   class="rounded-sm border border-[#182019] px-5 py-3.5 font-extrabold no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
                   href="#/s/snippets"
@@ -567,7 +562,7 @@
         <p class="font-serif text-[#697069] italic max-sm:hidden">Small scripts. Long memory.</p>
         <nav class="flex gap-4">
           <a class="text-xs font-extrabold" href="#/explore">Registry</a
-          ><a class="text-xs font-extrabold" href="#/create">Publish</a>
+          ><template if="user"><a class="text-xs font-extrabold" href="#/create">Publish</a></template>
         </nav>
       </footer>
 
