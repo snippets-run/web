@@ -233,6 +233,14 @@
             <p class="my-8 max-w-2xl text-xl leading-relaxed text-[#434b44]">
               Create a private workspace first, then add and commit the files that make your command useful.
             </p>
+            <template if="!user">
+              <div class="mt-14 max-w-2xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4">
+                <b class="text-lg">Sign in to create a snippet</b>
+                <p class="mt-2 mb-5 leading-relaxed text-[#697069]">Your editor workspace is private and requires an authenticated account.</p>
+                <a class="inline-block rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline" bind-href="loginHref()">Sign in with Auth</a>
+              </div>
+            </template>
+            <template if="user">
             <form class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4" on-submit.prevent="createSnippet($event)">
               <template if="createError"><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template>
               <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
@@ -243,6 +251,7 @@
               <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" bind-value="createMessage" placeholder="Create greeting" /></label>
               <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="creating">{{ creating ? 'Opening workspace...' : 'Open new workspace' }}</button>
             </form>
+            </template>
           </section>
         </template>
 
