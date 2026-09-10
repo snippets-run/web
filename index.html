@@ -71,25 +71,36 @@
           <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/explore"
             >Registry</a
           >
-          <template if="user"><a
-            class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
-            href="#/create"
-            >Publish</a
-          ></template>
-          <template if="user"><a class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]" href="#/mine">My Snippets</a></template>
-          <template if="!user"><a class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline" bind-href="loginHref()">Sign in</a></template>
+          <template if="user"
+            ><a
+              class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
+              href="#/create"
+              >Publish</a
+            ></template
+          >
+          <template if="user"
+            ><a
+              class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]"
+              href="#/mine"
+              >My Snippets</a
+            ></template
+          >
+          <template if="!user"
+            ><a
+              class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline"
+              bind-href="loginHref()"
+              >Sign in</a
+            ></template
+          >
         </nav>
       </header>
 
-      <main class="min-h-[calc(100vh-15rem)]">
+      <main class="min-h-screen">
         <template if="page === 'home'">
           <section
-            class="mx-auto grid min-h-[40rem] w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-[1.05fr_.95fr] items-center gap-[8vw] max-md:w-[calc(100%_-_1.75rem)] max-md:grid-cols-1 max-md:gap-16 max-md:py-20"
+            class="mx-auto grid min-h-[calc(100vh-5rem)] w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-1 lg:grid-cols-[1.05fr_.95fr] items-center gap-[8vw] md:w-[calc(100%_-_1.75rem)] md:gap-16 lg:pb-20"
           >
             <div>
-              <p class="mb-5 text-xs leading-none font-black tracking-[.15em] uppercase">
-                A tiny registry for useful code
-              </p>
               <h1
                 class="m-0 font-serif text-[clamp(3.6rem,7.7vw,7.2rem)] leading-[.88] font-medium tracking-[-.065em] max-md:text-[clamp(3.7rem,17vw,6rem)]"
               >
@@ -103,11 +114,13 @@
                 command.
               </p>
               <div class="flex flex-wrap gap-3">
-                <template if="user"><a
-                  class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
-                  href="#/create"
-                  >Publish a snippet</a
-                ></template>
+                <template if="user"
+                  ><a
+                    class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
+                    href="#/create"
+                    >Publish a snippet</a
+                  ></template
+                >
                 <a
                   class="rounded-sm border border-[#182019] px-5 py-3.5 font-extrabold no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
                   href="#/s/snippets"
@@ -148,7 +161,6 @@
             aria-labelledby="principles-title"
           >
             <div class="mb-16 grid grid-cols-[.6fr_1.4fr] gap-10 max-md:mb-12 max-md:grid-cols-1 max-md:gap-5">
-              <p class="m-0 text-xs leading-none font-black tracking-[.15em] uppercase">No more mystery files</p>
               <h2
                 class="m-0 max-w-3xl font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]"
                 id="principles-title"
@@ -216,15 +228,36 @@
         </template>
 
         <template if="page === 'mine'">
-          <section class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
+          <section
+            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20"
+          >
             <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Your workspace</p>
-            <h1 class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">My snippets.</h1>
+            <h1
+              class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]"
+            >
+              My snippets.
+            </h1>
             <template if="loading"><p class="mt-10 text-[#697069]">Loading your snippets...</p></template>
-            <template if="error"><div class="mt-10 border border-[#ff7146] bg-[#fff4ee] p-4">{{ error }}</div></template>
-            <template if="!loading && !error && mine.length === 0"><div class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">You have not published any snippets yet.</div></template>
+            <template if="error"
+              ><div class="mt-10 border border-[#ff7146] bg-[#fff4ee] p-4">{{ error }}</div></template
+            >
+            <template if="!loading && !error && mine.length === 0"
+              ><div class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">
+                You have not published any snippets yet.
+              </div></template
+            >
             <template if="!loading && !error && mine.length > 0">
               <ul class="mt-14 list-none border-t border-[#182019] p-0">
-                <template for="item of mine"><li class="border-b border-[#c8c7bd]"><a class="flex items-center justify-between gap-4 px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]" bind-href="mineHref(item)"><span><small class="mr-3 text-xs text-[#697069]">{{ item.owner }}</small>{{ item.repo }}</span><span>&#8599;</span></a></li></template>
+                <template for="item of mine"
+                  ><li class="border-b border-[#c8c7bd]">
+                    <a
+                      class="flex items-center justify-between gap-4 px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]"
+                      bind-href="mineHref(item)"
+                      ><span><small class="mr-3 text-xs text-[#697069]">{{ item.owner }}</small>{{ item.repo }}</span
+                      ><span>&#8599;</span></a
+                    >
+                  </li></template
+                >
               </ul>
             </template>
           </section>
@@ -244,23 +277,68 @@
               Create a private workspace first, then add and commit the files that make your command useful.
             </p>
             <template if="!user">
-              <div class="mt-14 max-w-2xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4">
+              <div
+                class="mt-14 max-w-2xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4"
+              >
                 <b class="text-lg">Sign in to create a snippet</b>
-                <p class="mt-2 mb-5 leading-relaxed text-[#697069]">Your editor workspace is private and requires an authenticated account.</p>
-                <a class="inline-block rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline" bind-href="loginHref()">Sign in with Auth</a>
+                <p class="mt-2 mb-5 leading-relaxed text-[#697069]">
+                  Your editor workspace is private and requires an authenticated account.
+                </p>
+                <a
+                  class="inline-block rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline"
+                  bind-href="loginHref()"
+                  >Sign in with Auth</a
+                >
               </div>
             </template>
             <template if="user">
-            <form class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4" on-submit.prevent="createSnippet($event)">
-              <template if="createError"><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template>
-              <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-                <label class="block text-xs font-black tracking-[.1em] uppercase">Owner<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="owner" placeholder="your-name" required /></label>
-                <label class="block text-xs font-black tracking-[.1em] uppercase">Snippet name<input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="name" placeholder="greeting" required /></label>
-              </div>
-              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Runtime<select class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="type"><option value="sh">Shell (.sh)</option><option value="js">Node.js (.js)</option><option value="py">Python (.py)</option></select></label>
-              <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase">Change summary <span class="font-normal normal-case text-[#697069]">optional</span><input class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]" name="message" placeholder="Create greeting" /></label>
-              <button class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit">{{ creating ? 'Opening workspace...' : 'Open new workspace' }}</button>
-            </form>
+              <form
+                class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4"
+                on-submit.prevent="createSnippet($event)"
+              >
+                <template if="createError"
+                  ><div class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">{{ createError }}</div></template
+                >
+                <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+                  <label class="block text-xs font-black tracking-[.1em] uppercase"
+                    >Owner<input
+                      class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
+                      name="owner"
+                      placeholder="your-name"
+                      required
+                  /></label>
+                  <label class="block text-xs font-black tracking-[.1em] uppercase"
+                    >Snippet name<input
+                      class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
+                      name="name"
+                      placeholder="greeting"
+                      required
+                  /></label>
+                </div>
+                <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase"
+                  >Runtime<select
+                    class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
+                    name="type"
+                  >
+                    <option value="sh">Shell (.sh)</option>
+                    <option value="js">Node.js (.js)</option>
+                    <option value="py">Python (.py)</option>
+                  </select></label
+                >
+                <label class="mt-5 block text-xs font-black tracking-[.1em] uppercase"
+                  >Change summary <span class="font-normal normal-case text-[#697069]">optional</span
+                  ><input
+                    class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
+                    name="message"
+                    placeholder="Create greeting"
+                /></label>
+                <button
+                  class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  type="submit"
+                >
+                  {{ creating ? 'Opening workspace...' : 'Open new workspace' }}
+                </button>
+              </form>
             </template>
           </section>
         </template>
@@ -475,44 +553,63 @@
                     ></template>
                   </nav>
                 </aside>
-                 <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
-                   <template if="!activeFile.path">
-                     <form class="flex flex-1 flex-col gap-4 p-6" on-submit.prevent="stageNewFile($event)">
-                       <div>
-                         <p class="mb-2 font-serif text-2xl">Your repository is empty.</p>
-                         <p class="m-0 text-sm text-[#aab4aa]">Add the first entrypoint to start your snippet.</p>
-                       </div>
-                       <input class="border border-[#566057] bg-[#252d26] px-3 py-3 font-mono text-sm text-[#e7ede6] outline-none focus:border-[#d7f34a]" bind-value="newFilePath" placeholder="main.sh" required />
-                       <textarea class="min-h-64 flex-1 resize-y border border-[#566057] bg-[#252d26] p-4 font-mono text-sm leading-6 text-[#e7ede6] outline-none focus:border-[#d7f34a]" bind-value="newFileContent" placeholder="Write your snippet..." required spellcheck="false"></textarea>
-                       <button class="self-start cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-4 py-3 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40" type="submit" attr-disabled="saving">{{ saving ? 'Staging...' : 'Stage first file' }}</button>
-                     </form>
-                   </template>
-                   <template if="activeFile.path">
-                  <div
-                    class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"
-                  >
-                    <span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span>
+                <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
+                  <template if="!activeFile.path">
+                    <form class="flex flex-1 flex-col gap-4 p-6" on-submit.prevent="stageNewFile($event)">
+                      <div>
+                        <p class="mb-2 font-serif text-2xl">Your repository is empty.</p>
+                        <p class="m-0 text-sm text-[#aab4aa]">Add the first entrypoint to start your snippet.</p>
+                      </div>
+                      <input
+                        class="border border-[#566057] bg-[#252d26] px-3 py-3 font-mono text-sm text-[#e7ede6] outline-none focus:border-[#d7f34a]"
+                        bind-value="newFilePath"
+                        placeholder="main.sh"
+                        required
+                      />
+                      <textarea
+                        class="min-h-64 flex-1 resize-y border border-[#566057] bg-[#252d26] p-4 font-mono text-sm leading-6 text-[#e7ede6] outline-none focus:border-[#d7f34a]"
+                        bind-value="newFileContent"
+                        placeholder="Write your snippet..."
+                        required
+                        spellcheck="false"
+                      ></textarea>
+                      <button
+                        class="self-start cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-4 py-3 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
+                        type="submit"
+                        attr-disabled="saving"
+                      >
+                        {{ saving ? 'Staging...' : 'Stage first file' }}
+                      </button>
+                    </form>
+                  </template>
+                  <template if="activeFile.path">
+                    <div
+                      class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]"
+                    >
+                      <span>{{ activeFile.path }}</span><span>{{ activeFile.staged ? 'staged' : 'working copy' }}</span>
                     </div>
                     <code-editor
-                    class="min-h-0 flex-1"
-                    bind-value="editorContent"
-                    bind-language="editorLanguage"
-                    status="Editing staged source"
-                    on-change="markDirty()"
-                  ></code-editor>
-                  <div class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3">
-                    <span class="font-mono text-xs text-[#aab4aa]">{{ editorContent.split('\n').length }} lines</span
-                    ><button
-                      class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
-                      type="button"
-                      on-click="stageActiveFile()"
-                      attr-disabled="!editorDirty || saving"
+                      class="min-h-0 flex-1"
+                      bind-value="editorContent"
+                      bind-language="editorLanguage"
+                      status="Editing staged source"
+                      on-change="markDirty()"
+                    ></code-editor>
+                    <div
+                      class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3"
                     >
-                      {{ saving ? 'Staging...' : 'Stage file' }}
-                    </button>
+                      <span class="font-mono text-xs text-[#aab4aa]">{{ editorContent.split('\n').length }} lines</span
+                      ><button
+                        class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
+                        type="button"
+                        on-click="stageActiveFile()"
+                        attr-disabled="!editorDirty || saving"
+                      >
+                        {{ saving ? 'Staging...' : 'Stage file' }}
+                      </button>
                     </div>
-                    </template>
-                  </div>
+                  </template>
+                </div>
                 <aside
                   class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0"
                 >
@@ -587,18 +684,18 @@
         const registry = 'https://registry.snippets.run';
 
         export default function app() {
-           const page = ref('home');
-           const user = ref(null);
+          const page = ref('home');
+          const user = ref(null);
           const owner = ref('');
           const ownerQuery = ref('');
-           const snippets = ref([]);
-           const mine = ref([]);
+          const snippets = ref([]);
+          const mine = ref([]);
           const snippet = ref(null);
           const editor = ref(null);
           const activeFile = ref({ path: '', content: '', staged: false });
-           const editorContent = ref('');
-           const newFilePath = ref('');
-           const newFileContent = ref('');
+          const editorContent = ref('');
+          const newFilePath = ref('');
+          const newFileContent = ref('');
           const editorDirty = ref(false);
           const saving = ref(false);
           const committing = ref(false);
@@ -635,10 +732,10 @@
               ] || '',
           );
 
-           async function request(path) {
-             const response = await fetch(registry + path, {
-               headers: { Accept: 'application/json' },
-               credentials: 'include',
+          async function request(path) {
+            const response = await fetch(registry + path, {
+              headers: { Accept: 'application/json' },
+              credentials: 'include',
             });
             if (!response.ok) {
               const body = await response.json().catch(() => ({}));
@@ -647,33 +744,33 @@
             return response.json();
           }
 
-           async function editorRequest(path, options = {}) {
-             const response = await fetch(registry + path, {
-               headers: { Accept: 'application/json', ...options.headers },
-               ...options,
-               credentials: 'include',
+          async function editorRequest(path, options = {}) {
+            const response = await fetch(registry + path, {
+              headers: { Accept: 'application/json', ...options.headers },
+              ...options,
+              credentials: 'include',
             });
             const body = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(body.error || `Editor request failed (${response.status})`);
             return body;
           }
 
-           async function createSnippet(event) {
-             creating.value = true;
-             createError.value = '';
-             const form = new FormData(event.currentTarget);
-             const owner = form.get('owner')?.toString().trim() || '';
-             const name = form.get('name')?.toString().trim() || '';
-             const type = form.get('type')?.toString() || 'sh';
-             const message = form.get('message')?.toString() || '';
-             try {
-               await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`, {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ message }),
-               });
-               newFilePath.value = type === 'js' ? 'index.mjs' : type === 'py' ? 'main.py' : 'main.sh';
-               location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`;
+          async function createSnippet(event) {
+            creating.value = true;
+            createError.value = '';
+            const form = new FormData(event.currentTarget);
+            const owner = form.get('owner')?.toString().trim() || '';
+            const name = form.get('name')?.toString().trim() || '';
+            const type = form.get('type')?.toString() || 'sh';
+            const message = form.get('message')?.toString() || '';
+            try {
+              await editorRequest(`/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message }),
+              });
+              newFilePath.value = type === 'js' ? 'index.mjs' : type === 'py' ? 'main.py' : 'main.sh';
+              location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`;
             } catch (reason) {
               createError.value = reason.message;
             } finally {
@@ -689,7 +786,7 @@
             }
           }
 
-           async function showOwner(selectedOwner) {
+          async function showOwner(selectedOwner) {
             const id = ++requestId;
             owner.value = selectedOwner;
             ownerQuery.value = selectedOwner;
@@ -704,22 +801,22 @@
             } finally {
               if (id === requestId) loading.value = false;
             }
-           }
+          }
 
-           async function showMine() {
-             loading.value = true;
-             mine.value = [];
-             error.value = '';
-             try {
-               mine.value = await request('/api/snippets/mine');
-             } catch (reason) {
-               error.value = reason.message;
-             } finally {
-               loading.value = false;
-             }
-           }
+          async function showMine() {
+            loading.value = true;
+            mine.value = [];
+            error.value = '';
+            try {
+              mine.value = await request('/api/snippets/mine');
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              loading.value = false;
+            }
+          }
 
-           async function showSnippet(selectedOwner, name) {
+          async function showSnippet(selectedOwner, name) {
             const id = ++requestId;
             owner.value = selectedOwner;
             snippet.value = null;
@@ -747,8 +844,8 @@
                 `/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`,
               );
               if (id !== requestId) return;
-               editor.value = result;
-               selectFile(result.files[0] || { path: '', content: '', staged: false });
+              editor.value = result;
+              selectFile(result.files[0] || { path: '', content: '', staged: false });
             } catch (reason) {
               if (id === requestId) error.value = reason.message;
             } finally {
@@ -768,7 +865,7 @@
             return file.path === activeFile.value.path ? 'bg-[#d7f34a] font-bold' : '';
           }
 
-           async function stageActiveFile() {
+          async function stageActiveFile() {
             saving.value = true;
             error.value = '';
             try {
@@ -788,50 +885,50 @@
               editorDirty.value = false;
             } catch (reason) {
               error.value = reason.message;
-             } finally {
-               saving.value = false;
-             }
-           }
+            } finally {
+              saving.value = false;
+            }
+          }
 
-           async function loadUser() {
-             try {
-               user.value = await request('/auth/me');
-             } catch {
-               user.value = null;
-             }
-           }
+          async function loadUser() {
+            try {
+              user.value = await request('/auth/me');
+            } catch {
+              user.value = null;
+            }
+          }
 
-           function loginHref() {
-             return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
-           }
+          function loginHref() {
+            return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
+          }
 
-           async function signOut() {
-             await fetch(`${registry}/auth/logout`, { method: 'POST', credentials: 'include' });
-             user.value = null;
-           }
+          async function signOut() {
+            await fetch(`${registry}/auth/logout`, { method: 'POST', credentials: 'include' });
+            user.value = null;
+          }
 
-           async function stageNewFile() {
-             saving.value = true;
-             error.value = '';
-             try {
-               await editorRequest(
-                 `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(newFilePath.value.trim())}`,
-                 {
-                   method: 'PUT',
-                   headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-                   body: newFileContent.value,
-                 },
-               );
-               await showEditor(editor.value.owner, editor.value.repo);
-               newFilePath.value = '';
-               newFileContent.value = '';
-             } catch (reason) {
-               error.value = reason.message;
-             } finally {
-               saving.value = false;
-             }
-           }
-           async function commitChanges() {
+          async function stageNewFile() {
+            saving.value = true;
+            error.value = '';
+            try {
+              await editorRequest(
+                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(newFilePath.value.trim())}`,
+                {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                  body: newFileContent.value,
+                },
+              );
+              await showEditor(editor.value.owner, editor.value.repo);
+              newFilePath.value = '';
+              newFileContent.value = '';
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              saving.value = false;
+            }
+          }
+          async function commitChanges() {
             committing.value = true;
             error.value = '';
             try {
@@ -891,20 +988,20 @@
           function snippetHref(item) {
             return `#/s/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
           }
-           function mineHref(item) {
-             return `#/edit/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
-           }
-           function ownerHref() {
+          function mineHref(item) {
+            return `#/edit/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
+          }
+          function ownerHref() {
             return `#/s/${encodeURIComponent(owner.value)}`;
           }
           function runtimeLabel(type) {
             return { bash: 'SH', node: 'JS', python: 'PY' }[type] || type.slice(0, 2).toUpperCase();
           }
 
-           onInit(() => {
-             window.addEventListener('hashchange', route);
-             loadUser();
-             route();
+          onInit(() => {
+            window.addEventListener('hashchange', route);
+            loadUser();
+            route();
           });
           onDestroy(() => window.removeEventListener('hashchange', route));
 
@@ -930,10 +1027,10 @@
             error,
             fileClass,
             hasStagedFiles,
-             loading,
-             mine,
-             mineHref,
-             loginHref,
+            loading,
+            mine,
+            mineHref,
+            loginHref,
             markDirty,
             owner,
             ownerHref,
@@ -942,8 +1039,8 @@
             registryTitle,
             resultCount,
             runCommand,
-             runtimeLabel,
-             signOut,
+            runtimeLabel,
+            signOut,
             shortCommit,
             saving,
             newFileContent,
@@ -951,10 +1048,10 @@
             selectFile,
             snippet,
             snippetHref,
-             snippets,
-             stageActiveFile,
-             stageNewFile,
-             user,
+            snippets,
+            stageActiveFile,
+            stageNewFile,
+            user,
           };
         }
       </script>
