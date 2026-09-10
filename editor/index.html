@@ -7,6 +7,26 @@
     <link rel="icon" href="/assets/icon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="component" href="https://sodium.static.apphor.de/code-editor.html" />
+    <script type="module">
+      import { WebContainer } from "https://unpkg.com/@webcontainer/api@1.1.5/dist/index.js";
+
+      let container;
+      window.getContainer = async () => {
+        if (container) return container;
+        const status = document.querySelector("[data-container-status]");
+        status.textContent = "Starting WebContainer...";
+        try {
+          container = await WebContainer.boot({ coep: "credentialless", workdirName: "snippets" });
+          await container.mount({});
+          status.textContent = "WebContainer Ready";
+          return container;
+        } catch (error) {
+          status.textContent = "WebContainer unavailable";
+          console.error("WebContainer boot failed", error);
+          throw error;
+        }
+      };
+    </script>
   </head>
   <body class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300">
     <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
@@ -15,7 +35,7 @@
         <div class="h-5 w-px bg-slate-700"></div>
         <div class="flex items-center gap-2 text-sm text-slate-400"><span>acme-corp</span><b class="text-slate-600">›</b><span>sysadmin-tools</span><b class="text-slate-600">›</b><span class="rounded bg-slate-800 px-2 py-1 text-white">▣ db-backup-s3⌄</span></div>
       </div>
-      <div class="flex items-center gap-3 text-xs"><span class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-green-400">● WebContainer Ready</span><span class="text-lg text-slate-500">⚙</span><span class="grid size-8 place-items-center rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500"></span></div>
+      <div class="flex items-center gap-3 text-xs"><button data-container-status class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-green-400" type="button" onclick="window.getContainer()">● WebContainer idle</button><span class="text-lg text-slate-500">⚙</span><span class="grid size-8 place-items-center rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500"></span></div>
     </header>
 
     <main class="flex min-h-0 flex-1 overflow-hidden">
@@ -41,7 +61,7 @@
 
       <aside class="flex w-96 shrink-0 flex-col border-l border-slate-700 bg-[#151e2e]">
         <div class="flex h-10 shrink-0 border-b border-slate-700 bg-[#0f172a] text-sm"><button class="flex-1 border-b-2 border-blue-500 bg-[#151e2e] text-white">◉ Run</button><button class="flex-1 text-slate-400">☑ Test Specs</button><button class="flex-1 text-slate-400">◷ History</button></div>
-        <div class="shrink-0 border-b border-slate-700 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-xs font-semibold tracking-wider text-slate-400 uppercase">In-Browser Testing</h2><span class="rounded border border-slate-700 bg-[#0f172a] px-2 py-1 text-[10px] text-blue-400">WebContainer</span></div><label class="mb-3 block text-[11px]">--dbname <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="users_production" /></label><label class="block text-[11px]">--s3-bucket <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="acme-corp-backups-secure" /></label><button class="mt-4 w-full rounded bg-blue-600 py-2 text-sm font-medium text-white">▶ Run Test Locally</button></div>
+        <div class="shrink-0 border-b border-slate-700 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-xs font-semibold tracking-wider text-slate-400 uppercase">In-Browser Testing</h2><span class="rounded border border-slate-700 bg-[#0f172a] px-2 py-1 text-[10px] text-blue-400">WebContainer</span></div><label class="mb-3 block text-[11px]">--dbname <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="users_production" /></label><label class="block text-[11px]">--s3-bucket <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="acme-corp-backups-secure" /></label><button class="mt-4 w-full rounded bg-blue-600 py-2 text-sm font-medium text-white" type="button" onclick="window.getContainer()">▶ Run Test Locally</button></div>
         <div class="flex min-h-0 flex-1 flex-col bg-black"><div class="flex h-8 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-800 px-3 text-xs text-slate-400"><span>⌘ Test Output</span><span>□ ⛶</span></div><div class="flex-1 overflow-y-auto p-3 font-mono text-xs leading-6"><div class="text-slate-500">$ Executing db-backup-s3 in local WebContainer...</div><div class="text-blue-400">Starting backup for database: users_production</div><div class="text-slate-300">Creating pg_dump...</div><div class="text-emerald-400">Dump created successfully</div><div class="text-slate-300">Uploading to s3://acme-corp-backups-secure/...</div><div class="mt-1 font-bold text-emerald-400">Backup completed successfully!</div><div class="mt-2 text-slate-500">Process exited with code 0 in 14.2s</div><div class="mt-3"><span class="text-emerald-500">webcontainer</span> ~ $ <span class="ml-2 inline-block h-4 w-2 animate-pulse bg-slate-400 align-middle"></span></div></div></div>
       </aside>
     </main>
