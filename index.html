@@ -72,11 +72,11 @@
             >Registry</a
           >
           <template if="user"><a
-            class="ml-1 rounded-full border border-[#182019] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#182019] hover:text-white"
+            class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
             href="#/create"
             >Publish</a
           ></template>
-          <template if="user"><button class="ml-1 cursor-pointer rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold" type="button" on-click="signOut">Sign out</button></template>
+          <template if="user"><a class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]" href="#/mine">My Snippets</a></template>
           <template if="!user"><a class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline" bind-href="loginHref()">Sign in</a></template>
         </nav>
       </header>
@@ -104,7 +104,7 @@
               </p>
               <div class="flex flex-wrap gap-3">
                 <template if="user"><a
-                  class="rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
+                  class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
                   href="#/create"
                   >Publish a snippet</a
                 ></template>
@@ -212,6 +212,21 @@
                 </div>
               </li>
             </ol>
+          </section>
+        </template>
+
+        <template if="page === 'mine'">
+          <section class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
+            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Your workspace</p>
+            <h1 class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">My snippets.</h1>
+            <template if="loading"><p class="mt-10 text-[#697069]">Loading your snippets...</p></template>
+            <template if="error"><div class="mt-10 border border-[#ff7146] bg-[#fff4ee] p-4">{{ error }}</div></template>
+            <template if="!loading && !error && mine.length === 0"><div class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">You have not published any snippets yet.</div></template>
+            <template if="!loading && !error && mine.length > 0">
+              <ul class="mt-14 list-none border-t border-[#182019] p-0">
+                <template for="item of mine"><li class="border-b border-[#c8c7bd]"><a class="flex items-center justify-between gap-4 px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]" bind-href="mineHref(item)"><span><small class="mr-3 text-xs text-[#697069]">{{ item.owner }}</small>{{ item.repo }}</span><span>&#8599;</span></a></li></template>
+              </ul>
+            </template>
           </section>
         </template>
 
@@ -576,7 +591,8 @@
            const user = ref(null);
           const owner = ref('');
           const ownerQuery = ref('');
-          const snippets = ref([]);
+           const snippets = ref([]);
+           const mine = ref([]);
           const snippet = ref(null);
           const editor = ref(null);
           const activeFile = ref({ path: '', content: '', staged: false });
@@ -673,7 +689,7 @@
             }
           }
 
-          async function showOwner(selectedOwner) {
+           async function showOwner(selectedOwner) {
             const id = ++requestId;
             owner.value = selectedOwner;
             ownerQuery.value = selectedOwner;
@@ -688,9 +704,22 @@
             } finally {
               if (id === requestId) loading.value = false;
             }
-          }
+           }
 
-          async function showSnippet(selectedOwner, name) {
+           async function showMine() {
+             loading.value = true;
+             mine.value = [];
+             error.value = '';
+             try {
+               mine.value = await request('/api/snippets/mine');
+             } catch (reason) {
+               error.value = reason.message;
+             } finally {
+               loading.value = false;
+             }
+           }
+
+           async function showSnippet(selectedOwner, name) {
             const id = ++requestId;
             owner.value = selectedOwner;
             snippet.value = null;
@@ -837,6 +866,9 @@
               owner.value = '';
               ownerQuery.value = '';
               snippets.value = [];
+            } else if (parts[0] === 'mine' && parts.length === 1) {
+              page.value = 'mine';
+              showMine();
             } else if (parts[0] === 's' && parts.length === 2) {
               page.value = 'explore';
               showOwner(parts[1]);
@@ -859,7 +891,10 @@
           function snippetHref(item) {
             return `#/s/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
           }
-          function ownerHref() {
+           function mineHref(item) {
+             return `#/edit/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
+           }
+           function ownerHref() {
             return `#/s/${encodeURIComponent(owner.value)}`;
           }
           function runtimeLabel(type) {
@@ -896,6 +931,8 @@
             fileClass,
             hasStagedFiles,
              loading,
+             mine,
+             mineHref,
              loginHref,
             markDirty,
             owner,
