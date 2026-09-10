@@ -60,38 +60,24 @@
       >
         <a
           class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
-          href="#/"
+          href="/"
           aria-label="snippets.run home"
         >
           <img class="size-9 max-sm:size-8" src="./assets/icon.svg" alt="" />
           <span class="max-sm:hidden">snippets.run</span>
         </a>
         <nav class="flex items-center gap-1" aria-label="Main navigation">
-          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/">Home</a>
-          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="#/explore"
+          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="/">Home</a>
+          <a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8" href="/search"
             >Registry</a
           >
-          <template if="user"
-            ><a
-              class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
-              href="#/create"
-              >Publish</a
-            ></template
-          >
-          <template if="user"
-            ><a
-              class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]"
-              href="#/mine"
-              >My Snippets</a
-            ></template
-          >
-          <template if="!user"
-            ><a
-              class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline"
-              bind-href="loginHref()"
-              >Sign in</a
-            ></template
-          >
+          <template if="user"><a
+            class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
+            href="/editor"
+            >Publish</a
+          ></template>
+          <template if="user"><a class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]" href="/mine">My Snippets</a></template>
+          <template if="!user"><a class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline" bind-href="loginHref()">Sign in</a></template>
         </nav>
       </header>
 
@@ -114,16 +100,14 @@
                 command.
               </p>
               <div class="flex flex-wrap gap-3">
-                <template if="user"
-                  ><a
-                    class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
-                    href="#/create"
-                    >Publish a snippet</a
-                  ></template
-                >
+                <template if="user"><a
+                  class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
+                  href="/editor"
+                  >Publish a snippet</a
+                ></template>
                 <a
                   class="rounded-sm border border-[#182019] px-5 py-3.5 font-extrabold no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
-                  href="#/s/snippets"
+                  href="/search?q=snippets"
                   >Browse examples</a
                 >
               </div>
@@ -658,7 +642,7 @@
             </h1>
             <a
               class="rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline"
-              href="#/"
+              href="/"
               >Return home</a
             >
           </section>
@@ -668,13 +652,13 @@
       <footer
         class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"
       >
-        <a class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline" href="#/"
+        <a class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline" href="/"
           ><img class="size-9" src="./assets/icon.svg" alt="" /><span>snippets.run</span></a
         >
         <p class="font-serif text-[#697069] italic max-sm:hidden">Small scripts. Long memory.</p>
         <nav class="flex gap-4">
-          <a class="text-xs font-extrabold" href="#/explore">Registry</a
-          ><template if="user"><a class="text-xs font-extrabold" href="#/create">Publish</a></template>
+          <a class="text-xs font-extrabold" href="/search">Registry</a
+          ><template if="user"><a class="text-xs font-extrabold" href="/editor">Publish</a></template>
         </nav>
       </footer>
 

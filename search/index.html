@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" class="bg-[#f3f0e7] text-[#182019]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search - snippets.run</title>
+    <link rel="icon" href="/assets/icon.svg" />
+    <script type="importmap">{"imports":{"@li3/":"https://at-li3.static.apphor.de/"}}</script>
+    <script type="module">import '@li3/web';</script>
+  </head>
+  <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
+    <template app>
+      <header class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
+        <a class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline" href="/"><img class="size-9" src="/assets/icon.svg" alt="" /><span>snippets.run</span></a>
+        <nav class="flex items-center gap-2" aria-label="Main navigation"><a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline" href="/">Home</a><a class="rounded-full bg-[#182019] px-3.5 py-2.5 text-sm font-bold text-white no-underline" href="/search">Search</a><a class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline" href="/editor">Editor</a></nav>
+      </header>
+      <main class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16">
+        <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Public registry</p>
+        <h1 class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">Find something useful.</h1>
+        <form class="my-14 flex border border-[#182019] bg-[#fffdf7] shadow-[7px_7px_0_#d7f34a]" on-submit.prevent="search()">
+          <input class="min-w-0 flex-1 bg-transparent px-4 py-4 outline-none" bind-value="query" name="q" placeholder="Search owners and snippets" />
+          <button class="cursor-pointer bg-[#182019] px-6 font-extrabold text-white" type="submit">Search</button>
+        </form>
+        <p if="loading" class="text-[#697069]">Searching the registry...</p>
+        <p if="!loading && results.length === 0" class="border border-[#c8c7bd] bg-[#fffdf7] p-5">No public snippets found.</p>
+        <ul if="!loading && results.length > 0" class="m-0 list-none border-t border-[#182019] p-0">
+          <template for="item of results"><li class="border-b border-[#c8c7bd]"><a class="flex items-center justify-between px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]" bind-href="itemHref(item)"><span><small class="mr-3 text-xs text-[#697069]">{{ item.owner }}</small>{{ item.repo }}</span><span class="text-xs font-bold uppercase">{{ item.type }}</span></a></li></template>
+        </ul>
+      </main>
+      <footer class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"><span class="font-black">snippets.run</span><a class="text-xs font-extrabold" href="/">Home</a></footer>
+      <script setup>
+        import { onInit, ref } from '@li3/web';
+        const registry = 'https://registry.snippets.run';
+        export default function app() {
+          const query = ref(new URLSearchParams(location.search).get('q') || '');
+          const results = ref([]);
+          const loading = ref(false);
+          async function search() {
+            loading.value = true;
+            const response = await fetch(`${registry}/api/snippets?q=${encodeURIComponent(query.value)}`);
+            results.value = response.ok ? await response.json() : [];
+            loading.value = false;
+          }
+          function itemHref(item) { return `/search?q=${encodeURIComponent(`${item.owner}/${item.repo}`)}`; }
+          onInit(search);
+          return { itemHref, loading, query, results, search };
+        }
+      </script>
+    </template>
+  </body>
+</html>

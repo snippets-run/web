@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" class="bg-[#f3f0e7] text-[#182019]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Snippets - snippets.run</title>
+    <link rel="icon" href="/assets/icon.svg" />
+    <script type="importmap">{"imports":{"@li3/":"https://at-li3.static.apphor.de/"}}</script>
+    <script type="module">import '@li3/web';</script>
+  </head>
+  <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
+    <template app>
+      <header class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"><a class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline" href="/"><img class="size-9" src="/assets/icon.svg" alt="" /><span>snippets.run</span></a><nav class="flex gap-4"><a class="text-sm font-bold no-underline" href="/search">Search</a><a class="rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline" href="/editor">Publish</a></nav></header>
+      <main class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16"><p class="mb-5 text-xs font-black tracking-[.15em] uppercase">Your workspace</p><h1 class="m-0 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] tracking-[-.065em]">My snippets.</h1><p if="loading" class="mt-10 text-[#697069]">Loading...</p><p if="error" class="mt-10 border border-[#ff7146] bg-[#fff4ee] p-4">{{ error }}</p><p if="!loading && !error && items.length === 0" class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">You have not published any snippets yet.</p><ul if="!loading && items.length > 0" class="mt-14 list-none border-t border-[#182019] p-0"><template for="item of items"><li class="border-b border-[#c8c7bd]"><a class="flex justify-between px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]" bind-href="itemHref(item)"><span>{{ item.owner }}/{{ item.repo }}</span><span>&#8599;</span></a></li></template></ul></main>
+      <script setup>
+        import { onInit, ref } from '@li3/web';
+        const registry = 'https://registry.snippets.run';
+        export default function app() {
+          const items = ref([]); const loading = ref(true); const error = ref('');
+          async function load() { try { const response = await fetch(`${registry}/api/snippets/mine`, { credentials: 'include' }); if (!response.ok) throw new Error('Sign in to view your snippets.'); items.value = await response.json(); } catch (reason) { error.value = reason.message; } finally { loading.value = false; } }
+          function itemHref(item) { return `/editor?owner=${encodeURIComponent(item.owner)}&repo=${encodeURIComponent(item.repo)}`; }
+          onInit(load); return { error, itemHref, items, loading };
+        }
+      </script>
+    </template>
+  </body>
+</html>
