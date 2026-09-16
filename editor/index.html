@@ -256,13 +256,6 @@
           card.querySelector("[data-input-delete]").onclick = () => { state.workspace.metadata.inputs.splice(index, 1); renderInputs(); saveMetadata(); };
           return card;
         }));
-        const testing = el("[data-test-inputs]");
-        testing.replaceChildren(...state.workspace.metadata.inputs.map((input) => {
-          const label = document.createElement("label");
-          label.className = "block text-[11px]";
-          label.innerHTML = `${input.name}${input.required ? ' <span class="text-red-400">*</span>' : ""}<input data-test-value class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" placeholder="Enter ${input.type}" />`;
-          return label;
-        }));
       }
 
       function renderHistory() {
@@ -322,7 +315,6 @@
         renderInputs();
         renderHistory();
         selectFile(state.workspace.files[0]?.path);
-        window.getContainer().catch((error) => console.error(error));
       }
 
       window.addEventListener("DOMContentLoaded", async () => {
@@ -357,7 +349,7 @@
         <div class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"><button data-revert class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300 shadow-lg">↶ Revert</button><button data-commit class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-lg">▣ Commit</button></div>
       </section>
 
-      <aside class="flex w-96 shrink-0 flex-col border-l border-slate-700 bg-[#151e2e]">
+      <aside hidden class="flex w-96 shrink-0 flex-col border-l border-slate-700 bg-[#151e2e]">
         <div class="flex h-10 shrink-0 items-center justify-between border-b border-slate-700 bg-[#0f172a] px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase"><span>WebContainer Shell</span><span class="text-blue-400">disposable</span></div>
         <details class="max-h-64 shrink-0 border-b border-slate-700"><summary class="cursor-pointer px-3 py-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">Git History</summary><div data-history-list class="max-h-48 overflow-y-auto"></div></details>
         <div class="flex min-h-0 flex-1 flex-col bg-black"><div class="flex h-8 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-800 px-3 text-xs text-slate-400"><span>⌘ Terminal</span><span>□ ⛶</span></div><div data-terminal class="min-h-0 flex-1 p-2"></div></div>
