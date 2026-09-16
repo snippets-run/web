@@ -211,13 +211,25 @@
 
       function renderTabs() {
         const tabs = el("[data-file-tabs]");
-        tabs.replaceChildren(...(state.workspace?.files || []).map((file) => {
+        const buttons = (state.workspace?.files || []).map((file) => {
           const button = document.createElement("button");
           button.className = `flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm ${file.path === state.activeFile ? "border-t-2 border-blue-500 bg-[#0f172a] text-slate-200" : "text-slate-400 hover:bg-slate-800"}`;
           button.textContent = `▤ ${file.path}`;
           button.onclick = () => selectFile(file.path);
           return button;
-        }));
+        });
+        const add = document.createElement("button");
+        add.className = "px-3 text-slate-500 hover:text-white";
+        add.textContent = "＋";
+        add.onclick = addFile;
+        tabs.replaceChildren(...buttons, add);
+      }
+
+      async function addFile() {
+        const path = window.prompt("New file name");
+        if (!path) return;
+        await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/file?path=${encoded(path)}`, { method: "PUT", headers: { "content-type": "text/plain" }, body: "" });
+        await loadWorkspace();
       }
 
       function selectFile(path) {
@@ -241,6 +253,13 @@
           card.querySelectorAll("input,select").forEach((field) => field.addEventListener("change", () => { updateInput(index, card); saveMetadata(); }));
           card.querySelector("[data-input-delete]").onclick = () => { state.workspace.metadata.inputs.splice(index, 1); renderInputs(); saveMetadata(); };
           return card;
+        }));
+        const testing = el("[data-test-inputs]");
+        testing.replaceChildren(...state.workspace.metadata.inputs.map((input) => {
+          const label = document.createElement("label");
+          label.className = "block text-[11px]";
+          label.innerHTML = `${input.name}${input.required ? ' <span class="text-red-400">*</span>' : ""}<input data-test-value class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" placeholder="Enter ${input.type}" />`;
+          return label;
         }));
       }
 
@@ -285,7 +304,7 @@
         el("[data-namespace]").addEventListener("change", async (event) => { const repos = state.owned.filter((item) => item.owner === event.target.value); el("[data-snippet]").replaceChildren(...repos.map((item) => new Option(item.repo, item.repo))); if (repos[0]) { el("[data-snippet]").value = repos[0].repo; history.replaceState({}, "", `/editor?owner=${encodeURIComponent(event.target.value)}&repo=${encodeURIComponent(repos[0].repo)}`); await loadWorkspace(); } });
         el("[data-snippet]").addEventListener("change", async (event) => { history.replaceState({}, "", `/editor?owner=${encodeURIComponent(el("[data-namespace]").value)}&repo=${encodeURIComponent(event.target.value)}`); await loadWorkspace(); });
         el("[data-revert]").addEventListener("click", () => location.reload());
-        el("[data-commit]").addEventListener("click", async () => { await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/commit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: "Update snippet" }) }); state.dirty = false; location.reload(); });
+        el("[data-commit]").addEventListener("click", async () => { await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/commit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: "Update snippet" }) }); state.dirty = false; await loadWorkspace(); });
       });
     </script>
 
@@ -304,14 +323,14 @@
       </aside>
 
       <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]">
-        <div data-file-tabs class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"></div>
+        <div data-file-tabs class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"><button data-add-file class="px-3 text-slate-500 hover:text-white" type="button">＋</button></div>
         <div class="min-h-0 flex-1 overflow-auto bg-[#1e1e1e] p-2"><code-editor data-code-editor nostatus class="block h-full"></code-editor></div>
         <div class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"><button data-revert class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300 shadow-lg">↶ Revert</button><button data-commit class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-lg">▣ Commit</button></div>
       </section>
 
       <aside class="flex w-96 shrink-0 flex-col border-l border-slate-700 bg-[#151e2e]">
         <div class="flex h-10 shrink-0 border-b border-slate-700 bg-[#0f172a] text-sm"><button class="flex-1 border-b-2 border-blue-500 bg-[#151e2e] text-white">◉ Run</button><button class="flex-1 text-slate-400">☑ Test Specs</button><button class="flex-1 text-slate-400">◷ History</button></div>
-        <div class="shrink-0 border-b border-slate-700 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-xs font-semibold tracking-wider text-slate-400 uppercase">In-Browser Testing</h2><span class="rounded border border-slate-700 bg-[#0f172a] px-2 py-1 text-[10px] text-blue-400">WebContainer</span></div><label class="mb-3 block text-[11px]">--dbname <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="users_production" /></label><label class="block text-[11px]">--s3-bucket <span class="text-red-400">*</span><input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-2 py-1.5 text-sm text-white" value="acme-corp-backups-secure" /></label><button class="mt-4 w-full rounded bg-blue-600 py-2 text-sm font-medium text-white" type="button" onclick="window.getContainer()">▶ Run Test Locally</button></div>
+        <div class="shrink-0 border-b border-slate-700 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-xs font-semibold tracking-wider text-slate-400 uppercase">In-Browser Testing</h2><span class="rounded border border-slate-700 bg-[#0f172a] px-2 py-1 text-[10px] text-blue-400">WebContainer</span></div><div data-test-inputs class="space-y-3"></div><button class="mt-4 w-full rounded bg-blue-600 py-2 text-sm font-medium text-white" type="button" onclick="window.getContainer()">▶ Run Test Locally</button></div>
         <div class="flex min-h-0 flex-1 flex-col bg-black"><div class="flex h-8 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-800 px-3 text-xs text-slate-400"><span>⌘ Terminal</span><span>□ ⛶</span></div><div data-terminal class="min-h-0 flex-1 p-2"></div></div>
       </aside>
     </main>
