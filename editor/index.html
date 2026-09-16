@@ -53,7 +53,7 @@
           async function loadMine() { owned.value = await request('/api/snippets/mine'); namespaces.value = [...new Set(owned.value.map((item) => item.owner))]; if (!owner.value) owner.value = namespaces.value[0] || ''; if (!repo.value) repo.value = ownedInNamespace.value[0]?.repo || ''; }
           async function init() { try { user.value = await request('/auth/me'); await loadMine(); await loadWorkspace(); } catch { user.value = null; } }
           function loginHref() { return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`; }
-          onInit(init); return { activeContent, activeLanguage, activePath, addFile, addInput, commit, createDialog, createSnippet, description, files, hasChanges, inputs, loginHref, newName, newOwner, newType, namespaces, openCreate, ownedInNamespace, owner, removeInput, repo, revert, selectFile, selectOwner, user };
+          onInit(init); return { activeContent, activeLanguage, activePath, addFile, addInput, commit, createDialog, createSnippet, description, files, hasChanges, inputs, loginHref, markDirty, newName, newOwner, newType, namespaces, openCreate, ownedInNamespace, owner, removeInput, repo, revert, selectFile, selectOwner, user };
         }
       </script>
     </template>
