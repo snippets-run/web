@@ -227,22 +227,25 @@
               ></code-editor>
             </div>
             <div
-              class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"
+              class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-700 bg-[#151e2e] p-2"
             >
-              <button
-                class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300"
-                type="button"
-                on-click="revert()"
-              >
-                ↶ Revert</button
-              ><button
-                class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-                type="button"
-                bind-disabled.bool="!hasChanges"
-                on-click="commit()"
-              >
-                ▣ Commit
-              </button>
+              <span class="text-xs text-red-400">{{ error }}</span>
+              <div class="flex gap-2">
+                <button
+                  class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300"
+                  type="button"
+                  on-click="revert()"
+                >
+                  ↶ Revert</button
+                ><button
+                  class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50"
+                  type="button"
+                  bind-disabled.bool="!hasStagedFiles || staging || committing"
+                  on-click="commit()"
+                >
+                  {{ committing ? 'Committing...' : '▣ Commit' }}
+                </button>
+              </div>
             </div>
           </section>
         </main>
@@ -379,6 +382,10 @@
           const [newName, setNewName] = hook("");
           const newType = ref("sh");
           const hasChanges = ref(false);
+          const metadataStaged = ref(false);
+          const staging = ref(false);
+          const committing = ref(false);
+          const error = ref("");
           const createDialog = templateRef("createDialog");
           const quickDialog = templateRef("quickDialog");
           const files = computed(() => workspace.value.files);
@@ -399,6 +406,11 @@
                 ? "javascript"
                 : "bash",
           );
+          const hasStagedFiles = computed(
+            () =>
+              workspace.value.files.some((file) => file.staged) ||
+              metadataStaged.value,
+          );
           const diffDialog = templateRef("diffDialog");
           const diffText = ref("");
           async function request(path, options = {}) {
@@ -418,6 +430,7 @@
             );
             workspace.value = result;
             description.value = result.metadata.description;
+            metadataStaged.value = false;
             selectFile(result.files[0]?.path || "");
           }
           function selectFile(path) {
@@ -440,18 +453,47 @@
               (item) => item.path === activePath.value,
             );
             if (file) file.content = content;
+            void stageActiveFile();
+          }
+          async function stageActiveFile() {
+            const file = workspace.value.files.find(
+              (item) => item.path === activePath.value,
+            );
+            if (!file) return;
+            staging.value = true;
+            try {
+              await request(
+                `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/file?path=${encodeURIComponent(file.path)}`,
+                {
+                  method: "PUT",
+                  headers: { "content-type": "text/plain" },
+                  body: file.content,
+                },
+              );
+              file.staged = true;
+              error.value = "";
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              staging.value = false;
+            }
           }
           async function saveMetadata() {
             workspace.value.metadata.description = description.value;
-            await request(
-              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/metadata`,
-              {
-                method: "PUT",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify(workspace.value.metadata),
-              },
-            );
-            hasChanges.value = true;
+            try {
+              await request(
+                `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/metadata`,
+                {
+                  method: "PUT",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify(workspace.value.metadata),
+                },
+              );
+              metadataStaged.value = true;
+              error.value = "";
+            } catch (reason) {
+              error.value = reason.message;
+            }
           }
           function addInput() {
             workspace.value.metadata.inputs.push({
@@ -479,16 +521,26 @@
             await loadWorkspace();
           }
           async function commit() {
-            await request(
-              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/commit`,
-              {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ message: "Update snippet" }),
-              },
-            );
-            hasChanges.value = false;
-            await loadWorkspace();
+            committing.value = true;
+            error.value = "";
+            try {
+              await stageActiveFile();
+              if (!hasStagedFiles.value) return;
+              await request(
+                `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/commit`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ message: "Update snippet" }),
+                },
+              );
+              hasChanges.value = false;
+              await loadWorkspace();
+            } catch (reason) {
+              error.value = reason.message;
+            } finally {
+              committing.value = false;
+            }
           }
           function revert() {
             loadWorkspace();
@@ -563,14 +615,17 @@
             addFile,
             addInput,
             commit,
+            committing,
             createDialog,
             createSnippet,
             description,
             setDescription,
             diffDialog,
             diffText,
+            error,
             files,
             hasChanges,
+            hasStagedFiles,
             history,
             inputs,
             loadWorkspace,
@@ -597,6 +652,8 @@
             selectOwner,
             showDiff,
             switchTo,
+            stageActiveFile,
+            staging,
             user,
           };
         }
