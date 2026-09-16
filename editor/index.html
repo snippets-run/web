@@ -222,7 +222,7 @@
                 theme="github-dark"
                 bind-value="activeContent"
                 bind-language="activeLanguage"
-                on-change="markDirty()"
+                on-change="markDirty($event)"
               ></code-editor>
             </div>
             <div
@@ -424,13 +424,14 @@
             loadWorkspace();
           }
           function markDirty(event) {
-            if (event?.target?.value !== undefined)
-              activeContent.value = event.target.value;
+            const content =
+              event?.detail ?? event?.target?.value ?? activeContent.value;
+            activeContent.value = content;
             hasChanges.value = true;
             const file = workspace.value.files.find(
               (item) => item.path === activePath.value,
             );
-            if (file) file.content = activeContent.value;
+            if (file) file.content = content;
           }
           async function saveMetadata() {
             workspace.value.metadata.description = description.value;
