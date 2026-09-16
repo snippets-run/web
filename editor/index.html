@@ -5,355 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Editor - snippets.run</title>
     <link rel="icon" href="/assets/icon.svg" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="component" href="https://sodium.static.apphor.de/code-editor.html" />
-    <link rel="stylesheet" href="https://unpkg.com/@xterm/xterm@6/css/xterm.css" />
-    <script type="module">
-      import { Terminal } from "https://unpkg.com/@xterm/xterm@6/lib/xterm.mjs";
-      import { FitAddon } from "https://unpkg.com/@xterm/addon-fit@0.11.0/lib/addon-fit.mjs";
-      import { parsePatch } from "https://unpkg.com/diff@9.0.0/libesm/index.js";
-      import { WebContainer } from "https://unpkg.com/@webcontainer/api@1.1.5/dist/index.js";
-
-      let container;
-      let terminal;
-      let fitAddon;
-      let shellWriter;
-      let dirty = false;
-      let ownedSnippets = [];
-      let currentUser = null;
-
-      function markDirty() {
-        dirty = true;
-      }
-
-      function allowNavigation(event) {
-        if (dirty && !window.confirm("You have unsaved changes. Leave the editor?")) event.preventDefault();
-      }
-
-      function createTerminal() {
-        terminal = new Terminal({ convertEol: true, cursorBlink: true, theme: { background: "#000000" } });
-        fitAddon = new FitAddon();
-        terminal.loadAddon(fitAddon);
-        terminal.open(document.querySelector("[data-terminal]"));
-        fitAddon.fit();
-        terminal.onData((data) => shellWriter?.write(data));
-        terminal.onResize(({ cols, rows }) => console.debug("terminal resize", cols, rows));
-        window.addEventListener("resize", () => fitAddon.fit());
-      }
-
-      function updateSnippetOptions(owner) {
-        const select = document.querySelector("[data-snippet]");
-        select.replaceChildren(...ownedSnippets.filter((item) => item.owner === owner).map((item) => new Option(item.repo, item.repo)));
-      }
-
-      function updateOwnedOptions() {
-        const namespace = document.querySelector("[data-namespace]");
-        const owners = [...new Set(ownedSnippets.map((item) => item.owner))];
-        namespace.replaceChildren(...owners.map((owner) => new Option(owner, owner)));
-        updateSnippetOptions(owners[0] || "");
-      }
-
-      function updateAuthControls() {
-        const link = document.querySelector("[data-auth-link]");
-        const create = document.querySelector("[data-create-cta]");
-        const shell = document.querySelector("[data-editor-shell]");
-        const empty = document.querySelector("[data-auth-empty]");
-        const navigation = document.querySelector("[data-editor-navigation]");
-        const emptySignIn = document.querySelector("[data-empty-signin]");
-        if (currentUser) {
-          link.textContent = "My Profile";
-          link.href = "/mine";
-          link.target = "_blank";
-          link.rel = "noopener";
-          create.hidden = false;
-          shell.hidden = false;
-          empty.hidden = true;
-          navigation.hidden = false;
-        } else {
-          link.textContent = "Sign In";
-          link.href = `https://registry.snippets.run/auth/login?return_to=${encodeURIComponent(location.href)}`;
-          emptySignIn.href = link.href;
-          link.removeAttribute("target");
-          link.removeAttribute("rel");
-          create.hidden = true;
-          shell.hidden = true;
-          empty.hidden = false;
-          navigation.hidden = true;
-        }
-      }
-
-      async function loadUser() {
-        const response = await fetch("https://registry.snippets.run/auth/me", { credentials: "include" });
-        currentUser = response.ok ? await response.json() : null;
-        updateAuthControls();
-        if (currentUser) window.dispatchEvent(new Event("editor-auth-ready"));
-      }
-
-      async function loadOwnedSnippets() {
-        const response = await fetch("https://registry.snippets.run/api/snippets/mine", { credentials: "include" });
-        if (response.ok) {
-          ownedSnippets = await response.json();
-          updateOwnedOptions();
-          const params = new URLSearchParams(location.search);
-          if (params.get("owner") && params.get("repo")) {
-            document.querySelector("[data-namespace]").value = params.get("owner");
-            updateSnippetOptions(params.get("owner"));
-            document.querySelector("[data-snippet]").value = params.get("repo");
-          }
-        }
-      }
-
-      async function createSnippet(event) {
-        event.preventDefault();
-        const form = new FormData(event.currentTarget);
-        const owner = form.get("owner").toString().trim();
-        const name = form.get("name").toString().trim();
-        const type = form.get("type").toString();
-        const response = await fetch(`https://registry.snippets.run/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({}),
-        });
-        if (!response.ok) return;
-        document.querySelector("[data-create-dialog]").close();
-        const item = { owner, repo: `${name}.${type}`, type: type === "sh" ? "bash" : type === "js" ? "node" : "python" };
-        ownedSnippets = [...ownedSnippets.filter((existing) => `${existing.owner}/${existing.repo}` !== `${owner}/${item.repo}`), item];
-        updateOwnedOptions();
-        document.querySelector("[data-namespace]").value = owner;
-        updateSnippetOptions(owner);
-        document.querySelector("[data-snippet]").value = item.repo;
-        history.replaceState({}, "", `/editor?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(item.repo)}`);
-      }
-
-      function openQuickNavigation() {
-        const dialog = document.querySelector("[data-quick-nav]");
-        dialog.showModal();
-        dialog.querySelector("input").focus();
-        renderQuickNavigation("");
-      }
-
-      function renderQuickNavigation(query) {
-        const list = document.querySelector("[data-quick-list]");
-        const matches = ownedSnippets.filter((item) => `${item.owner}/${item.repo}`.toLowerCase().includes(query.toLowerCase()));
-        list.replaceChildren(...matches.map((item) => {
-          const button = document.createElement("button");
-          button.className = "block w-full rounded px-3 py-2 text-left font-mono text-sm text-slate-300 hover:bg-slate-700";
-          button.textContent = `${item.owner}/${item.repo}`;
-          button.onclick = () => { document.querySelector("[data-namespace]").value = item.owner; updateSnippetOptions(item.owner); document.querySelector("[data-snippet]").value = item.repo; document.querySelector("[data-quick-nav]").close(); };
-          return button;
-        }));
-      }
-
-      async function startShell() {
-        const shell = await container.spawn("sh", [], { env: { npm_config_prefix: "/home/npm", PATH: "/home/npm/bin:/bin:/usr/bin:/usr/local/bin" } });
-        shellWriter = shell.input.getWriter();
-        shell.output.pipeTo(new WritableStream({ write(data) { terminal.write(data); } }));
-      }
-
-      window.getContainer = async () => {
-        if (container) return container;
-        try {
-          container = await WebContainer.boot({ coep: "credentialless", workdirName: "snippets" });
-          await container.mount({});
-          createTerminal();
-          await startShell();
-          return container;
-        } catch (error) {
-          console.error("WebContainer boot failed", error);
-          throw error;
-        }
-      };
-
-      window.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("[data-navigate]").forEach((link) => link.addEventListener("click", allowNavigation));
-        document.querySelectorAll("[data-editor-input]").forEach((input) => input.addEventListener("input", markDirty));
-        window.addEventListener("beforeunload", (event) => { if (dirty) event.preventDefault(); });
-        document.querySelector("[data-commit]")?.addEventListener("click", () => { dirty = false; });
-        document.querySelector("[data-create-cta]")?.addEventListener("click", () => document.querySelector("[data-create-dialog]").showModal());
-        document.querySelector("[data-create-form]")?.addEventListener("submit", createSnippet);
-        document.querySelector("[data-namespace]").addEventListener("change", (event) => updateSnippetOptions(event.target.value));
-        document.querySelector("[data-quick-input]").addEventListener("input", (event) => renderQuickNavigation(event.target.value));
-        window.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); openQuickNavigation(); } });
-        loadUser();
-      });
-      window.addEventListener("editor-auth-ready", loadOwnedSnippets);
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="importmap">{"imports":{"@li3/":"https://at-li3.static.apphor.de/"}}</script>
+    <script type="module">import '@li3/web';</script>
   </head>
   <body class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300">
-    <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
-      <div class="flex items-center gap-4">
-        <a class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline" data-navigate href="/"><img class="size-7 brightness-0 invert" src="/assets/icon.svg" alt="" />snippets.run</a>
-        <div class="h-5 w-px bg-slate-700"></div>
-        <div data-editor-navigation hidden class="flex items-center gap-2 text-sm"><select data-namespace class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"><option>Loading...</option></select><span class="text-slate-600">›</span><select data-snippet class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"><option>Loading...</option></select><button class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white" type="button" onclick="document.querySelector('[data-quick-nav]').showModal()">⌘K</button></div>
-      </div>
-      <div class="flex items-center gap-2"><button data-create-cta hidden class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500" type="button">＋ New Snippet</button><a data-auth-link class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white" href="#">Sign In</a></div>
-    </header>
+    <template app>
+      <template if="user">
+        <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
+          <div class="flex items-center gap-4"><a class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline" href="/"><img class="size-7 brightness-0 invert" src="/assets/icon.svg" alt="" />snippets.run</a><div class="h-5 w-px bg-slate-700"></div><div class="flex items-center gap-2 text-sm"><select bind-value="owner" on-change="selectOwner()" class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"><template for="namespace of namespaces"><option>{{ namespace }}</option></template></select><span class="text-slate-600">›</span><select bind-value="repo" on-change="loadWorkspace()" class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"><template for="item of ownedInNamespace"><option>{{ item.repo }}</option></template></select><button class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white" type="button" on-click="openQuickNavigation()">⌘K</button></div></div>
+          <div class="flex items-center gap-2"><button class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500" type="button" on-click="openCreate()">＋ New Snippet</button><a class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white" href="/mine" target="_blank" rel="noopener">My Profile</a></div>
+        </header>
 
-    <section data-auth-empty class="flex min-h-[calc(100vh-3.5rem)] flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center">
-      <div class="max-w-md"><img class="mx-auto mb-8 size-24 brightness-0 invert opacity-80" src="/assets/icon.svg" alt="" /><p class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase">Private workspace</p><h1 class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white">Sign in before you start building.</h1><p class="mt-6 leading-relaxed text-slate-400">Your snippets, files, and revisions belong to your account.</p><a data-empty-signin class="mt-8 inline-block rounded bg-blue-600 px-5 py-3 font-bold text-white no-underline hover:bg-blue-500" href="#">Sign in to continue</a></div>
-    </section>
+        <main class="flex min-h-0 flex-1 overflow-hidden">
+          <aside class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
+            <div class="space-y-3 border-b border-slate-700 p-4"><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Owner<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-slate-400" bind-value="owner" readonly /></label><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Slug<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="repo" readonly /></label><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Description<textarea class="mt-1 h-20 w-full resize-none rounded border border-slate-700 bg-[#0f172a] p-2 text-sm text-slate-300 outline-none" bind-value="description" on-change="saveMetadata()"></textarea></label></div>
+            <div class="flex-1 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-sm font-semibold text-white">{ } Input Variables</h2><button class="text-xs text-blue-400" type="button" on-click="addInput()">＋ Add Field</button></div><p class="mb-4 text-xs text-slate-500">Stored with the snippet revision.</p><div class="space-y-3"><template for="[input, index] of inputs"><div class="rounded border border-slate-700 bg-slate-800 p-3"><div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400 uppercase">Name<input class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white" bind-value="input.name" on-change="saveMetadata()" /></label><label class="text-[10px] text-slate-400 uppercase">Type<select class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white" bind-value="input.type" on-change="saveMetadata()"><option value="string">String</option><option value="number">Number</option><option value="boolean">Boolean</option><option value="file">File Path</option></select></label></div><div class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400"><label><input type="checkbox" bind-checked="input.required" on-change="saveMetadata" class="mr-1 accent-blue-500" /> Required</label><button class="text-red-400" type="button" on-click="removeInput(index)">Remove</button></div></div></template></div></div>
+          </aside>
 
-    <dialog data-quick-nav class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70"><form method="dialog"><input data-quick-input class="w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-3 font-mono text-sm outline-none focus:border-blue-500" placeholder="Switch to a snippet..." /></form><div data-quick-list class="mt-2 max-h-80 overflow-y-auto"></div></dialog>
-    <dialog data-create-dialog class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"><form data-create-form><div class="mb-4 flex items-center justify-between"><h2 class="m-0 text-lg font-semibold text-white">New snippet</h2><button class="text-slate-400" type="button" onclick="this.closest('dialog').close()">×</button></div><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Namespace<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="owner" required /></label><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Snippet name<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="name" required /></label><label class="block text-xs font-bold uppercase text-slate-400">Runtime<select class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="type"><option value="sh">Shell</option><option value="js">Node.js</option><option value="py">Python</option></select></label><button class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-500" type="submit">Create and load</button></form></dialog>
-    <dialog data-diff-dialog class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70"><div class="mb-3 flex items-center justify-between"><h2 class="m-0 text-sm font-semibold text-white">Commit diff</h2><button class="text-slate-400" type="button" onclick="this.closest('dialog').close()">×</button></div><pre data-diff-output class="max-h-[65vh] overflow-auto rounded bg-[#0f172a] p-3 font-mono text-xs leading-5"></pre></dialog>
+          <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]"><div class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"><template for="file of files"><button class="flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm text-slate-400" bind-class="{ 'border-t-2 border-blue-500 bg-[#0f172a] text-slate-200': file.path === activePath }" type="button" on-click="selectFile(file.path)">▤ {{ file.path }}</button></template><button class="px-3 text-slate-500 hover:text-white" type="button" on-click="addFile()">＋</button></div><div class="min-h-0 flex-1 overflow-auto bg-[#1e1e1e] p-2"><code-editor class="block h-full" nostatus bind-value="activeContent" bind-language="activeLanguage" on-change="markDirty()"></code-editor></div><div class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"><button class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300" type="button" on-click="revert()">↶ Revert</button><button class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50" type="button" bind-disabled.bool="!hasChanges" on-click="commit()">▣ Commit</button></div></section>
+        </main>
+      </template>
+      <template if="!user"><main class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center"><div class="max-w-md"><img class="mx-auto mb-8 size-24 brightness-0 invert opacity-80" src="/assets/icon.svg" alt="" /><p class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase">Private workspace</p><h1 class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white">Sign in before you start building.</h1><p class="mt-6 leading-relaxed text-slate-400">Your snippets, files, and revisions belong to your account.</p><a class="mt-8 inline-block rounded bg-blue-600 px-5 py-3 font-bold text-white no-underline hover:bg-blue-500" bind-href="loginHref()">Sign in to continue</a></div></main></template>
 
-    <script type="module">
-      const registry = "https://registry.snippets.run";
-      const state = { owner: "", repo: "", owned: [], workspace: null, activeFile: "", dirty: false };
-      const el = (selector) => document.querySelector(selector);
-      const encoded = (value) => encodeURIComponent(value);
+      <dialog ref="createDialog" class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"><form on-submit.prevent="createSnippet()"><div class="mb-4 flex items-center justify-between"><h2 class="m-0 text-lg font-semibold text-white">New snippet</h2><button class="text-slate-400" type="button" on-click="createDialog.close()">×</button></div><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Namespace<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newOwner" required /></label><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Snippet name<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newName" required /></label><label class="block text-xs font-bold uppercase text-slate-400">Runtime<select class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newType"><option value="sh">Shell</option><option value="js">Node.js</option><option value="py">Python</option></select></label><button class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white" type="submit">Create and load</button></form></dialog>
 
-      async function api(path, options = {}) {
-        const response = await fetch(registry + path, { credentials: "include", headers: { Accept: "application/json", ...options.headers }, ...options });
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || `Registry request failed (${response.status})`);
-        return body;
-      }
-
-      function renderTabs() {
-        const tabs = el("[data-file-tabs]");
-        const buttons = (state.workspace?.files || []).map((file) => {
-          const button = document.createElement("button");
-          button.className = `flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm ${file.path === state.activeFile ? "border-t-2 border-blue-500 bg-[#0f172a] text-slate-200" : "text-slate-400 hover:bg-slate-800"}`;
-          button.textContent = `▤ ${file.path}`;
-          button.onclick = () => selectFile(file.path);
-          return button;
-        });
-        const add = document.createElement("button");
-        add.className = "px-3 text-slate-500 hover:text-white";
-        add.textContent = "＋";
-        add.onclick = addFile;
-        tabs.replaceChildren(...buttons, add);
-      }
-
-      async function addFile() {
-        const path = window.prompt("New file name");
-        if (!path) return;
-        await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/file?path=${encoded(path)}`, { method: "PUT", headers: { "content-type": "text/plain" }, body: "" });
-        await loadWorkspace();
-      }
-
-      function selectFile(path) {
-        const file = state.workspace.files.find((item) => item.path === path);
-        if (!file) return;
-        state.activeFile = path;
-        const editor = el("[data-code-editor]");
-        editor.value = file.content;
-        editor.setAttribute("language", path.endsWith(".py") ? "python" : path.endsWith(".js") ? "javascript" : "bash");
-        renderTabs();
-      }
-
-      function renderInputs() {
-        const target = el("[data-inputs]");
-        target.replaceChildren(...state.workspace.metadata.inputs.map((input, index) => {
-          const card = document.createElement("div");
-          card.className = "rounded border border-slate-700 bg-slate-800 p-3";
-          card.innerHTML = `<div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400 uppercase">Name<input data-input-name class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white" value="${input.name}" /></label><label class="text-[10px] text-slate-400 uppercase">Type<select data-input-type class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white"><option value="string">String</option><option value="number">Number</option><option value="boolean">Boolean</option><option value="file">File Path</option></select></label></div><div class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400"><label><input data-input-required type="checkbox" class="mr-1 accent-blue-500" /> Required</label><button data-input-delete class="text-red-400" type="button">Remove</button></div>`;
-          card.querySelector("[data-input-type]").value = input.type;
-          card.querySelector("[data-input-required]").checked = input.required;
-          card.querySelectorAll("input,select").forEach((field) => field.addEventListener("change", () => { updateInput(index, card); saveMetadata(); }));
-          card.querySelector("[data-input-delete]").onclick = () => { state.workspace.metadata.inputs.splice(index, 1); renderInputs(); saveMetadata(); };
-          return card;
-        }));
-      }
-
-      function renderHistory() {
-        const target = el("[data-history-list]");
-        target.replaceChildren(...(state.workspace?.history || []).map((entry) => {
-          const button = document.createElement("button");
-          button.className = "block w-full border-b border-slate-800 px-3 py-2 text-left hover:bg-slate-800";
-          button.innerHTML = `<span class="block truncate text-xs text-slate-300">${entry.message}</span><span class="font-mono text-[10px] text-slate-500">${entry.shortCommit} · ${entry.date.slice(0, 10)}</span>`;
-          button.onclick = () => showDiff(entry.commit);
-          return button;
-        }));
-      }
-
-      async function showDiff(commit) {
-        const result = await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/diff?commit=${encoded(commit)}`);
-        const patches = parsePatch(result.diff);
-        const lines = patches.flatMap((patch) => patch.hunks.flatMap((hunk) => hunk.lines));
-        const output = el("[data-diff-output]");
-        output.replaceChildren(...lines.map((line) => {
-          const row = document.createElement("div");
-          row.className = line.startsWith("+") && !line.startsWith("+++") ? "bg-emerald-950 text-emerald-300" : line.startsWith("-") && !line.startsWith("---") ? "bg-red-950 text-red-300" : "text-slate-400";
-          row.textContent = line;
-          return row;
-        }));
-        el("[data-diff-dialog]").showModal();
-      }
-
-      function updateInput(index, card) {
-        const input = state.workspace.metadata.inputs[index];
-        input.name = card.querySelector("[data-input-name]").value;
-        input.type = card.querySelector("[data-input-type]").value;
-        input.required = card.querySelector("[data-input-required]").checked;
-      }
-
-      async function saveMetadata() {
-        state.dirty = true;
-        await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/metadata`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(state.workspace.metadata) });
-      }
-
-      async function loadWorkspace() {
-        const params = new URLSearchParams(location.search);
-        const owned = await api("/api/snippets/mine");
-        state.owned = owned;
-        const owners = [...new Set(owned.map((item) => item.owner))];
-        el("[data-namespace]").replaceChildren(...owners.map((owner) => new Option(owner, owner)));
-        state.owner = params.get("owner") || owners[0] || "";
-        const repos = owned.filter((item) => item.owner === state.owner);
-        el("[data-snippet]").replaceChildren(...repos.map((item) => new Option(item.repo, item.repo)));
-        state.repo = params.get("repo") || repos[0]?.repo || "";
-        if (!state.owner || !state.repo) return;
-        el("[data-namespace]").value = state.owner;
-        el("[data-snippet]").value = state.repo;
-        state.workspace = await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}`);
-        el("[data-owner]").value = state.owner;
-        el("[data-repo]").value = state.repo;
-        el("[data-description]").value = state.workspace.metadata.description;
-        renderInputs();
-        renderHistory();
-        selectFile(state.workspace.files[0]?.path);
-      }
-
-      window.addEventListener("DOMContentLoaded", async () => {
-        window.addEventListener("editor-auth-ready", async () => { try { await loadWorkspace(); } catch (error) { console.error(error); } }, { once: true });
-        el("[data-description]").addEventListener("change", () => { state.workspace.metadata.description = el("[data-description]").value; saveMetadata(); });
-        el("[data-add-input]").addEventListener("click", () => { state.workspace.metadata.inputs.push({ name: "value", type: "string", required: false }); renderInputs(); saveMetadata(); });
-        el("[data-code-editor]").addEventListener("change", () => { state.dirty = true; });
-        el("[data-namespace]").addEventListener("change", async (event) => { const repos = state.owned.filter((item) => item.owner === event.target.value); el("[data-snippet]").replaceChildren(...repos.map((item) => new Option(item.repo, item.repo))); if (repos[0]) { el("[data-snippet]").value = repos[0].repo; history.replaceState({}, "", `/editor?owner=${encodeURIComponent(event.target.value)}&repo=${encodeURIComponent(repos[0].repo)}`); await loadWorkspace(); } });
-        el("[data-snippet]").addEventListener("change", async (event) => { history.replaceState({}, "", `/editor?owner=${encodeURIComponent(el("[data-namespace]").value)}&repo=${encodeURIComponent(event.target.value)}`); await loadWorkspace(); });
-        el("[data-revert]").addEventListener("click", () => location.reload());
-        el("[data-commit]").addEventListener("click", async () => { await api(`/api/editor/${encoded(state.owner)}/${encoded(state.repo)}/commit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: "Update snippet" }) }); state.dirty = false; await loadWorkspace(); });
-      });
-    </script>
-
-    <main data-editor-shell hidden class="flex min-h-0 flex-1 overflow-hidden">
-      <aside class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
-        <div class="space-y-4 border-b border-slate-700 p-4">
-            <label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Owner<input data-owner readonly class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-slate-400 outline-none" /></label>
-            <label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Slug<input data-repo readonly class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none" /></label>
-            <label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Description<textarea data-description class="mt-1 h-20 w-full resize-none rounded border border-slate-700 bg-[#0f172a] p-2 text-sm text-slate-300 outline-none"></textarea></label>
-        </div>
-        <div class="flex-1 p-4">
-          <div class="mb-3 flex items-center justify-between"><h2 class="text-sm font-semibold text-white">{ } Input Variables</h2><button data-add-input class="text-xs text-blue-400" type="button">＋ Add Field</button></div>
-          <p class="mb-4 text-xs text-slate-500">Define arguments passed to the runner.</p>
-          <div data-inputs class="space-y-3"></div>
-        </div>
-      </aside>
-
-      <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]">
-        <div data-file-tabs class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"><button data-add-file class="px-3 text-slate-500 hover:text-white" type="button">＋</button></div>
-        <div class="min-h-0 flex-1 overflow-auto bg-[#1e1e1e] p-2"><code-editor data-code-editor nostatus class="block h-full"></code-editor></div>
-        <div class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"><button data-revert class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300 shadow-lg">↶ Revert</button><button data-commit class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-lg">▣ Commit</button></div>
-      </section>
-
-      <aside hidden class="flex w-96 shrink-0 flex-col border-l border-slate-700 bg-[#151e2e]">
-        <div class="flex h-10 shrink-0 items-center justify-between border-b border-slate-700 bg-[#0f172a] px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase"><span>WebContainer Shell</span><span class="text-blue-400">disposable</span></div>
-        <details class="max-h-64 shrink-0 border-b border-slate-700"><summary class="cursor-pointer px-3 py-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">Git History</summary><div data-history-list class="max-h-48 overflow-y-auto"></div></details>
-        <div class="flex min-h-0 flex-1 flex-col bg-black"><div class="flex h-8 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-800 px-3 text-xs text-slate-400"><span>⌘ Terminal</span><span>□ ⛶</span></div><div data-terminal class="min-h-0 flex-1 p-2"></div></div>
-      </aside>
-    </main>
+      <script setup>
+        import { computed, onInit, ref, templateRef } from '@li3/web';
+        const registry = 'https://registry.snippets.run';
+        export default function app() {
+          const user = ref(null); const namespaces = ref([]); const owned = ref([]); const owner = ref(''); const repo = ref(''); const workspace = ref({ files: [], history: [], metadata: { description: '', inputs: [] } }); const activePath = ref(''); const activeContent = ref(''); const description = ref(''); const newOwner = ref(''); const newName = ref(''); const newType = ref('sh'); const hasChanges = ref(false); const createDialog = templateRef('createDialog');
+          const files = computed(() => workspace.value.files); const inputs = computed(() => workspace.value.metadata.inputs); const ownedInNamespace = computed(() => owned.value.filter((item) => item.owner === owner.value)); const activeLanguage = computed(() => activePath.value.endsWith('.py') ? 'python' : activePath.value.endsWith('.js') ? 'javascript' : 'bash');
+          async function request(path, options = {}) { const response = await fetch(registry + path, { credentials: 'include', headers: { Accept: 'application/json', ...options.headers }, ...options }); if (!response.ok) throw new Error(`Registry request failed (${response.status})`); return response.json(); }
+          async function loadWorkspace() { if (!owner.value || !repo.value) return; const result = await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}`); workspace.value = result; description.value = result.metadata.description; selectFile(result.files[0]?.path || ''); }
+          function selectFile(path) { activePath.value = path; activeContent.value = workspace.value.files.find((file) => file.path === path)?.content || ''; hasChanges.value = false; }
+          function selectOwner() { repo.value = ownedInNamespace.value[0]?.repo || ''; loadWorkspace(); }
+          function markDirty() { hasChanges.value = true; const file = workspace.value.files.find((item) => item.path === activePath.value); if (file) file.content = activeContent.value; }
+          async function saveMetadata() { workspace.value.metadata.description = description.value; await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/metadata`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(workspace.value.metadata) }); hasChanges.value = true; }
+          function addInput() { workspace.value.metadata.inputs.push({ name: 'value', type: 'string', required: false }); saveMetadata(); }
+          function removeInput(index) { workspace.value.metadata.inputs.splice(index, 1); saveMetadata(); }
+          async function addFile() { const path = window.prompt('New file name'); if (!path) return; await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/file?path=${encodeURIComponent(path)}`, { method: 'PUT', headers: { 'content-type': 'text/plain' }, body: '' }); await loadWorkspace(); }
+          async function commit() { await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/commit`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: 'Update snippet' }) }); hasChanges.value = false; await loadWorkspace(); }
+          function revert() { loadWorkspace(); }
+          function openCreate() { newOwner.value = owner.value; createDialog.value.showModal(); }
+          async function createSnippet() { const type = newType.value; const name = newName.value.trim(); const selectedOwner = newOwner.value.trim(); await request(`/api/snippets/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}.${type}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) }); createDialog.value.close(); owner.value = selectedOwner; repo.value = `${name}.${type}`; await loadMine(); await loadWorkspace(); }
+          async function loadMine() { owned.value = await request('/api/snippets/mine'); namespaces.value = [...new Set(owned.value.map((item) => item.owner))]; if (!owner.value) owner.value = namespaces.value[0] || ''; if (!repo.value) repo.value = ownedInNamespace.value[0]?.repo || ''; }
+          async function init() { try { user.value = await request('/auth/me'); await loadMine(); await loadWorkspace(); } catch { user.value = null; } }
+          function loginHref() { return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`; }
+          onInit(init); return { activeContent, activeLanguage, activePath, addFile, addInput, commit, createDialog, createSnippet, description, files, hasChanges, inputs, loginHref, newName, newOwner, newType, namespaces, openCreate, ownedInNamespace, owner, removeInput, repo, revert, selectFile, selectOwner, user };
+        }
+      </script>
+    </template>
   </body>
 </html>
