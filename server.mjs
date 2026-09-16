@@ -4,12 +4,26 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 
 const root = "/home/app/dist";
-const types = { ".css": "text/css", ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png" };
+const types = {
+  ".css": "text/css",
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+};
 
 createServer(async (request, response) => {
   try {
-    const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
-    const relative = pathname === "/" ? "index.html" : pathname.endsWith("/") ? `${pathname.slice(1)}index.html` : pathname.slice(1);
+    const pathname = decodeURIComponent(
+      new URL(request.url, "http://localhost").pathname,
+    );
+    const relative =
+      pathname === "/"
+        ? "index.html"
+        : pathname.endsWith("/")
+          ? `${pathname.slice(1)}index.html`
+          : pathname.slice(1);
     let file = normalize(join(root, relative));
     if (!file.startsWith(`${root}/`)) return response.writeHead(403).end();
     let info = await stat(file);

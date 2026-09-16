@@ -1,5 +1,11 @@
 {
   "name": "@snippets.run/web",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write index.html search/index.html editor/index.html mine/index.html server.mjs README.md package.json package-lock.json"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.7"
+  }
 }

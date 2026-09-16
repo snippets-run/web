@@ -5,61 +5,587 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Editor - snippets.run</title>
     <link rel="icon" href="/assets/icon.svg" />
-    <link rel="component" href="https://sodium.static.apphor.de/code-editor.html" />
+    <link
+      rel="component"
+      href="https://sodium.static.apphor.de/code-editor.html"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script type="importmap">{"imports":{"@li3/":"https://at-li3.static.apphor.de/"}}</script>
-    <script type="module">import '@li3/web';</script>
+    <script type="importmap">
+      { "imports": { "@li3/": "https://at-li3.static.apphor.de/" } }
+    </script>
+    <script type="module">
+      import "@li3/web";
+    </script>
   </head>
-  <body class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300">
+  <body
+    class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300"
+  >
     <template app>
       <template if="user">
-        <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
-          <div class="flex items-center gap-4"><a class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline" href="/"><img class="size-7 brightness-0 invert" src="/assets/icon.svg" alt="" />snippets.run</a><div class="h-5 w-px bg-slate-700"></div><div class="flex items-center gap-2 text-sm"><select bind-value="owner" on-change="selectOwner()" class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"><template for="namespace of namespaces"><option>{{ namespace }}</option></template></select><span class="text-slate-600">›</span><select bind-value="repo" on-change="loadWorkspace()" class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"><template for="item of ownedInNamespace"><option>{{ item.repo }}</option></template></select><button class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white" type="button" on-click="openQuickNavigation()">⌘K</button></div></div>
-          <div class="flex items-center gap-2"><button class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500" type="button" on-click="openCreate()">＋ New Snippet</button><a class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white" href="/mine" target="_blank" rel="noopener">My Profile</a></div>
+        <header
+          class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4"
+        >
+          <div class="flex items-center gap-4">
+            <a
+              class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline"
+              href="/"
+              ><img
+                class="size-7 brightness-0 invert"
+                src="/assets/icon.svg"
+                alt=""
+              />snippets.run</a
+            >
+            <div class="h-5 w-px bg-slate-700"></div>
+            <div class="flex items-center gap-2 text-sm">
+              <select
+                bind-value="owner"
+                on-change="selectOwner()"
+                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"
+              >
+                <template for="namespace of namespaces"
+                  ><option>{{ namespace }}</option></template
+                ></select
+              ><span class="text-slate-600">›</span
+              ><select
+                bind-value="repo"
+                on-change="loadWorkspace()"
+                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"
+              >
+                <template for="item of ownedInNamespace"
+                  ><option>{{ item.repo }}</option></template
+                ></select
+              ><button
+                class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white"
+                type="button"
+                on-click="openQuickNavigation()"
+              >
+                ⌘K
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500"
+              type="button"
+              on-click="openCreate()"
+            >
+              ＋ New Snippet</button
+            ><a
+              class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white"
+              href="/mine"
+              target="_blank"
+              rel="noopener"
+              >My Profile</a
+            >
+          </div>
         </header>
 
         <main class="flex min-h-0 flex-1 overflow-hidden">
-          <aside class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
-            <div class="space-y-3 border-b border-slate-700 p-4"><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Owner<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-slate-400" bind-value="owner" readonly /></label><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Slug<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="repo" readonly /></label><label class="block text-xs font-medium tracking-wider text-slate-400 uppercase">Description<textarea class="mt-1 h-20 w-full resize-none rounded border border-slate-700 bg-[#0f172a] p-2 text-sm text-slate-300 outline-none" bind-value="description" on-change="saveMetadata()"></textarea></label></div>
-            <div class="flex-1 p-4"><div class="mb-3 flex items-center justify-between"><h2 class="text-sm font-semibold text-white">{ } Input Variables</h2><button class="text-xs text-blue-400" type="button" on-click="addInput()">＋ Add Field</button></div><p class="mb-4 text-xs text-slate-500">Stored with the snippet revision.</p><div class="space-y-3"><template for="[input, index] of inputs"><div class="rounded border border-slate-700 bg-slate-800 p-3"><div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400 uppercase">Name<input class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white" bind-value="input.name" on-change="saveMetadata()" /></label><label class="text-[10px] text-slate-400 uppercase">Type<select class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white" bind-value="input.type" on-change="saveMetadata()"><option value="string">String</option><option value="number">Number</option><option value="boolean">Boolean</option><option value="file">File Path</option></select></label></div><div class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400"><label><input type="checkbox" bind-checked="input.required" on-change="saveMetadata()" class="mr-1 accent-blue-500" /> Required</label><button class="text-red-400" type="button" on-click="removeInput(index)">Remove</button></div></div></template></div><details class="mt-6 border-t border-slate-700 pt-4" open><summary class="cursor-pointer text-xs font-bold tracking-wider text-slate-400 uppercase">Git History</summary><div class="mt-2"><template for="entry of history"><button class="block w-full border-b border-slate-800 px-2 py-2 text-left hover:bg-slate-800" type="button" on-click="showDiff(entry.commit)"><span class="block truncate text-xs text-slate-300">{{ entry.message }}</span><span class="font-mono text-[10px] text-slate-500">{{ entry.shortCommit }} · {{ entry.date.slice(0, 10) }}</span></button></template></div></details></div>
+          <aside
+            class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]"
+          >
+            <div class="space-y-3 border-b border-slate-700 p-4">
+              <label
+                class="block text-xs font-medium tracking-wider text-slate-400 uppercase"
+                >Owner<input
+                  class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-slate-400"
+                  bind-value="owner"
+                  readonly /></label
+              ><label
+                class="block text-xs font-medium tracking-wider text-slate-400 uppercase"
+                >Slug<input
+                  class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white"
+                  bind-value="repo"
+                  readonly /></label
+              ><label
+                class="block text-xs font-medium tracking-wider text-slate-400 uppercase"
+                >Description<textarea
+                  class="mt-1 h-20 w-full resize-none rounded border border-slate-700 bg-[#0f172a] p-2 text-sm text-slate-300 outline-none"
+                  bind-value="description"
+                  on-change="saveMetadata()"
+                ></textarea>
+              </label>
+            </div>
+            <div class="flex-1 p-4">
+              <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-white">
+                  { } Input Variables
+                </h2>
+                <button
+                  class="text-xs text-blue-400"
+                  type="button"
+                  on-click="addInput()"
+                >
+                  ＋ Add Field
+                </button>
+              </div>
+              <p class="mb-4 text-xs text-slate-500">
+                Stored with the snippet revision.
+              </p>
+              <div class="space-y-3">
+                <template for="[input, index] of inputs"
+                  ><div
+                    class="rounded border border-slate-700 bg-slate-800 p-3"
+                  >
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="text-[10px] text-slate-400 uppercase"
+                        >Name<input
+                          class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white"
+                          bind-value="input.name"
+                          on-change="saveMetadata()" /></label
+                      ><label class="text-[10px] text-slate-400 uppercase"
+                        >Type<select
+                          class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white"
+                          bind-value="input.type"
+                          on-change="saveMetadata()"
+                        >
+                          <option value="string">String</option>
+                          <option value="number">Number</option>
+                          <option value="boolean">Boolean</option>
+                          <option value="file">File Path</option>
+                        </select></label
+                      >
+                    </div>
+                    <div
+                      class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400"
+                    >
+                      <label
+                        ><input
+                          type="checkbox"
+                          bind-checked="input.required"
+                          on-change="saveMetadata()"
+                          class="mr-1 accent-blue-500"
+                        />
+                        Required</label
+                      ><button
+                        class="text-red-400"
+                        type="button"
+                        on-click="removeInput(index)"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div></template
+                >
+              </div>
+              <details class="mt-6 border-t border-slate-700 pt-4" open>
+                <summary
+                  class="cursor-pointer text-xs font-bold tracking-wider text-slate-400 uppercase"
+                >
+                  Git History
+                </summary>
+                <div class="mt-2">
+                  <template for="entry of history"
+                    ><button
+                      class="block w-full border-b border-slate-800 px-2 py-2 text-left hover:bg-slate-800"
+                      type="button"
+                      on-click="showDiff(entry)"
+                    >
+                      <span class="block truncate text-xs text-slate-300"
+                        >{{ entry.message }}</span
+                      ><span class="font-mono text-[10px] text-slate-500"
+                        >{{ entry.shortCommit }} · {{ entry.date.slice(0, 10)
+                        }}</span
+                      >
+                    </button></template
+                  >
+                </div>
+              </details>
+            </div>
           </aside>
 
-          <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]"><div class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"><template for="file of files"><button class="flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm text-slate-400" bind-class="{ 'border-t-2 border-blue-500 bg-[#0f172a] text-slate-200': file.path === activePath }" type="button" on-click="selectFile(file.path)">▤ {{ file.path }}</button></template><button class="px-3 text-slate-500 hover:text-white" type="button" on-click="addFile()">＋</button></div><div class="min-h-0 flex-1 overflow-auto p-2"><code-editor class="block h-full rounded-lg overflow-hidden" nostatus theme="github-dark" bind-value="activeContent" bind-language="activeLanguage" on-change="markDirty()"></code-editor></div><div class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"><button class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300" type="button" on-click="revert()">↶ Revert</button><button class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50" type="button" bind-disabled.bool="!hasChanges" on-click="commit()">▣ Commit</button></div></section>
+          <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]">
+            <div
+              class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"
+            >
+              <template for="file of files"
+                ><button
+                  class="flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm text-slate-400"
+                  bind-class="{ 'border-t-2 border-blue-500 bg-[#0f172a] text-slate-200': file.path === activePath }"
+                  type="button"
+                  on-click="selectFile(file.path)"
+                >
+                  ▤ {{ file.path }}
+                </button></template
+              ><button
+                class="px-3 text-slate-500 hover:text-white"
+                type="button"
+                on-click="addFile()"
+              >
+                ＋
+              </button>
+            </div>
+            <div class="min-h-0 flex-1 overflow-auto p-2">
+              <code-editor
+                class="block h-full rounded-lg overflow-hidden"
+                nostatus
+                theme="github-dark"
+                bind-value="activeContent"
+                bind-language="activeLanguage"
+                on-change="markDirty()"
+              ></code-editor>
+            </div>
+            <div
+              class="flex shrink-0 justify-end gap-2 border-t border-slate-700 bg-[#151e2e] p-2"
+            >
+              <button
+                class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300"
+                type="button"
+                on-click="revert()"
+              >
+                ↶ Revert</button
+              ><button
+                class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50"
+                type="button"
+                bind-disabled.bool="!hasChanges"
+                on-click="commit()"
+              >
+                ▣ Commit
+              </button>
+            </div>
+          </section>
         </main>
       </template>
-      <template if="!user"><main class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center"><div class="max-w-md"><img class="mx-auto mb-8 size-24 brightness-0 invert opacity-80" src="/assets/icon.svg" alt="" /><p class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase">Private workspace</p><h1 class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white">Sign in before you start building.</h1><p class="mt-6 leading-relaxed text-slate-400">Your snippets, files, and revisions belong to your account.</p><a class="mt-8 inline-block rounded bg-blue-600 px-5 py-3 font-bold text-white no-underline hover:bg-blue-500" bind-href="loginHref()">Sign in to continue</a></div></main></template>
+      <template if="!user"
+        ><main
+          class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center"
+        >
+          <div class="max-w-md">
+            <img
+              class="mx-auto mb-8 size-24 brightness-0 invert opacity-80"
+              src="/assets/icon.svg"
+              alt=""
+            />
+            <p
+              class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase"
+            >
+              Private workspace
+            </p>
+            <h1
+              class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white"
+            >
+              Sign in before you start building.
+            </h1>
+            <p class="mt-6 leading-relaxed text-slate-400">
+              Your snippets, files, and revisions belong to your account.
+            </p>
+            <a
+              class="mt-8 inline-block rounded bg-blue-600 px-5 py-3 font-bold text-white no-underline hover:bg-blue-500"
+              bind-href="loginHref()"
+              >Sign in to continue</a
+            >
+          </div>
+        </main></template
+      >
 
-      <dialog ref="createDialog" class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"><form on-submit.prevent="createSnippet()"><div class="mb-4 flex items-center justify-between"><h2 class="m-0 text-lg font-semibold text-white">New snippet</h2><button class="text-slate-400" type="button" on-click="createDialog.close()">×</button></div><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Namespace<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newOwner" required /></label><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Snippet name<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newName" required /></label><label class="block text-xs font-bold uppercase text-slate-400">Runtime<select class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white" bind-value="newType"><option value="sh">Shell</option><option value="js">Node.js</option><option value="py">Python</option></select></label><button class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white" type="submit">Create and load</button></form></dialog>
-      <dialog ref="quickDialog" class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70"><div class="mb-2 flex items-center justify-between px-2"><b>Switch snippet</b><button type="button" on-click="quickDialog.close()">×</button></div><div class="max-h-80 overflow-y-auto"><template for="item of owned"><button class="block w-full rounded px-3 py-2 text-left font-mono text-sm hover:bg-slate-700" type="button" on-click="switchTo(item)">{{ item.owner }}/{{ item.repo }}</button></template></div></dialog>
-      <dialog ref="diffDialog" class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70"><div class="mb-3 flex items-center justify-between"><b>Commit diff</b><button type="button" on-click="diffDialog.close()">×</button></div><pre class="max-h-[65vh] overflow-auto rounded bg-[#0f172a] p-3 font-mono text-xs leading-5">{{ diffText }}</pre></dialog>
+      <dialog
+        ref="createDialog"
+        class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"
+      >
+        <form on-submit.prevent="createSnippet()">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="m-0 text-lg font-semibold text-white">New snippet</h2>
+            <button
+              class="text-slate-400"
+              type="button"
+              on-click="createDialog.close()"
+            >
+              ×
+            </button>
+          </div>
+          <label class="mb-3 block text-xs font-bold uppercase text-slate-400"
+            >Namespace<input
+              class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white"
+              bind-value="newOwner"
+              required /></label
+          ><label class="mb-3 block text-xs font-bold uppercase text-slate-400"
+            >Snippet name<input
+              class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white"
+              bind-value="newName"
+              required /></label
+          ><label class="block text-xs font-bold uppercase text-slate-400"
+            >Runtime<select
+              class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white"
+              bind-value="newType"
+            >
+              <option value="sh">Shell</option>
+              <option value="js">Node.js</option>
+              <option value="py">Python</option>
+            </select></label
+          ><button
+            class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white"
+            type="submit"
+          >
+            Create and load
+          </button>
+        </form>
+      </dialog>
+      <dialog
+        ref="quickDialog"
+        class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70"
+      >
+        <div class="mb-2 flex items-center justify-between px-2">
+          <b>Switch snippet</b
+          ><button type="button" on-click="quickDialog.close()">×</button>
+        </div>
+        <div class="max-h-80 overflow-y-auto">
+          <template for="item of owned"
+            ><button
+              class="block w-full rounded px-3 py-2 text-left font-mono text-sm hover:bg-slate-700"
+              type="button"
+              on-click="switchTo(item)"
+            >
+              {{ item.owner }}/{{ item.repo }}
+            </button></template
+          >
+        </div>
+      </dialog>
+      <dialog
+        ref="diffDialog"
+        class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <b>Commit diff</b
+          ><button type="button" on-click="diffDialog.close()">×</button>
+        </div>
+        <pre
+          class="max-h-[65vh] overflow-auto rounded bg-[#0f172a] p-3 font-mono text-xs leading-5"
+        >
+{{ diffText }}</pre>
+      </dialog>
 
       <script setup>
-        import { parsePatch } from 'https://unpkg.com/diff@9.0.0/libesm/index.js';
-        import { computed, onInit, ref, templateRef } from '@li3/web';
-        const registry = 'https://registry.snippets.run';
+        import { parsePatch } from "https://unpkg.com/diff@9.0.0/libesm/index.js";
+        import { computed, onInit, ref, templateRef } from "@li3/web";
+        const registry = "https://registry.snippets.run";
         export default function app() {
-          const user = ref(null); const namespaces = ref([]); const owned = ref([]); const owner = ref(''); const repo = ref(''); const workspace = ref({ files: [], history: [], metadata: { description: '', inputs: [] } }); const activePath = ref(''); const activeContent = ref(''); const description = ref(''); const newOwner = ref(''); const newName = ref(''); const newType = ref('sh'); const hasChanges = ref(false); const createDialog = templateRef('createDialog'); const quickDialog = templateRef('quickDialog');
-          const files = computed(() => workspace.value.files); const inputs = computed(() => workspace.value.metadata.inputs); const history = computed(() => workspace.value.history); const ownedInNamespace = computed(() => owned.value.filter((item) => item.owner === owner.value)); const activeLanguage = computed(() => activePath.value.endsWith('.py') ? 'python' : activePath.value.endsWith('.js') ? 'javascript' : 'bash'); const diffDialog = templateRef('diffDialog'); const diffText = ref('');
-          async function request(path, options = {}) { const response = await fetch(registry + path, { credentials: 'include', headers: { Accept: 'application/json', ...options.headers }, ...options }); if (!response.ok) throw new Error(`Registry request failed (${response.status})`); return response.json(); }
-          async function loadWorkspace() { if (!owner.value || !repo.value) return; const result = await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}`); workspace.value = result; description.value = result.metadata.description; selectFile(result.files[0]?.path || ''); }
-          function selectFile(path) { activePath.value = path; activeContent.value = workspace.value.files.find((file) => file.path === path)?.content || ''; hasChanges.value = false; }
-          function selectOwner() { repo.value = ownedInNamespace.value[0]?.repo || ''; loadWorkspace(); }
-          function markDirty(event) { if (event?.target?.value !== undefined) activeContent.value = event.target.value; hasChanges.value = true; const file = workspace.value.files.find((item) => item.path === activePath.value); if (file) file.content = activeContent.value; }
-          async function saveMetadata() { workspace.value.metadata.description = description.value; await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/metadata`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(workspace.value.metadata) }); hasChanges.value = true; }
-          function addInput() { workspace.value.metadata.inputs.push({ name: 'value', type: 'string', required: false }); saveMetadata(); }
-          function removeInput(index) { workspace.value.metadata.inputs.splice(index, 1); saveMetadata(); }
-          async function addFile() { const path = window.prompt('New file name'); if (!path) return; await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/file?path=${encodeURIComponent(path)}`, { method: 'PUT', headers: { 'content-type': 'text/plain' }, body: '' }); await loadWorkspace(); }
-          async function commit() { await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/commit`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: 'Update snippet' }) }); hasChanges.value = false; await loadWorkspace(); }
-          function revert() { loadWorkspace(); }
-          async function showDiff(commit) { const result = await request(`/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/diff?commit=${encodeURIComponent(commit)}`); diffText.value = parsePatch(result.diff).flatMap((patch) => patch.hunks.flatMap((hunk) => hunk.lines)).join('\n'); diffDialog.value.showModal(); }
-          function openCreate() { newOwner.value = owner.value; createDialog.value.showModal(); }
-          function openQuickNavigation() { quickDialog.value.showModal(); }
-          function switchTo(item) { owner.value = item.owner; repo.value = item.repo; quickDialog.value.close(); loadWorkspace(); }
-          async function createSnippet() { const type = newType.value; const name = newName.value.trim(); const selectedOwner = newOwner.value.trim(); await request(`/api/snippets/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}.${type}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) }); createDialog.value.close(); owner.value = selectedOwner; repo.value = `${name}.${type}`; await loadMine(); await loadWorkspace(); }
-          async function loadMine() { owned.value = await request('/api/snippets/mine'); namespaces.value = [...new Set(owned.value.map((item) => item.owner))]; if (!owner.value) owner.value = namespaces.value[0] || ''; if (!repo.value) repo.value = ownedInNamespace.value[0]?.repo || ''; }
-          async function init() { try { user.value = await request('/auth/me'); await loadMine(); await loadWorkspace(); } catch { user.value = null; } }
-          function loginHref() { return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`; }
-          onInit(init); return { activeContent, activeLanguage, activePath, addFile, addInput, commit, createDialog, createSnippet, description, diffDialog, diffText, files, hasChanges, history, inputs, loadWorkspace, loginHref, markDirty, newName, newOwner, newType, namespaces, openCreate, openQuickNavigation, owned, ownedInNamespace, owner, quickDialog, removeInput, repo, revert, saveMetadata, selectFile, selectOwner, showDiff, switchTo, user };
+          const user = ref(null);
+          const namespaces = ref([]);
+          const owned = ref([]);
+          const owner = ref("");
+          const repo = ref("");
+          const workspace = ref({
+            files: [],
+            history: [],
+            metadata: { description: "", inputs: [] },
+          });
+          const activePath = ref("");
+          const activeContent = ref("");
+          const description = ref("");
+          const newOwner = ref("");
+          const newName = ref("");
+          const newType = ref("sh");
+          const hasChanges = ref(false);
+          const createDialog = templateRef("createDialog");
+          const quickDialog = templateRef("quickDialog");
+          const files = computed(() => workspace.value.files);
+          const inputs = computed(() => workspace.value.metadata.inputs);
+          const history = computed(() => workspace.value.history);
+          const ownedInNamespace = computed(() =>
+            owned.value.filter((item) => item.owner === owner.value),
+          );
+          const activeLanguage = computed(() =>
+            activePath.value.endsWith(".py")
+              ? "python"
+              : activePath.value.endsWith(".js")
+                ? "javascript"
+                : "bash",
+          );
+          const diffDialog = templateRef("diffDialog");
+          const diffText = ref("");
+          async function request(path, options = {}) {
+            const response = await fetch(registry + path, {
+              credentials: "include",
+              headers: { Accept: "application/json", ...options.headers },
+              ...options,
+            });
+            if (!response.ok)
+              throw new Error(`Registry request failed (${response.status})`);
+            return response.json();
+          }
+          async function loadWorkspace() {
+            if (!owner.value || !repo.value) return;
+            const result = await request(
+              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}`,
+            );
+            workspace.value = result;
+            description.value = result.metadata.description;
+            selectFile(result.files[0]?.path || "");
+          }
+          function selectFile(path) {
+            activePath.value = path;
+            activeContent.value =
+              workspace.value.files.find((file) => file.path === path)
+                ?.content || "";
+            hasChanges.value = false;
+          }
+          function selectOwner() {
+            repo.value = ownedInNamespace.value[0]?.repo || "";
+            loadWorkspace();
+          }
+          function markDirty(event) {
+            if (event?.target?.value !== undefined)
+              activeContent.value = event.target.value;
+            hasChanges.value = true;
+            const file = workspace.value.files.find(
+              (item) => item.path === activePath.value,
+            );
+            if (file) file.content = activeContent.value;
+          }
+          async function saveMetadata() {
+            workspace.value.metadata.description = description.value;
+            await request(
+              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/metadata`,
+              {
+                method: "PUT",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(workspace.value.metadata),
+              },
+            );
+            hasChanges.value = true;
+          }
+          function addInput() {
+            workspace.value.metadata.inputs.push({
+              name: "value",
+              type: "string",
+              required: false,
+            });
+            saveMetadata();
+          }
+          function removeInput(index) {
+            workspace.value.metadata.inputs.splice(index, 1);
+            saveMetadata();
+          }
+          async function addFile() {
+            const path = window.prompt("New file name");
+            if (!path) return;
+            await request(
+              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/file?path=${encodeURIComponent(path)}`,
+              {
+                method: "PUT",
+                headers: { "content-type": "text/plain" },
+                body: "",
+              },
+            );
+            await loadWorkspace();
+          }
+          async function commit() {
+            await request(
+              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/commit`,
+              {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ message: "Update snippet" }),
+              },
+            );
+            hasChanges.value = false;
+            await loadWorkspace();
+          }
+          function revert() {
+            loadWorkspace();
+          }
+          async function showDiff(entry) {
+            const commit = typeof entry === "string" ? entry : entry?.commit;
+            if (!commit) return;
+            const result = await request(
+              `/api/editor/${encodeURIComponent(owner.value)}/${encodeURIComponent(repo.value)}/diff?commit=${encodeURIComponent(commit)}`,
+            );
+            diffText.value = parsePatch(result.diff)
+              .flatMap((patch) => patch.hunks.flatMap((hunk) => hunk.lines))
+              .join("\n");
+            diffDialog.value.showModal();
+          }
+          function openCreate() {
+            newOwner.value = owner.value;
+            createDialog.value.showModal();
+          }
+          function openQuickNavigation() {
+            quickDialog.value.showModal();
+          }
+          function switchTo(item) {
+            owner.value = item.owner;
+            repo.value = item.repo;
+            quickDialog.value.close();
+            loadWorkspace();
+          }
+          async function createSnippet() {
+            const type = newType.value;
+            const name = newName.value.trim();
+            const selectedOwner = newOwner.value.trim();
+            await request(
+              `/api/snippets/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}.${type}`,
+              {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({}),
+              },
+            );
+            createDialog.value.close();
+            owner.value = selectedOwner;
+            repo.value = `${name}.${type}`;
+            await loadMine();
+            await loadWorkspace();
+          }
+          async function loadMine() {
+            owned.value = await request("/api/snippets/mine");
+            namespaces.value = [
+              ...new Set(owned.value.map((item) => item.owner)),
+            ];
+            if (!owner.value) owner.value = namespaces.value[0] || "";
+            if (!repo.value) repo.value = ownedInNamespace.value[0]?.repo || "";
+          }
+          async function init() {
+            try {
+              user.value = await request("/auth/me");
+              await loadMine();
+              await loadWorkspace();
+            } catch {
+              user.value = null;
+            }
+          }
+          function loginHref() {
+            return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
+          }
+          onInit(init);
+          return {
+            activeContent,
+            activeLanguage,
+            activePath,
+            addFile,
+            addInput,
+            commit,
+            createDialog,
+            createSnippet,
+            description,
+            diffDialog,
+            diffText,
+            files,
+            hasChanges,
+            history,
+            inputs,
+            loadWorkspace,
+            loginHref,
+            markDirty,
+            newName,
+            newOwner,
+            newType,
+            namespaces,
+            openCreate,
+            openQuickNavigation,
+            owned,
+            ownedInNamespace,
+            owner,
+            quickDialog,
+            removeInput,
+            repo,
+            revert,
+            saveMetadata,
+            selectFile,
+            selectOwner,
+            showDiff,
+            switchTo,
+            user,
+          };
         }
       </script>
     </template>
