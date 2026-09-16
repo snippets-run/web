@@ -16,8 +16,7 @@
   <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
     <template app>
       <header
-        class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"
-      >
+        class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
         <a
           class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
           href="/"
@@ -42,44 +41,37 @@
         </nav>
       </header>
       <main
-        class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16"
-      >
+        class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16">
         <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
           Public registry
         </p>
         <h1
-          class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]"
-        >
+          class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
           Find something useful.
         </h1>
         <form
           class="my-14 flex border border-[#182019] bg-[#fffdf7] shadow-[7px_7px_0_#d7f34a]"
-          on-submit.prevent="search()"
-        >
+          on-submit.prevent="search()">
           <input
             class="min-w-0 flex-1 bg-transparent px-4 py-4 outline-none"
             bind-value="query"
             name="q"
-            placeholder="Search owners and snippets"
-          />
+            placeholder="Search owners and snippets" />
           <button
             class="cursor-pointer bg-[#182019] px-6 font-extrabold text-white"
-            type="submit"
-          >
+            type="submit">
             Search
           </button>
         </form>
         <p if="loading" class="text-[#697069]">Searching the registry...</p>
         <p
           if="!loading && results.length === 0"
-          class="border border-[#c8c7bd] bg-[#fffdf7] p-5"
-        >
+          class="border border-[#c8c7bd] bg-[#fffdf7] p-5">
           No public snippets found.
         </p>
         <ul
           if="!loading && results.length > 0"
-          class="m-0 list-none border-t border-[#182019] p-0"
-        >
+          class="m-0 list-none border-t border-[#182019] p-0">
           <template for="item of results"
             ><li class="border-b border-[#c8c7bd]">
               <a
@@ -98,8 +90,7 @@
         </ul>
       </main>
       <footer
-        class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"
-      >
+        class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
         <span class="font-black">snippets.run</span
         ><a class="text-xs font-extrabold" href="/">Home</a>
       </footer>

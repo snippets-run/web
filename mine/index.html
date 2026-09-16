@@ -16,8 +16,7 @@
   <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
     <template app>
       <header
-        class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]"
-      >
+        class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
         <a
           class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
           href="/"
@@ -35,14 +34,12 @@
         </nav>
       </header>
       <main
-        class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16"
-      >
+        class="mx-auto min-h-[calc(100vh-15rem)] w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-16">
         <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
           Your workspace
         </p>
         <h1
-          class="m-0 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] tracking-[-.065em]"
-        >
+          class="m-0 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] tracking-[-.065em]">
           My snippets.
         </h1>
         <p if="loading" class="mt-10 text-[#697069]">Loading...</p>
@@ -51,14 +48,12 @@
         </p>
         <p
           if="!loading && !error && items.length === 0"
-          class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5"
-        >
+          class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">
           You have not published any snippets yet.
         </p>
         <ul
           if="!loading && items.length > 0"
-          class="mt-14 list-none border-t border-[#182019] p-0"
-        >
+          class="mt-14 list-none border-t border-[#182019] p-0">
           <template for="item of items"
             ><li class="border-b border-[#c8c7bd]">
               <a

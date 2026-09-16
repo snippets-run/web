@@ -7,8 +7,7 @@
     <link rel="icon" href="/assets/icon.svg" />
     <link
       rel="component"
-      href="https://sodium.static.apphor.de/code-editor.html"
-    />
+      href="https://sodium.static.apphor.de/code-editor.html" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script type="importmap">
       { "imports": { "@li3/": "https://at-li3.static.apphor.de/" } }
@@ -18,13 +17,11 @@
     </script>
   </head>
   <body
-    class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300"
-  >
+    class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300">
     <template app>
       <template if="user">
         <header
-          class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4"
-        >
+          class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
           <div class="flex items-center gap-4">
             <a
               class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline"
@@ -32,16 +29,14 @@
               ><img
                 class="size-7 brightness-0 invert"
                 src="/assets/icon.svg"
-                alt=""
-              />snippets.run</a
+                alt="" />snippets.run</a
             >
             <div class="h-5 w-px bg-slate-700"></div>
             <div class="flex items-center gap-2 text-sm">
               <select
                 bind-value="owner"
                 on-change="selectOwner()"
-                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"
-              >
+                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none">
                 <template for="namespace of namespaces"
                   ><option>{{ namespace }}</option></template
                 ></select
@@ -49,16 +44,14 @@
               ><select
                 bind-value="repo"
                 on-change="loadWorkspace()"
-                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"
-              >
+                class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none">
                 <template for="item of ownedInNamespace"
                   ><option>{{ item.repo }}</option></template
                 ></select
               ><button
                 class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white"
                 type="button"
-                on-click="openQuickNavigation()"
-              >
+                on-click="openQuickNavigation()">
                 ⌘K
               </button>
             </div>
@@ -67,8 +60,7 @@
             <button
               class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500"
               type="button"
-              on-click="openCreate()"
-            >
+              on-click="openCreate()">
               ＋ New Snippet</button
             ><a
               class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white"
@@ -82,8 +74,7 @@
 
         <main class="flex min-h-0 flex-1 overflow-hidden">
           <aside
-            class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]"
-          >
+            class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
             <div class="space-y-3 border-b border-slate-700 p-4">
               <label
                 class="block text-xs font-medium tracking-wider text-slate-400 uppercase"
@@ -104,8 +95,7 @@
                   class="mt-1 h-20 w-full resize-none rounded border border-slate-700 bg-[#0f172a] p-2 text-sm text-slate-300 outline-none"
                   bind-value="description"
                   on-input="setDescription($event.target.value)"
-                  on-change="saveMetadata()"
-                ></textarea>
+                  on-change="saveMetadata()"></textarea>
               </label>
             </div>
             <div class="flex-1 p-4">
@@ -116,8 +106,7 @@
                 <button
                   class="text-xs text-blue-400"
                   type="button"
-                  on-click="addInput()"
-                >
+                  on-click="addInput()">
                   ＋ Add Field
                 </button>
               </div>
@@ -127,8 +116,7 @@
               <div class="space-y-3">
                 <template for="[input, index] of inputs"
                   ><div
-                    class="rounded border border-slate-700 bg-slate-800 p-3"
-                  >
+                    class="rounded border border-slate-700 bg-slate-800 p-3">
                     <div class="grid grid-cols-2 gap-2">
                       <label class="text-[10px] text-slate-400 uppercase"
                         >Name<input
@@ -139,8 +127,7 @@
                         >Type<select
                           class="mt-1 w-full rounded border border-slate-600 bg-[#0f172a] px-2 py-1 text-xs text-white"
                           bind-value="input.type"
-                          on-change="input.type = $event.target.value; saveMetadata()"
-                        >
+                          on-change="input.type = $event.target.value; saveMetadata()">
                           <option value="string">String</option>
                           <option value="number">Number</option>
                           <option value="boolean">Boolean</option>
@@ -149,21 +136,18 @@
                       >
                     </div>
                     <div
-                      class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400"
-                    >
+                      class="mt-2 flex items-center justify-between border-t border-slate-700 pt-2 text-xs text-slate-400">
                       <label
                         ><input
                           type="checkbox"
                           bind-checked="input.required"
                           on-change="input.required = $event.target.checked; saveMetadata()"
-                          class="mr-1 accent-blue-500"
-                        />
+                          class="mr-1 accent-blue-500" />
                         Required</label
                       ><button
                         class="text-red-400"
                         type="button"
-                        on-click="removeInput(index)"
-                      >
+                        on-click="removeInput(index)">
                         Remove
                       </button>
                     </div>
@@ -172,8 +156,7 @@
               </div>
               <details class="mt-6 border-t border-slate-700 pt-4" open>
                 <summary
-                  class="cursor-pointer text-xs font-bold tracking-wider text-slate-400 uppercase"
-                >
+                  class="cursor-pointer text-xs font-bold tracking-wider text-slate-400 uppercase">
                   Git History
                 </summary>
                 <div class="mt-2">
@@ -181,8 +164,7 @@
                     ><button
                       class="block w-full border-b border-slate-800 px-2 py-2 text-left hover:bg-slate-800"
                       type="button"
-                      on-click="showDiff(entry)"
-                    >
+                      on-click="showDiff(entry)">
                       <span class="block truncate text-xs text-slate-300"
                         >{{ entry.message }}</span
                       ><span class="font-mono text-[10px] text-slate-500"
@@ -197,22 +179,19 @@
 
           <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]">
             <div
-              class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2"
-            >
+              class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2">
               <template for="file of files"
                 ><button
                   class="flex h-full items-center gap-2 border-r border-slate-700 px-4 text-sm text-slate-400"
                   bind-class="{ 'border-t-2.border-blue-500.bg-[#0f172a].text-slate-200': file.path === activePath }"
                   type="button"
-                  on-click="selectFile(file.path)"
-                >
+                  on-click="selectFile(file.path)">
                   ▤ {{ file.path }}
                 </button></template
               ><button
                 class="px-3 text-slate-500 hover:text-white"
                 type="button"
-                on-click="addFile()"
-              >
+                on-click="addFile()">
                 ＋
               </button>
             </div>
@@ -223,26 +202,22 @@
                 theme="github-dark"
                 bind-value="activeContent"
                 bind-language="activeLanguage"
-                on-change="markDirty($event)"
-              ></code-editor>
+                on-change="markDirty($event)"></code-editor>
             </div>
             <div
-              class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-700 bg-[#151e2e] p-2"
-            >
+              class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-700 bg-[#151e2e] p-2">
               <span class="text-xs text-red-400">{{ error }}</span>
               <div class="flex gap-2">
                 <button
                   class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300"
                   type="button"
-                  on-click="revert()"
-                >
+                  on-click="revert()">
                   ↶ Revert</button
                 ><button
                   class="rounded-md bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50"
                   type="button"
                   bind-disabled.bool="!hasStagedFiles || staging || committing"
-                  on-click="commit()"
-                >
+                  on-click="commit()">
                   {{ committing ? 'Committing...' : '▣ Commit' }}
                 </button>
               </div>
@@ -252,22 +227,18 @@
       </template>
       <template if="!user"
         ><main
-          class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center"
-        >
+          class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center">
           <div class="max-w-md">
             <img
               class="mx-auto mb-8 size-24 brightness-0 invert opacity-80"
               src="/assets/icon.svg"
-              alt=""
-            />
+              alt="" />
             <p
-              class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase"
-            >
+              class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase">
               Private workspace
             </p>
             <h1
-              class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white"
-            >
+              class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white">
               Sign in before you start building.
             </h1>
             <p class="mt-6 leading-relaxed text-slate-400">
@@ -284,16 +255,14 @@
 
       <dialog
         ref="createDialog"
-        class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"
-      >
+        class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <form on-submit.prevent="createSnippet()">
           <div class="mb-4 flex items-center justify-between">
             <h2 class="m-0 text-lg font-semibold text-white">New snippet</h2>
             <button
               class="text-slate-400"
               type="button"
-              on-click="createDialog.close()"
-            >
+              on-click="createDialog.close()">
               ×
             </button>
           </div>
@@ -312,24 +281,21 @@
           ><label class="block text-xs font-bold uppercase text-slate-400"
             >Runtime<select
               class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white"
-              bind-value="newType"
-            >
+              bind-value="newType">
               <option value="sh">Shell</option>
               <option value="js">Node.js</option>
               <option value="py">Python</option>
             </select></label
           ><button
             class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white"
-            type="submit"
-          >
+            type="submit">
             Create and load
           </button>
         </form>
       </dialog>
       <dialog
         ref="quickDialog"
-        class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70"
-      >
+        class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="mb-2 flex items-center justify-between px-2">
           <b>Switch snippet</b
           ><button type="button" on-click="quickDialog.close()">×</button>
@@ -339,8 +305,7 @@
             ><button
               class="block w-full rounded px-3 py-2 text-left font-mono text-sm hover:bg-slate-700"
               type="button"
-              on-click="switchTo(item)"
-            >
+              on-click="switchTo(item)">
               {{ item.owner }}/{{ item.repo }}
             </button></template
           >
@@ -348,15 +313,13 @@
       </dialog>
       <dialog
         ref="diffDialog"
-        class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70"
-      >
+        class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="mb-3 flex items-center justify-between">
           <b>Commit diff</b
           ><button type="button" on-click="diffDialog.close()">×</button>
         </div>
         <pre
-          class="max-h-[65vh] overflow-auto rounded bg-[#0f172a] p-3 font-mono text-xs leading-5"
-        >
+          class="max-h-[65vh] overflow-auto rounded bg-[#0f172a] p-3 font-mono text-xs leading-5">
 {{ diffText }}</pre>
       </dialog>
 
