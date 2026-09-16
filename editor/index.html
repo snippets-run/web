@@ -19,6 +19,7 @@
       let shellWriter;
       let dirty = false;
       let ownedSnippets = [];
+      let currentUser = null;
 
       function markDirty() {
         dirty = true;
@@ -51,12 +52,61 @@
         updateSnippetOptions(owners[0] || "");
       }
 
+      function updateAuthControls() {
+        const link = document.querySelector("[data-auth-link]");
+        const create = document.querySelector("[data-create-cta]");
+        if (currentUser) {
+          link.textContent = "My Profile";
+          link.href = "/mine";
+          create.hidden = false;
+        } else {
+          link.textContent = "Sign In";
+          link.href = `https://registry.snippets.run/auth/login?return_to=${encodeURIComponent(location.href)}`;
+          create.hidden = true;
+        }
+      }
+
+      async function loadUser() {
+        const response = await fetch("https://registry.snippets.run/auth/me", { credentials: "include" });
+        currentUser = response.ok ? await response.json() : null;
+        updateAuthControls();
+      }
+
       async function loadOwnedSnippets() {
         const response = await fetch("https://registry.snippets.run/api/snippets/mine", { credentials: "include" });
         if (response.ok) {
           ownedSnippets = await response.json();
           updateOwnedOptions();
+          const params = new URLSearchParams(location.search);
+          if (params.get("owner") && params.get("repo")) {
+            document.querySelector("[data-namespace]").value = params.get("owner");
+            updateSnippetOptions(params.get("owner"));
+            document.querySelector("[data-snippet]").value = params.get("repo");
+          }
         }
+      }
+
+      async function createSnippet(event) {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const owner = form.get("owner").toString().trim();
+        const name = form.get("name").toString().trim();
+        const type = form.get("type").toString();
+        const response = await fetch(`https://registry.snippets.run/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        if (!response.ok) return;
+        document.querySelector("[data-create-dialog]").close();
+        const item = { owner, repo: `${name}.${type}`, type: type === "sh" ? "bash" : type === "js" ? "node" : "python" };
+        ownedSnippets = [...ownedSnippets.filter((existing) => `${existing.owner}/${existing.repo}` !== `${owner}/${item.repo}`), item];
+        updateOwnedOptions();
+        document.querySelector("[data-namespace]").value = owner;
+        updateSnippetOptions(owner);
+        document.querySelector("[data-snippet]").value = item.repo;
+        history.replaceState({}, "", `/editor?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(item.repo)}`);
       }
 
       function openQuickNavigation() {
@@ -103,10 +153,13 @@
         document.querySelectorAll("[data-editor-input]").forEach((input) => input.addEventListener("input", markDirty));
         window.addEventListener("beforeunload", (event) => { if (dirty) event.preventDefault(); });
         document.querySelector("[data-commit]")?.addEventListener("click", () => { dirty = false; });
+        document.querySelector("[data-create-cta]")?.addEventListener("click", () => document.querySelector("[data-create-dialog]").showModal());
+        document.querySelector("[data-create-form]")?.addEventListener("submit", createSnippet);
         document.querySelector("[data-namespace]").addEventListener("change", (event) => updateSnippetOptions(event.target.value));
         document.querySelector("[data-quick-input]").addEventListener("input", (event) => renderQuickNavigation(event.target.value));
         window.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); openQuickNavigation(); } });
         loadOwnedSnippets();
+        loadUser();
       });
     </script>
   </head>
@@ -117,10 +170,11 @@
         <div class="h-5 w-px bg-slate-700"></div>
         <div class="flex items-center gap-2 text-sm"><select data-namespace class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-300 outline-none"><option>Loading...</option></select><span class="text-slate-600">›</span><select data-snippet class="rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-white outline-none"><option>Loading...</option></select><button class="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white" type="button" onclick="document.querySelector('[data-quick-nav]').showModal()">⌘K</button></div>
       </div>
-      <div></div>
+      <div class="flex items-center gap-2"><button data-create-cta hidden class="rounded bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500" type="button">＋ New Snippet</button><a data-auth-link class="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 no-underline hover:border-slate-500 hover:text-white" href="#">Sign In</a></div>
     </header>
 
     <dialog data-quick-nav class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70"><form method="dialog"><input data-quick-input class="w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-3 font-mono text-sm outline-none focus:border-blue-500" placeholder="Switch to a snippet..." /></form><div data-quick-list class="mt-2 max-h-80 overflow-y-auto"></div></dialog>
+    <dialog data-create-dialog class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70"><form data-create-form><div class="mb-4 flex items-center justify-between"><h2 class="m-0 text-lg font-semibold text-white">New snippet</h2><button class="text-slate-400" type="button" onclick="this.closest('dialog').close()">×</button></div><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Namespace<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="owner" required /></label><label class="mb-3 block text-xs font-bold uppercase text-slate-400">Snippet name<input class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="name" required /></label><label class="block text-xs font-bold uppercase text-slate-400">Runtime<select class="mt-1 w-full rounded border border-slate-700 bg-[#0f172a] px-3 py-2 text-sm text-white outline-none focus:border-blue-500" name="type"><option value="sh">Shell</option><option value="js">Node.js</option><option value="py">Python</option></select></label><button class="mt-5 w-full rounded bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-500" type="submit">Create and load</button></form></dialog>
 
     <main class="flex min-h-0 flex-1 overflow-hidden">
       <aside class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
