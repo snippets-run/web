@@ -184,8 +184,7 @@
                       <span class="block truncate text-xs text-slate-300"
                         >{{ entry.message }}</span
                       ><span class="font-mono text-[10px] text-slate-500"
-                        >{{ entry.shortCommit }} · {{ entry.date.slice(0, 10)
-                        }}</span
+                        >{{ entry.shortCommit }} · {{ entry.displayDate }}</span
                       >
                     </button></template
                   >
@@ -380,7 +379,12 @@
           const quickDialog = templateRef("quickDialog");
           const files = computed(() => workspace.value.files);
           const inputs = computed(() => workspace.value.metadata.inputs);
-          const history = computed(() => workspace.value.history);
+          const history = computed(() =>
+            workspace.value.history.map((entry) => ({
+              ...entry,
+              displayDate: entry.date ? String(entry.date).slice(0, 10) : "",
+            })),
+          );
           const ownedInNamespace = computed(() =>
             owned.value.filter((item) => item.owner === owner.value),
           );
