@@ -232,7 +232,29 @@
           </section>
         </main>
       </template>
-      <template if="!user"
+      <template if="authLoading"
+        ><main
+          class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center">
+          <div class="max-w-md">
+            <img
+              class="mx-auto mb-8 size-24 brightness-0 invert opacity-80"
+              src="/assets/icon.svg"
+              alt="" />
+            <p
+              class="mb-4 font-mono text-xs font-bold tracking-[.18em] text-blue-400 uppercase">
+              Snippets.run editor
+            </p>
+            <h1
+              class="m-0 font-serif text-5xl leading-none tracking-[-.05em] text-white">
+              Welcome to your workspace.
+            </h1>
+            <p class="mt-6 leading-relaxed text-slate-400">
+              Checking your sign-in status...
+            </p>
+          </div>
+        </main></template
+      >
+      <template if="!user && !authLoading"
         ><main
           class="flex min-h-screen flex-1 items-center justify-center bg-[#0f172a] px-6 py-20 text-center">
           <div class="max-w-md">
@@ -384,6 +406,7 @@
         const registry = "https://registry.snippets.run";
         export default function app() {
           const user = ref(null);
+          const authLoading = ref(true);
           const namespaces = ref([]);
           const owned = ref([]);
           const owner = ref("");
@@ -628,6 +651,8 @@
               await loadWorkspace();
             } catch {
               user.value = null;
+            } finally {
+              authLoading.value = false;
             }
           }
           function loginHref() {
@@ -638,6 +663,7 @@
             activeContent,
             activeLanguage,
             activePath,
+            authLoading,
             addFile,
             addInput,
             commit,
