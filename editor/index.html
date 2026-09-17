@@ -262,6 +262,7 @@
 
       <dialog
         ref="createDialog"
+        on-click="closeOnBackdrop($event)"
         class="m-auto w-[min(30rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-5 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <form on-submit.prevent="createSnippet()">
           <div class="mb-4 flex items-center justify-between">
@@ -302,6 +303,7 @@
       </dialog>
       <dialog
         ref="quickDialog"
+        on-click="closeOnBackdrop($event)"
         class="m-auto w-[min(34rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-2 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="mb-2 flex items-center justify-between px-2">
           <b>Switch snippet</b
@@ -320,6 +322,7 @@
       </dialog>
       <dialog
         ref="helpDialog"
+        on-click="closeOnBackdrop($event)"
         class="m-auto w-[min(38rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-6 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="flex items-center justify-between">
           <h2 class="m-0 text-lg font-semibold text-white">Snippet inputs</h2>
@@ -364,6 +367,7 @@
       </dialog>
       <dialog
         ref="diffDialog"
+        on-click="closeOnBackdrop($event)"
         class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="mb-3 flex items-center justify-between">
           <b>Commit diff</b
@@ -581,6 +585,10 @@
           function openHelp() {
             helpDialog.value.showModal();
           }
+          function closeOnBackdrop(event) {
+            if (event.target === event.currentTarget)
+              event.currentTarget.close();
+          }
           function switchTo(item) {
             owner.value = item.owner;
             repo.value = item.repo;
@@ -634,6 +642,7 @@
             addInput,
             commit,
             committing,
+            closeOnBackdrop,
             createDialog,
             createSnippet,
             description,
