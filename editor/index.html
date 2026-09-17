@@ -209,6 +209,13 @@
               <span class="text-xs text-red-400">{{ error }}</span>
               <div class="flex gap-2">
                 <button
+                  class="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-slate-300"
+                  type="button"
+                  on-click="openHelp()"
+                  title="Input help">
+                  ?
+                </button>
+                <button
                   class="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-slate-300"
                   type="button"
                   on-click="revert()">
@@ -312,6 +319,50 @@
         </div>
       </dialog>
       <dialog
+        ref="helpDialog"
+        class="m-auto w-[min(38rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-6 text-slate-200 shadow-2xl backdrop:bg-black/70">
+        <div class="flex items-center justify-between">
+          <h2 class="m-0 text-lg font-semibold text-white">Snippet inputs</h2>
+          <button type="button" on-click="helpDialog.close()">×</button>
+        </div>
+        <div class="mt-5 space-y-4 text-sm leading-relaxed text-slate-300">
+          <p>
+            Input names become environment variables. A field named
+            <code
+              class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-blue-300"
+              >database_name</code
+            >
+            is available as
+            <code
+              class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-blue-300"
+              >INPUTS_DATABASE_NAME</code
+            >.
+          </p>
+          <p>
+            Names are normalized to uppercase. Values arrive as strings, so
+            parse numbers, booleans, or paths in your script when needed.
+          </p>
+          <div class="rounded border border-slate-700 bg-[#0f172a] p-3">
+            <p
+              class="m-0 mb-2 text-xs font-bold tracking-wider text-slate-500 uppercase">
+              CLI example
+            </p>
+            <code class="font-mono text-xs text-emerald-300"
+              >run acme/db-backup.sh --database_name=users_production
+              --dry_run=true</code
+            >
+            <p class="mt-3 mb-0 text-xs text-slate-400">
+              The script receives
+              <code class="font-mono text-blue-300"
+                >INPUTS_DATABASE_NAME=users_production</code
+              >
+              and
+              <code class="font-mono text-blue-300">INPUTS_DRY_RUN=true</code>.
+            </p>
+          </div>
+        </div>
+      </dialog>
+      <dialog
         ref="diffDialog"
         class="m-auto max-h-[80vh] w-[min(60rem,calc(100vw_-_2rem))] rounded-lg border border-slate-700 bg-[#151e2e] p-4 text-slate-200 shadow-2xl backdrop:bg-black/70">
         <div class="mb-3 flex items-center justify-between">
@@ -351,6 +402,7 @@
           const error = ref("");
           const createDialog = templateRef("createDialog");
           const quickDialog = templateRef("quickDialog");
+          const helpDialog = templateRef("helpDialog");
           const files = computed(() => workspace.value.files);
           const inputs = computed(() => workspace.value.metadata.inputs);
           const history = computed(() =>
@@ -526,6 +578,9 @@
           function openQuickNavigation() {
             quickDialog.value.showModal();
           }
+          function openHelp() {
+            helpDialog.value.showModal();
+          }
           function switchTo(item) {
             owner.value = item.owner;
             repo.value = item.repo;
@@ -589,6 +644,7 @@
             files,
             hasChanges,
             hasStagedFiles,
+            helpDialog,
             history,
             inputs,
             loadWorkspace,
@@ -602,6 +658,7 @@
             namespaces,
             openCreate,
             openQuickNavigation,
+            openHelp,
             owned,
             ownedInNamespace,
             owner,
