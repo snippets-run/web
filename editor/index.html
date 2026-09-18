@@ -18,24 +18,74 @@
     <script type="module">
       import "@li3/web";
     </script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        background:
+          radial-gradient(
+            circle at 58% 28%,
+            rgb(35 69 101 / 20%),
+            transparent 32rem
+          ),
+          #090d16;
+      }
+      header,
+      aside,
+      details,
+      .editor-actions {
+        border-color: #233246 !important;
+      }
+      header,
+      aside {
+        background: #0d1420 !important;
+      }
+      select,
+      input,
+      textarea {
+        border-color: #2b4058 !important;
+        background: #101b2a !important;
+      }
+      summary {
+        list-style: none;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      summary::before {
+        color: #6f8ca9;
+        content: "+";
+        font-family: ui-monospace, monospace;
+      }
+      details[open] > summary::before {
+        content: "-";
+      }
+      code-editor {
+        border: 1px solid #233246;
+        box-shadow:
+          0 0 0 1px rgb(0 0 0 / 35%),
+          0 18px 48px rgb(0 0 0 / 25%);
+      }
+    </style>
   </head>
   <body
     class="m-0 flex h-screen min-w-[60rem] flex-col overflow-hidden bg-[#0f172a] font-sans text-slate-300">
     <template app>
       <template if="user">
         <header
-          class="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-4">
+          class="flex h-20 shrink-0 items-center justify-between border-b border-slate-700 bg-[#151e2e] px-6">
           <div class="flex items-center gap-4">
             <a
-              class="inline-flex items-center gap-2 font-black tracking-[-.04em] text-white no-underline"
+              class="inline-flex items-center gap-3 font-mono text-xs font-black tracking-[.2em] text-[#c2ddec] uppercase no-underline"
               href="/"
               ><img
-                class="size-7 brightness-0 invert"
+                class="size-8 brightness-0 invert"
                 src="/assets/icon.svg"
                 alt="" />snippets.run</a
             >
-            <div class="h-5 w-px bg-slate-700"></div>
-            <div class="flex items-center gap-2 text-sm">
+            <div class="h-8 w-px bg-slate-700"></div>
+            <div class="flex items-center gap-2 font-mono text-xs">
               <select
                 bind-value="owner"
                 on-change="selectOwner()"
@@ -77,7 +127,7 @@
 
         <main class="flex min-h-0 flex-1 overflow-hidden">
           <aside
-            class="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
+            class="flex w-84 shrink-0 flex-col overflow-y-auto border-r border-slate-700 bg-[#151e2e]">
             <details class="border-b border-slate-700 p-4" open>
               <summary
                 class="flex cursor-pointer items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
@@ -187,7 +237,7 @@
             </div>
           </aside>
 
-          <section class="flex min-w-0 flex-1 flex-col bg-[#0f172a]">
+          <section class="flex min-w-0 flex-1 flex-col bg-[#090d16]">
             <div
               class="flex h-10 shrink-0 items-center border-b border-slate-700 bg-[#151e2e] px-2">
               <template for="file of files"
@@ -205,7 +255,7 @@
                 ＋
               </button>
             </div>
-            <div class="min-h-0 flex-1 overflow-auto p-2">
+            <div class="min-h-0 flex-1 overflow-auto p-5">
               <code-editor
                 class="block h-full rounded-lg overflow-hidden"
                 nostatus
@@ -215,7 +265,7 @@
                 on-change="markDirty($event)"></code-editor>
             </div>
             <div
-              class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-700 bg-[#151e2e] p-2">
+              class="editor-actions flex shrink-0 items-center justify-between gap-2 border-t border-slate-700 bg-[#151e2e] px-5 py-3">
               <span class="text-xs text-red-400">{{ error }}</span>
               <div class="flex gap-2">
                 <button
