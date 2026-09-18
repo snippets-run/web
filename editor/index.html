@@ -161,7 +161,7 @@
             <div class="flex-1 p-4">
               <details open>
                 <summary
-                  class="flex cursor-pointer items-center gap-2 text-sm font-semibold text-white">
+                  class="flex cursor-pointer items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
                   <lucide-icon icon="braces" size="15"></lucide-icon>Input
                   Variables
                 </summary>
@@ -288,8 +288,9 @@
                   type="button"
                   bind-disabled.bool="!hasStagedFiles || staging || committing"
                   on-click="commit()">
-                  <lucide-icon icon="save" size="15"></lucide-icon>{{ committing
-                  ? 'Committing...' : 'Commit' }}
+                  <lucide-icon icon="save" size="15"></lucide-icon
+                  ><span
+                    bind-innertext="committing ? 'Committing...' : 'Commit'"></span>
                 </button>
               </div>
             </div>
