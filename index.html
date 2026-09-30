@@ -1202,8 +1202,10 @@
               .split("/")
               .filter(Boolean)
               .map(decode);
-            if (parts.length === 0) page.value = "snippet";
-            else if (parts[0] === "s" && parts.length === 3) {
+            if (parts.length === 0) {
+              page.value = "snippet";
+              showSnippet("docker", "remove-dead-containers.sh");
+            } else if (parts[0] === "s" && parts.length === 3) {
               page.value = "snippet";
               showSnippet(parts[1], parts[2]);
             } else if (parts[0] === "edit" && parts.length === 3) {
@@ -1211,7 +1213,7 @@
               showEditor(parts[1], parts[2]);
             } else page.value = "snippet";
             window.scrollTo({ top: 0, behavior: "instant" });
-            document.title = `${parts.at(-1) || page.value} - snippets.run`;
+            document.title = `${parts.at(-1) || "Remove Dead Containers"} - snippets.run`;
           }
 
           function browseOwner(event) {
