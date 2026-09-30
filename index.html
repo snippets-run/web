@@ -11,6 +11,11 @@
     <link
       rel="component"
       href="https://sodium.static.apphor.de/code-editor.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet" />
     <script type="importmap">
       {
         "imports": {
@@ -32,7 +37,7 @@
           >{{ code }}</code
         >
         <button
-          class="shrink-0 cursor-pointer rounded-xs border-0 bg-[#d7f34a] px-3 py-2 text-[.68rem] font-black text-[#182019] uppercase"
+          class="shrink-0 cursor-pointer rounded-xs border-0 bg-[#a6e6f4] px-3 py-2 text-[.68rem] font-black text-[#092030] uppercase"
           type="button"
           on-click="copy()"
           attr-aria-label="label">
@@ -44,8 +49,11 @@
 
         export default function copyBox() {
           const code = defineProp("code", { default: "" });
+          const buttonText = defineProp("label", { default: "Copy" });
           const copied = ref(false);
-          const label = computed(() => (copied.value ? "Copied" : "Copy"));
+          const label = computed(() =>
+            copied.value ? "Copied" : buttonText.value,
+          );
 
           async function copy() {
             await navigator.clipboard.writeText(code.value);
@@ -58,8 +66,553 @@
       </script>
     </template>
 
+    <template component="snippet-details">
+      <article class="detail-page">
+        <div class="detail-container">
+          <div class="detail-breadcrumbs">
+            <span>{{ snippet.owner }}</span><span aria-hidden="true">/</span>
+            <span>{{ snippet.repo }}</span>
+          </div>
+
+          <header class="detail-hero">
+            <div>
+              <p class="detail-kicker">{{ snippet.type }} snippet</p>
+              <h1>{{ snippet.repo }}</h1>
+              <p class="detail-description">{{ description }}</p>
+            </div>
+          </header>
+
+          <div class="detail-command" aria-label="Run command">
+            <span class="detail-prompt" aria-hidden="true">$</span>
+            <copy-box
+              class="detail-command-copy"
+              bind-code="command"></copy-box>
+          </div>
+
+          <div class="detail-layout">
+            <section
+              class="detail-card detail-source"
+              aria-labelledby="source-title">
+              <div class="detail-card-header">
+                <div>
+                  <span class="detail-overline">Entrypoint</span>
+                  <h2 id="source-title">{{ snippet.entrypoint }}</h2>
+                </div>
+                <copy-box
+                  class="detail-code-copy"
+                  bind-code="script"
+                  label="Copy code"></copy-box>
+              </div>
+              <div
+                class="detail-code"
+                role="region"
+                aria-label="Snippet source code"
+                tabindex="0">
+                <div class="detail-line-numbers" aria-hidden="true">
+                  <template for="[line, index] of lines"
+                    ><span>{{ index + 1 }}</span></template
+                  >
+                </div>
+                <pre><code>{{ script }}</code></pre>
+              </div>
+            </section>
+
+            <aside class="detail-sidebar">
+              <section class="detail-card" aria-labelledby="metadata-title">
+                <div class="detail-card-body">
+                  <h2 class="detail-card-title" id="metadata-title">
+                    Snippet details
+                  </h2>
+                  <dl class="detail-metadata">
+                    <div>
+                      <dt>Owner</dt>
+                      <dd>{{ snippet.owner }}</dd>
+                    </div>
+                    <div>
+                      <dt>Runtime</dt>
+                      <dd>{{ snippet.type }}</dd>
+                    </div>
+                    <div>
+                      <dt>Entrypoint</dt>
+                      <dd>{{ snippet.entrypoint }}</dd>
+                    </div>
+                    <div>
+                      <dt>Latest commit</dt>
+                      <dd>{{ shortCommit }}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </section>
+
+              <section class="detail-card" aria-labelledby="inputs-title">
+                <div class="detail-card-body">
+                  <h2 class="detail-card-title" id="inputs-title">
+                    Required inputs
+                  </h2>
+                  <template if="inputs.length">
+                    <template for="input of inputs">
+                      <div class="detail-input-group">
+                        <label
+                          class="detail-input-label"
+                          attr-for="'snippet-input-' + input.name">
+                          <span>{{ input.name }}</span
+                          ><span class="detail-type">{{ input.type }}</span>
+                        </label>
+                        <template if="input.type === 'boolean'">
+                          <select
+                            class="detail-input"
+                            attr-id="'snippet-input-' + input.name"
+                            bind-value="inputValue(input.name)"
+                            on-change="updateInput(input.name, $event)">
+                            <option value="">Choose…</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                          </select>
+                        </template>
+                        <template if="input.type !== 'boolean'">
+                          <input
+                            class="detail-input"
+                            attr-id="'snippet-input-' + input.name"
+                            attr-type="input.type === 'number' ? 'number' : 'text'"
+                            bind-value="inputValue(input.name)"
+                            on-input="updateInput(input.name, $event)" />
+                        </template>
+                      </div>
+                    </template>
+                  </template>
+                  <template if="!inputs.length"
+                    ><p class="detail-empty">
+                      No inputs are declared for this snippet.
+                    </p></template
+                  >
+                </div>
+              </section>
+
+              <section class="detail-card" aria-labelledby="history-title">
+                <div class="detail-card-body">
+                  <h2 class="detail-card-title" id="history-title">
+                    Repository history
+                  </h2>
+                  <template if="history.length">
+                    <ol class="detail-timeline">
+                      <template for="commit of history">
+                        <li class="detail-timeline-item">
+                          <span
+                            class="detail-timeline-dot"
+                            aria-hidden="true"></span>
+                          <div>
+                            <p>{{ commit.message }}</p>
+                            <small>{{ commitMeta(commit) }}</small>
+                          </div>
+                        </li>
+                      </template>
+                    </ol>
+                  </template>
+                  <template if="!history.length"
+                    ><p class="detail-empty">
+                      {{ shortCommit }} is the current revision. History is not
+                      available from this snippet response.
+                    </p></template
+                  >
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </article>
+
+      <script setup>
+        import { computed, defineProp, ref } from "@li3/web";
+
+        export default function snippetDetails() {
+          const snippet = defineProp("snippet", { default: null });
+          const inputValues = ref({});
+          const script = computed(() => snippet.value?.script || "");
+          const lines = computed(() => script.value.split(/\r?\n/));
+          const inputs = computed(
+            () =>
+              snippet.value?.metadata?.inputs || snippet.value?.inputs || [],
+          );
+          const history = computed(
+            () => snippet.value?.history || snippet.value?.gitHistory || [],
+          );
+          const description = computed(
+            () =>
+              snippet.value?.metadata?.description ||
+              snippet.value?.description ||
+              "A version-controlled script, ready to run.",
+          );
+          const shortCommit = computed(
+            () => snippet.value?.commit?.slice(0, 12) || "—",
+          );
+          const command = computed(() => {
+            if (!snippet.value) return "";
+            const target = `run ${snippet.value.owner}/${snippet.value.repo}@${snippet.value.commit}`;
+            const args = inputs.value
+              .map((input) => {
+                const value =
+                  inputValues.value[input.name] ?? input.default ?? "";
+                return value === ""
+                  ? ""
+                  : ` --${input.name}='${String(value).replace(/'/g, "'\\''")}'`;
+              })
+              .filter(Boolean)
+              .join("");
+            return target + args;
+          });
+
+          function inputValue(name) {
+            return (
+              inputValues.value[name] ??
+              inputs.value.find((input) => input.name === name)?.default ??
+              ""
+            );
+          }
+
+          function commitLabel(commit) {
+            return commit.shortCommit || commit.commit.slice(0, 7);
+          }
+
+          function commitMeta(commit) {
+            return `${commitLabel(commit)} · ${commit.date}`;
+          }
+
+          function updateInput(name, event) {
+            inputValues.value[name] = event.currentTarget.value;
+          }
+
+          return {
+            command,
+            commitLabel,
+            commitMeta,
+            description,
+            history,
+            inputValue,
+            inputs,
+            lines,
+            script,
+            shortCommit,
+            snippet,
+            updateInput,
+          };
+        }
+      </script>
+
+      <style>
+        .detail-page {
+          min-height: calc(100vh - 5rem);
+          padding: 3rem 0 5rem;
+          background: #0d1420;
+          color: #e2e8f0;
+        }
+        .detail-container {
+          width: min(75rem, calc(100% - 3rem));
+          margin: 0 auto;
+        }
+        .detail-breadcrumbs {
+          display: flex;
+          gap: 0.55rem;
+          margin-bottom: 1rem;
+          color: #94a3b8;
+          font:
+            0.8rem "Fira Code",
+            monospace;
+        }
+        .detail-breadcrumbs span:first-child {
+          color: #a6e6f4;
+        }
+        .detail-hero {
+          padding: 1rem 0 2rem;
+          border-bottom: 1px solid #233246;
+        }
+        .detail-kicker,
+        .detail-overline {
+          margin: 0 0 0.6rem;
+          color: #94a3b8;
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .detail-hero h1 {
+          margin: 0;
+          color: #fff;
+          font-size: clamp(2rem, 5vw, 3rem);
+          line-height: 1.05;
+          overflow-wrap: anywhere;
+        }
+        .detail-description {
+          max-width: 52rem;
+          margin: 0.8rem 0 0;
+          color: #94a3b8;
+        }
+        .detail-command {
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          margin: 1.5rem 0 2rem;
+          padding: 0.5rem 0.75rem;
+          border: 1px solid #233246;
+          border-radius: 0.6rem;
+          background: #151e2e;
+          box-shadow: 0 4px 12px #0004;
+        }
+        .detail-prompt {
+          color: #94a3b8;
+          font-family: "Fira Code", monospace;
+        }
+        .detail-command-copy {
+          flex: 1;
+          min-width: 0;
+        }
+        .detail-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 7fr) minmax(17rem, 3fr);
+          gap: 1.5rem;
+          align-items: start;
+        }
+        .detail-sidebar {
+          display: grid;
+          gap: 1rem;
+        }
+        .detail-card {
+          overflow: hidden;
+          border: 1px solid #233246;
+          border-radius: 0.7rem;
+          background: #151e2e;
+        }
+        .detail-card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          padding: 1rem 1.25rem;
+          border-bottom: 1px solid #233246;
+          background: #101927;
+        }
+        .detail-card-header h2 {
+          margin: 0;
+          color: #e2e8f0;
+          font:
+            500 0.9rem "Fira Code",
+            monospace;
+        }
+        .detail-code-copy {
+          width: auto;
+        }
+        .detail-card-body {
+          padding: 1.2rem;
+        }
+        .detail-card-title {
+          margin: 0 0 1rem;
+          color: #fff;
+          font-size: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .detail-metadata {
+          display: grid;
+          gap: 0.9rem;
+          margin: 0;
+        }
+        .detail-metadata div {
+          display: flex;
+          justify-content: space-between;
+          gap: 0.7rem;
+        }
+        .detail-metadata dt {
+          color: #94a3b8;
+          font-size: 0.75rem;
+        }
+        .detail-metadata dd {
+          margin: 0;
+          color: #e2e8f0;
+          font:
+            0.75rem "Fira Code",
+            monospace;
+          text-align: right;
+          overflow-wrap: anywhere;
+        }
+        .detail-code {
+          display: flex;
+          max-height: 38rem;
+          overflow: auto;
+          padding: 1rem 0;
+          background: #0d1420;
+        }
+        .detail-line-numbers {
+          display: flex;
+          flex: 0 0 3rem;
+          flex-direction: column;
+          padding: 0 0.8rem;
+          border-right: 1px solid #233246;
+          color: #64748b;
+          font:
+            0.8rem/1.75 "Fira Code",
+            monospace;
+          text-align: right;
+          user-select: none;
+        }
+        .detail-code pre {
+          min-width: max-content;
+          margin: 0;
+          padding: 0 1rem;
+          color: #e2e8f0;
+          font:
+            0.8rem/1.75 "Fira Code",
+            monospace;
+        }
+        .detail-input-group + .detail-input-group {
+          margin-top: 1rem;
+        }
+        .detail-input-label {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.45rem;
+          color: #a6e6f4;
+          font:
+            0.75rem "Fira Code",
+            monospace;
+        }
+        .detail-type {
+          padding: 0.1rem 0.35rem;
+          border: 1px solid #233246;
+          border-radius: 0.25rem;
+          color: #94a3b8;
+          font-size: 0.65rem;
+        }
+        .detail-input {
+          width: 100%;
+          padding: 0.6rem 0.7rem;
+          border: 1px solid #233246;
+          border-radius: 0.35rem;
+          outline: none;
+          background: #0d1420;
+          color: #e2e8f0;
+          font:
+            0.8rem "Fira Code",
+            monospace;
+        }
+        .detail-input:focus {
+          border-color: #8bd6e9;
+        }
+        .detail-empty {
+          margin: 0;
+          color: #94a3b8;
+          font-size: 0.8rem;
+          line-height: 1.6;
+        }
+        .detail-timeline {
+          display: grid;
+          gap: 1rem;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        .detail-timeline-item {
+          display: grid;
+          grid-template-columns: 0.75rem 1fr;
+          gap: 0.75rem;
+        }
+        .detail-timeline-dot {
+          width: 0.7rem;
+          height: 0.7rem;
+          margin-top: 0.2rem;
+          border: 2px solid #151e2e;
+          border-radius: 50%;
+          background: #a6e6f4;
+          box-shadow: 0 0 0 1px #233246;
+        }
+        .detail-timeline-item p {
+          margin: 0 0 0.25rem;
+          color: #e2e8f0;
+          font-size: 0.8rem;
+        }
+        .detail-timeline-item small {
+          color: #94a3b8;
+          font:
+            0.68rem "Fira Code",
+            monospace;
+        }
+        .dark-navbar {
+          width: 100% !important;
+          max-width: none !important;
+          padding: 0 max(1.25rem, calc((100vw - 77.5rem) / 2));
+          border-color: #233246 !important;
+          background: #0d1420;
+          color: #e2e8f0;
+        }
+        .dark-navbar a {
+          color: inherit;
+        }
+        .dark-navbar img {
+          filter: brightness(0) invert(1);
+        }
+        .dark-navbar nav a:hover {
+          background: #151e2e;
+        }
+        .dark-navbar nav a[href="/editor"],
+        .dark-navbar nav a[href="/mine"] {
+          border-color: #24465b;
+          background: #0d1d2c;
+          color: #c3f3ff;
+        }
+        .dark-navbar nav a.detail-sign-in {
+          border: 1px solid #8bd6e9;
+          background: #a6e6f4;
+          color: #092030;
+        }
+        .dark-footer {
+          width: 100% !important;
+          max-width: none !important;
+          padding: 0 max(1.25rem, calc((100vw - 77.5rem) / 2));
+          border-color: #233246 !important;
+          background: #0d1420;
+          color: #94a3b8;
+        }
+        .dark-footer a {
+          color: #e2e8f0;
+        }
+        .dark-footer img {
+          filter: brightness(0) invert(1);
+        }
+        .detail-code-copy code {
+          display: none;
+        }
+        @media (max-width: 900px) {
+          .detail-layout {
+            grid-template-columns: 1fr;
+          }
+          .detail-container {
+            width: min(100% - 2rem, 75rem);
+          }
+        }
+        .detail-empty-state {
+          padding: 5rem 0;
+        }
+        .detail-empty-state h1 {
+          max-width: 42rem;
+          margin: 0 0 1.5rem;
+          color: #fff;
+          font-size: clamp(2rem, 5vw, 3rem);
+        }
+        .detail-empty-state a {
+          display: inline-block;
+          padding: 0.7rem 1rem;
+          border: 1px solid #8bd6e9;
+          border-radius: 0.4rem;
+          background: #a6e6f4;
+          color: #092030;
+          font-weight: 700;
+          text-decoration: none;
+        }
+      </style>
+    </template>
+
     <template app>
       <header
+        class-dark-navbar="page === 'snippet'"
         class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:h-[4.5rem] max-sm:w-[calc(100%_-_1.75rem)]">
         <a
           class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
@@ -95,6 +648,7 @@
           >
           <template if="!user"
             ><a
+              class-detail-sign-in="page === 'snippet'"
               class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline"
               bind-href="loginHref()"
               >Sign in</a
@@ -104,484 +658,31 @@
       </header>
 
       <main class="min-h-screen">
-        <template if="page === 'home'">
-          <section
-            class="mx-auto grid min-h-[calc(100vh-5rem)] w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-1 lg:grid-cols-[1.05fr_.95fr] items-center gap-[8vw] md:w-[calc(100%_-_1.75rem)] md:gap-16 lg:pb-20">
-            <div>
-              <h1
-                class="m-0 font-serif text-[clamp(3.6rem,7.7vw,7.2rem)] leading-[.88] font-medium tracking-[-.065em] max-md:text-[clamp(3.7rem,17vw,6rem)]">
-                Write it once.<br /><em
-                  class="relative z-0 font-medium not-italic after:absolute after:right-[-.08em] after:bottom-[.04em] after:left-[-.02em] after:-z-10 after:h-[.22em] after:-rotate-1 after:bg-[#d7f34a] after:content-['']"
-                  >Run it anywhere.</em
-                >
-              </h1>
-              <p
-                class="my-8 max-w-[38rem] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-relaxed text-[#434b44]">
-                Keep the scripts you trust under version control, then call them
-                from any machine with one memorable command.
-              </p>
-              <div class="flex flex-wrap gap-3">
-                <template if="user"
-                  ><a
-                    class="rounded-sm border border-[#182019] bg-[#d7f34a] px-5 py-3.5 font-extrabold text-[#182019] no-underline transition hover:-translate-0.5 hover:bg-[#182019] hover:text-white hover:shadow-[4px_4px_0_#182019]"
-                    href="/editor"
-                    >Publish a snippet</a
-                  ></template
-                >
-                <a
-                  class="rounded-sm border border-[#182019] px-5 py-3.5 font-extrabold no-underline transition hover:-translate-0.5 hover:shadow-[4px_4px_0_#182019]"
-                  href="/search?q=snippets"
-                  >Browse examples</a
-                >
-              </div>
-            </div>
-            <div
-              class="rotate-1 overflow-hidden rounded-lg border border-[#070a07] bg-[#1d241e] text-[#e9eee7] shadow-[18px_18px_0_#d7f34a] max-md:mr-3 max-md:shadow-[11px_11px_0_#d7f34a]"
-              aria-label="Command line example">
-              <div
-                class="flex h-11 items-center gap-2 border-b border-[#3e493f] px-4">
-                <span class="size-2 rounded-full bg-[#ff7146]"></span
-                ><span class="size-2 rounded-full bg-[#627064]"></span
-                ><span class="size-2 rounded-full bg-[#627064]"></span
-                ><b
-                  class="ml-auto font-mono text-[.68rem] font-medium text-[#929c93]"
-                  >~/anywhere</b
-                >
-              </div>
-              <div
-                class="min-h-64 overflow-auto px-8 py-9 font-mono text-[clamp(.76rem,1.4vw,1rem)] leading-8 max-md:min-h-52 max-md:px-5">
-                <p class="m-0 whitespace-nowrap">
-                  <i class="text-[#d7f34a] not-italic">$</i> curl -fsSL
-                  https://install.snippets.run | sh
-                </p>
-                <p class="m-0 whitespace-nowrap">
-                  <i class="text-[#d7f34a] not-italic">$</i> run
-                  snippets/hello.js
-                </p>
-                <p class="m-0 pl-5 whitespace-nowrap text-[#8f9a90]">
-                  Hello from snippets.run
-                </p>
-                <span
-                  class="mt-2 block h-4 w-2 animate-pulse bg-[#d7f34a]"></span>
-              </div>
-              <div
-                class="border-t border-[#3e493f] bg-[#293129] px-5 py-3 text-xs font-bold tracking-[.08em] text-[#bac3bb] uppercase">
-                Versioned. Portable. One command away.
-              </div>
-            </div>
-          </section>
-
-          <section
-            class="bg-[#182019] px-[max(1.25rem,calc((100vw-77.5rem)/2))] py-24 text-[#fffdf7] max-md:py-20"
-            aria-labelledby="principles-title">
-            <div
-              class="mb-16 grid grid-cols-[.6fr_1.4fr] gap-10 max-md:mb-12 max-md:grid-cols-1 max-md:gap-5">
-              <h2
-                class="m-0 max-w-3xl font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]"
-                id="principles-title">
-                Your scripts deserve a proper home.
-              </h2>
-            </div>
-            <div
-              class="grid grid-cols-3 border-t border-[#566057] max-md:grid-cols-1">
-              <article
-                class="py-9 pr-9 max-md:border-b max-md:border-[#566057] max-md:pr-0">
-                <b class="font-mono text-xs text-[#d7f34a]">01</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">
-                  Keep the source
-                </h3>
-                <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Every snippet is a Git repository. Review it, version it, and
-                  know exactly what will run.
-                </p>
-              </article>
-              <article
-                class="border-l border-[#566057] px-9 py-9 max-md:border-b max-md:border-l-0 max-md:px-0">
-                <b class="font-mono text-xs text-[#d7f34a]">02</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">
-                  Skip the setup
-                </h3>
-                <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Install the runner once. Use the same command on your laptop,
-                  a server, or a fresh environment.
-                </p>
-              </article>
-              <article
-                class="border-l border-[#566057] py-9 pl-9 max-md:border-b max-md:border-l-0 max-md:pl-0">
-                <b class="font-mono text-xs text-[#d7f34a]">03</b>
-                <h3
-                  class="mt-11 mb-3 font-serif text-3xl font-medium max-md:mt-6">
-                  Share the fix
-                </h3>
-                <p class="m-0 max-w-80 leading-relaxed text-[#b9c0ba]">
-                  Use owner-qualified names to make trusted utilities
-                  discoverable to your team and community.
-                </p>
-              </article>
-            </div>
-          </section>
-
-          <section
-            class="mx-auto grid w-[calc(100%_-_2.5rem)] max-w-[77.5rem] grid-cols-[.8fr_1.2fr] gap-[9vw] py-28 max-md:w-[calc(100%_-_1.75rem)] max-md:grid-cols-1 max-md:gap-12 max-md:py-20">
-            <div>
-              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                Two-minute setup
-              </p>
-              <h2
-                class="m-0 font-serif text-[clamp(2.4rem,5vw,5rem)] leading-none font-medium tracking-[-.045em]">
-                From zero to reusable.
-              </h2>
-            </div>
-            <ol class="m-0 list-none border-t border-[#182019] p-0">
-              <li
-                class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7">
-                <span
-                  class="grid size-9 place-items-center rounded-full border border-[#182019] bg-[#d7f34a] font-black"
-                  >1</span
-                >
-                <div>
-                  <h3 class="mt-2 mb-4 text-base font-bold">
-                    Install the runner
-                  </h3>
-                  <copy-box
-                    class="block"
-                    code="curl -fsSL https://install.snippets.run | sh"></copy-box>
-                </div>
-              </li>
-              <li
-                class="grid grid-cols-[3rem_1fr] gap-5 border-b border-[#c8c7bd] py-7">
-                <span
-                  class="grid size-9 place-items-center rounded-full border border-[#182019] bg-[#d7f34a] font-black"
-                  >2</span
-                >
-                <div>
-                  <h3 class="mt-2 mb-4 text-base font-bold">
-                    Run your first snippet
-                  </h3>
-                  <copy-box
-                    class="block"
-                    code="run snippets/hello.js"></copy-box>
-                </div>
-              </li>
-            </ol>
-          </section>
-        </template>
-
-        <template if="page === 'mine'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
-            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-              Your workspace
-            </p>
-            <h1
-              class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
-              My snippets.
-            </h1>
-            <template if="loading"
-              ><p class="mt-10 text-[#697069]">
-                Loading your snippets...
-              </p></template
-            >
-            <template if="error"
-              ><div class="mt-10 border border-[#ff7146] bg-[#fff4ee] p-4">
-                {{ error }}
-              </div></template
-            >
-            <template if="!loading && !error && mine.length === 0"
-              ><div class="mt-10 border border-[#c8c7bd] bg-[#fffdf7] p-5">
-                You have not published any snippets yet.
-              </div></template
-            >
-            <template if="!loading && !error && mine.length > 0">
-              <ul class="mt-14 list-none border-t border-[#182019] p-0">
-                <template for="item of mine"
-                  ><li class="border-b border-[#c8c7bd]">
-                    <a
-                      class="flex items-center justify-between gap-4 px-4 py-5 font-mono no-underline hover:bg-[#fffdf7]"
-                      bind-href="mineHref(item)"
-                      ><span
-                        ><small class="mr-3 text-xs text-[#697069]"
-                          >{{ item.owner }}</small
-                        >{{ item.repo }}</span
-                      ><span>&#8599;</span></a
-                    >
-                  </li></template
-                >
-              </ul>
-            </template>
-          </section>
-        </template>
-
-        <template if="page === 'create'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[65rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
-            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-              Publish
-            </p>
-            <h1
-              class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
-              Turn a repository<br />into a command.
-            </h1>
-            <p class="my-8 max-w-2xl text-xl leading-relaxed text-[#434b44]">
-              Create a private workspace first, then add and commit the files
-              that make your command useful.
-            </p>
-            <template if="!user">
-              <div
-                class="mt-14 max-w-2xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4">
-                <b class="text-lg">Sign in to create a snippet</b>
-                <p class="mt-2 mb-5 leading-relaxed text-[#697069]">
-                  Your editor workspace is private and requires an authenticated
-                  account.
-                </p>
-                <a
-                  class="inline-block rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline"
-                  bind-href="loginHref()"
-                  >Sign in with Auth</a
-                >
-              </div>
-            </template>
-            <template if="user">
-              <form
-                class="mt-14 max-w-3xl border border-[#182019] bg-[#fffdf7] p-6 shadow-[8px_8px_0_#d7f34a] max-md:p-4"
-                on-submit.prevent="createSnippet($event)">
-                <template if="createError"
-                  ><div
-                    class="mb-5 border border-[#ff7146] bg-[#fff4ee] p-3 text-sm">
-                    {{ createError }}
-                  </div></template
-                >
-                <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-                  <label
-                    class="block text-xs font-black tracking-[.1em] uppercase"
-                    >Owner<input
-                      class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
-                      name="owner"
-                      placeholder="your-name"
-                      required
-                  /></label>
-                  <label
-                    class="block text-xs font-black tracking-[.1em] uppercase"
-                    >Snippet name<input
-                      class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
-                      name="name"
-                      placeholder="greeting"
-                      required
-                  /></label>
-                </div>
-                <label
-                  class="mt-5 block text-xs font-black tracking-[.1em] uppercase"
-                  >Runtime<select
-                    class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
-                    name="type">
-                    <option value="sh">Shell (.sh)</option>
-                    <option value="js">Node.js (.js)</option>
-                    <option value="py">Python (.py)</option>
-                  </select></label
-                >
-                <label
-                  class="mt-5 block text-xs font-black tracking-[.1em] uppercase"
-                  >Change summary
-                  <span class="font-normal normal-case text-[#697069]"
-                    >optional</span
-                  ><input
-                    class="mt-2 block w-full border border-[#c8c7bd] bg-transparent px-3 py-3 text-sm font-normal tracking-normal normal-case outline-none focus:border-[#182019]"
-                    name="message"
-                    placeholder="Create greeting"
-                /></label>
-                <button
-                  class="mt-6 cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  type="submit">
-                  {{ creating ? 'Opening workspace...' : 'Open new workspace' }}
-                </button>
-              </form>
-            </template>
-          </section>
-        </template>
-
-        <template if="page === 'explore'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[59rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
-            <div>
-              <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                Registry browser
-              </p>
-              <h1
-                class="m-0 max-w-4xl font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
-                {{ registryTitle }}
-              </h1>
-              <p class="mt-6 text-lg text-[#697069]">
-                Look up an owner to inspect their public, runnable repositories.
-              </p>
-              <form
-                class="my-14 border border-[#182019] bg-[#fffdf7] p-5 shadow-[7px_7px_0_#182019] max-md:p-4 max-md:shadow-[5px_5px_0_#182019]"
-                on-submit.prevent="browseOwner($event)">
-                <label
-                  class="mb-2.5 block text-xs font-black tracking-[.1em] uppercase"
-                  for="owner"
-                  >Repository owner</label
-                >
-                <div class="flex">
-                  <input
-                    class="min-w-0 flex-1 border border-[#c8c7bd] bg-transparent px-3.5 py-3 outline-none focus:border-[#182019] focus:ring-1 focus:ring-[#182019]"
-                    id="owner"
-                    name="owner"
-                    bind-value="ownerQuery"
-                    placeholder='Try "snippets"'
-                    required /><button
-                    class="cursor-pointer border border-[#182019] bg-[#182019] px-6 font-extrabold text-white"
-                    type="submit">
-                    Browse
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <template if="loading"
-              ><div
-                class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5">
-                <span
-                  class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
-                <p class="m-0 text-[#697069]">Reading the registry...</p>
-              </div></template
-            >
-            <template if="error"
-              ><div class="border border-[#ff7146] bg-[#fffdf7] p-5">
-                <b>Request failed</b>
-                <p class="mt-2 mb-0 text-[#697069]">{{ error }}</p>
-              </div></template
-            >
-            <template if="!loading && !error && owner && snippets.length === 0"
-              ><div class="border border-[#c8c7bd] bg-[#fffdf7] p-5">
-                <b>No snippets yet</b>
-                <p class="mt-2 mb-0 text-[#697069]">
-                  This owner has no runnable repositories.
-                </p>
-              </div></template
-            >
-            <template if="!loading && snippets.length > 0">
-              <div
-                class="grid grid-cols-[1fr_6.25rem] px-4 pb-3 pl-20 text-[.68rem] font-black tracking-[.12em] text-[#697069] uppercase max-md:hidden">
-                <span>{{ resultCount }}</span><span>Runtime</span>
-              </div>
-              <ul class="m-0 list-none border-t border-[#182019] p-0">
-                <template for="item of snippets">
-                  <li class="border-b border-[#c8c7bd]">
-                    <a
-                      class="grid grid-cols-[3rem_1fr_6.25rem_1.5rem] items-center gap-4 px-4 py-5 no-underline transition-all hover:bg-[#fffdf7] hover:px-5 max-md:grid-cols-[2.75rem_1fr_1.5rem] max-md:gap-3 max-md:px-1"
-                      bind-href="snippetHref(item)">
-                      <span
-                        class="grid size-10 place-items-center rounded-full border border-[#182019] bg-[#d7f34a] font-mono text-xs font-black"
-                        attr-data-runtime="item.type"
-                        >{{ runtimeLabel(item.type) }}</span
-                      >
-                      <span class="flex min-w-0 flex-col gap-1"
-                        ><small class="text-xs text-[#697069]"
-                          >{{ item.owner }}</small
-                        ><strong
-                          class="overflow-hidden font-mono text-base text-ellipsis"
-                          >{{ item.repo }}</strong
-                        ></span
-                      >
-                      <span class="text-xs font-bold uppercase max-md:hidden"
-                        >{{ item.type }}</span
-                      ><span class="text-lg">&#8599;</span>
-                    </a>
-                  </li>
-                </template>
-              </ul>
-            </template>
-          </section>
-        </template>
-
         <template if="page === 'snippet'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[68.75rem] py-24 max-md:w-[calc(100%_-_1.75rem)] max-md:py-20">
-            <template if="loading"
-              ><div
-                class="flex items-center gap-3.5 border border-[#c8c7bd] bg-[#fffdf7] p-5">
-                <span
-                  class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
-                <p class="m-0 text-[#697069]">Fetching the source...</p>
-              </div></template
-            >
-            <template if="error"
-              ><div class="border border-[#ff7146] bg-[#fffdf7] p-5">
-                <b>Could not load this snippet</b>
-                <p class="mt-2 text-[#697069]">{{ error }}</p>
-                <a class="font-extrabold" bind-href="ownerHref()"
-                  >Back to owner</a
-                >
-              </div></template
-            >
-            <template if="!loading && snippet">
-              <a
-                class="mb-14 inline-block text-xs font-extrabold no-underline hover:underline"
-                bind-href="ownerHref()"
-                >&larr; All snippets by {{ snippet.owner }}</a
-              >
-              <div class="flex flex-col gap-9">
-                <div>
-                  <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-                    {{ snippet.type }} snippet
-                  </p>
-                  <h1
-                    class="m-0 max-w-3xl [overflow-wrap:anywhere] font-serif text-[clamp(2.7rem,6vw,5.4rem)] leading-[.92] font-medium tracking-[-.05em]">
-                    {{ snippet.owner }}<i class="text-[#ff7146] not-italic">/</i
-                    >{{ snippet.repo }}
-                  </h1>
+          <section class="detail-page detail-state">
+            <div class="detail-container">
+              <template if="loading">
+                <p class="detail-empty" role="status">
+                  Fetching snippet source…
+                </p>
+              </template>
+              <template if="error">
+                <div class="detail-card detail-card-body" role="alert">
+                  <b>Could not load this snippet</b>
+                  <p class="detail-empty">{{ error }}</p>
                 </div>
-                <copy-box
-                  class="block w-full max-w-md self-end max-md:self-stretch"
-                  bind-code="runCommand"></copy-box>
-              </div>
-              <dl
-                class="my-14 grid grid-cols-3 border border-[#c8c7bd] max-md:grid-cols-1">
-                <div class="min-w-0 p-5">
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">
-                    Runtime
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
-                    {{ snippet.type }}
-                  </dd>
+              </template>
+              <template if="!loading && snippet">
+                <snippet-details bind-snippet="snippet"></snippet-details>
+              </template>
+              <template if="!loading && !error && !snippet">
+                <div class="detail-empty-state">
+                  <p class="detail-kicker">Snippet details</p>
+                  <h1>Open a snippet to inspect its source.</h1>
+                  <a href="/search">Browse snippets</a>
                 </div>
-                <div
-                  class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0">
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">
-                    Entrypoint
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
-                    {{ snippet.entrypoint }}
-                  </dd>
-                </div>
-                <div
-                  class="min-w-0 border-l border-[#c8c7bd] p-5 max-md:border-t max-md:border-l-0">
-                  <dt
-                    class="mb-2 text-[.65rem] font-black tracking-[.12em] text-[#697069] uppercase">
-                    Commit
-                  </dt>
-                  <dd
-                    class="m-0 overflow-hidden font-mono text-sm font-semibold text-ellipsis whitespace-nowrap">
-                    {{ shortCommit }}
-                  </dd>
-                </div>
-              </dl>
-              <div
-                class="overflow-hidden rounded-sm border border-[#080b08] bg-[#1a211b] text-[#e7ede6] shadow-[8px_8px_0_#d7f34a]">
-                <div
-                  class="flex justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-[.68rem] font-semibold text-[#9ca79d] uppercase">
-                  <span>{{ snippet.entrypoint }}</span><span>read only</span>
-                </div>
-                <pre
-                  class="m-0 max-h-[37.5rem] overflow-auto p-6 font-mono text-[.8rem] leading-7"><code>{{ snippet.script }}</code></pre>
-              </div>
-            </template>
+              </template>
+            </div>
           </section>
         </template>
 
@@ -754,27 +855,10 @@
             </template>
           </section>
         </template>
-
-        <template if="page === 'not-found'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[56rem] py-36 text-center">
-            <p class="mb-5 text-xs font-black tracking-[.15em] uppercase">
-              404
-            </p>
-            <h1
-              class="mb-12 font-serif text-[clamp(3.3rem,7vw,6.3rem)] leading-[.88] font-medium tracking-[-.065em]">
-              That command went nowhere.
-            </h1>
-            <a
-              class="rounded-sm border border-[#182019] bg-[#182019] px-5 py-3.5 font-extrabold text-white no-underline"
-              href="/"
-              >Return home</a
-            >
-          </section>
-        </template>
       </main>
 
       <footer
+        class-dark-footer="page === 'snippet'"
         class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
         <a
           class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
@@ -802,7 +886,7 @@
         const registry = "https://registry.snippets.run";
 
         export default function app() {
-          const page = ref("home");
+          const page = ref("snippet");
           const user = ref(null);
           const owner = ref("");
           const ownerQuery = ref("");
@@ -1118,32 +1202,16 @@
               .split("/")
               .filter(Boolean)
               .map(decode);
-            if (parts.length === 0) page.value = "home";
-            else if (parts[0] === "create" && parts.length === 1)
-              page.value = "create";
-            else if (parts[0] === "explore" && parts.length === 1) {
-              page.value = "explore";
-              owner.value = "";
-              ownerQuery.value = "";
-              snippets.value = [];
-            } else if (parts[0] === "mine" && parts.length === 1) {
-              page.value = "mine";
-              showMine();
-            } else if (parts[0] === "s" && parts.length === 2) {
-              page.value = "explore";
-              showOwner(parts[1]);
-            } else if (parts[0] === "s" && parts.length === 3) {
+            if (parts.length === 0) page.value = "snippet";
+            else if (parts[0] === "s" && parts.length === 3) {
               page.value = "snippet";
               showSnippet(parts[1], parts[2]);
             } else if (parts[0] === "edit" && parts.length === 3) {
               page.value = "editor";
               showEditor(parts[1], parts[2]);
-            } else page.value = "not-found";
+            } else page.value = "snippet";
             window.scrollTo({ top: 0, behavior: "instant" });
-            document.title =
-              page.value === "home"
-                ? "snippets.run"
-                : `${parts.at(-1) || page.value} - snippets.run`;
+            document.title = `${parts.at(-1) || page.value} - snippets.run`;
           }
 
           function browseOwner(event) {
