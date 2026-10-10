@@ -1,16 +1,15 @@
 # snippets.run web
 
-The browser interface is a build-free [Lithium](https://li3.dev/) application. Its components, routing,
-application state, and Tailwind CSS utility classes are declared in `index.html`.
+The public snippet page is a small [Lithium](https://li3.dev/) view. The server loads snippet data from the
+registry and embeds it in the HTML response as JSON for immediate rendering. The existing editor is served at
+`/editor`.
 
-Serve this directory with any static HTTP server. There is no install or build command:
+Run the built-in server from this directory (Node 20+):
 
 ```bash
-npx serve .
+node server.mjs
 ```
 
-The browser loads Lithium from `cdn.li3.dev`, Tailwind's browser runtime from jsDelivr, Sodium's Lithium
-`code-editor` component for syntax-highlighted editing, and snippets from `registry.snippets.run`. The editor is
-The landing page is served at `/`, the public registry search at `/search`, the new editor shell at `/editor`, and the
-account snippet list at `/mine`. Sign-in is handled by the registry's OIDC flow; the browser never receives the OIDC
-client secret.
+The server uses Node's built-in HTTP and fetch APIs. `/` displays the featured snippet and `/s/:owner/:repo`
+displays a requested public snippet. `/editor` remains the separate authenticated editor. Sign-in is handled by the
+registry's OIDC flow; the browser never receives the OIDC client secret.

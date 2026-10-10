@@ -1,1298 +1,304 @@
 <!doctype html>
-<html lang="en" class="bg-[#f3f0e7] text-[#182019]">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Keep useful scripts in one place and run them from any machine." />
-    <title>snippets.run</title>
-    <link rel="icon" href="./assets/icon.svg" />
-    <link
-      rel="component"
-      href="https://sodium.static.apphor.de/code-editor.html" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet" />
+      content="A fast, read-only view of a runnable snippet." />
+    <title>Snippet · snippets.run</title>
+    <link rel="icon" href="/assets/icon.svg" />
     <script type="importmap">
-      {
-        "imports": {
-          "@li3/": "https://at-li3.static.apphor.de/",
-          "@sodium/": "https://sodium.static.apphor.de/"
-        }
-      }
+      { "imports": { "@li3/": "https://at-li3.static.apphor.de/" } }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script type="module">
       import "@li3/web";
     </script>
-  </head>
-  <body class="m-0 min-w-80 bg-[#f3f0e7] font-sans antialiased">
-    <template component="copy-box">
-      <div
-        class="flex w-full min-w-0 items-center justify-between gap-4 rounded-sm border border-[#090d09] bg-[#242c25] py-1.5 pr-1.5 pl-4 text-[#edf2eb]">
-        <code class="overflow-auto whitespace-nowrap font-mono text-xs"
-          >{{ code }}</code
-        >
-        <button
-          class="shrink-0 cursor-pointer rounded-xs border-0 bg-[#a6e6f4] px-3 py-2 text-[.68rem] font-black text-[#092030] uppercase"
-          type="button"
-          on-click="copy()"
-          attr-aria-label="label">
-          <span>{{ label }}</span>
-        </button>
-      </div>
-      <script setup>
-        import { computed, defineProp, ref } from "@li3/web";
-
-        export default function copyBox() {
-          const code = defineProp("code", { default: "" });
-          const buttonText = defineProp("label", { default: "Copy" });
-          const copied = ref(false);
-          const label = computed(() =>
-            copied.value ? "Copied" : buttonText.value,
-          );
-
-          async function copy() {
-            await navigator.clipboard.writeText(code.value);
-            copied.value = true;
-            setTimeout(() => (copied.value = false), 1800);
-          }
-
-          return { code, copy, label };
-        }
-      </script>
-    </template>
-
-    <template component="snippet-details">
-      <article class="detail-page">
-        <div class="detail-container">
-          <div class="detail-breadcrumbs">
-            <span>{{ snippet.owner }}</span><span aria-hidden="true">/</span>
-            <span>{{ snippet.repo }}</span>
-          </div>
-
-          <header class="detail-hero">
-            <div>
-              <p class="detail-kicker">{{ snippet.type }} snippet</p>
-              <h1>{{ snippet.repo }}</h1>
-              <p class="detail-description">{{ description }}</p>
-            </div>
-          </header>
-
-          <div class="detail-command" aria-label="Run command">
-            <span class="detail-prompt" aria-hidden="true">$</span>
-            <copy-box
-              class="detail-command-copy"
-              bind-code="command"></copy-box>
-          </div>
-
-          <div class="detail-layout">
-            <section
-              class="detail-card detail-source"
-              aria-labelledby="source-title">
-              <div class="detail-card-header">
-                <div>
-                  <span class="detail-overline">Entrypoint</span>
-                  <h2 id="source-title">{{ snippet.entrypoint }}</h2>
-                </div>
-                <copy-box
-                  class="detail-code-copy"
-                  bind-code="script"
-                  label="Copy code"></copy-box>
-              </div>
-              <div
-                class="detail-code"
-                role="region"
-                aria-label="Snippet source code"
-                tabindex="0">
-                <div class="detail-line-numbers" aria-hidden="true">
-                  <template for="[line, index] of lines"
-                    ><span>{{ index + 1 }}</span></template
-                  >
-                </div>
-                <pre><code>{{ script }}</code></pre>
-              </div>
-            </section>
-
-            <aside class="detail-sidebar">
-              <section class="detail-card" aria-labelledby="metadata-title">
-                <div class="detail-card-body">
-                  <h2 class="detail-card-title" id="metadata-title">
-                    Snippet details
-                  </h2>
-                  <dl class="detail-metadata">
-                    <div>
-                      <dt>Owner</dt>
-                      <dd>{{ snippet.owner }}</dd>
-                    </div>
-                    <div>
-                      <dt>Runtime</dt>
-                      <dd>{{ snippet.type }}</dd>
-                    </div>
-                    <div>
-                      <dt>Entrypoint</dt>
-                      <dd>{{ snippet.entrypoint }}</dd>
-                    </div>
-                    <div>
-                      <dt>Latest commit</dt>
-                      <dd>{{ shortCommit }}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </section>
-
-              <section class="detail-card" aria-labelledby="inputs-title">
-                <div class="detail-card-body">
-                  <h2 class="detail-card-title" id="inputs-title">
-                    Required inputs
-                  </h2>
-                  <template if="inputs.length">
-                    <template for="input of inputs">
-                      <div class="detail-input-group">
-                        <label
-                          class="detail-input-label"
-                          attr-for="'snippet-input-' + input.name">
-                          <span>{{ input.name }}</span
-                          ><span class="detail-type">{{ input.type }}</span>
-                        </label>
-                        <template if="input.type === 'boolean'">
-                          <select
-                            class="detail-input"
-                            attr-id="'snippet-input-' + input.name"
-                            bind-value="inputValue(input.name)"
-                            on-change="updateInput(input.name, $event)">
-                            <option value="">Choose…</option>
-                            <option value="true">true</option>
-                            <option value="false">false</option>
-                          </select>
-                        </template>
-                        <template if="input.type !== 'boolean'">
-                          <input
-                            class="detail-input"
-                            attr-id="'snippet-input-' + input.name"
-                            attr-type="input.type === 'number' ? 'number' : 'text'"
-                            bind-value="inputValue(input.name)"
-                            on-input="updateInput(input.name, $event)" />
-                        </template>
-                      </div>
-                    </template>
-                  </template>
-                  <template if="!inputs.length"
-                    ><p class="detail-empty">
-                      No inputs are declared for this snippet.
-                    </p></template
-                  >
-                </div>
-              </section>
-
-              <section class="detail-card" aria-labelledby="history-title">
-                <div class="detail-card-body">
-                  <h2 class="detail-card-title" id="history-title">
-                    Repository history
-                  </h2>
-                  <template if="history.length">
-                    <ol class="detail-timeline">
-                      <template for="commit of history">
-                        <li class="detail-timeline-item">
-                          <span
-                            class="detail-timeline-dot"
-                            aria-hidden="true"></span>
-                          <div>
-                            <p>{{ commit.message }}</p>
-                            <small>{{ commitMeta(commit) }}</small>
-                          </div>
-                        </li>
-                      </template>
-                    </ol>
-                  </template>
-                  <template if="!history.length"
-                    ><p class="detail-empty">
-                      {{ shortCommit }} is the current revision. History is not
-                      available from this snippet response.
-                    </p></template
-                  >
-                </div>
-              </section>
-            </aside>
-          </div>
-        </div>
-      </article>
-
-      <script setup>
-        import { computed, defineProp, ref } from "@li3/web";
-
-        export default function snippetDetails() {
-          const snippet = defineProp("snippet", { default: null });
-          const inputValues = ref({});
-          const script = computed(() => snippet.value?.script || "");
-          const lines = computed(() => script.value.split(/\r?\n/));
-          const inputs = computed(
-            () =>
-              snippet.value?.metadata?.inputs || snippet.value?.inputs || [],
-          );
-          const history = computed(
-            () => snippet.value?.history || snippet.value?.gitHistory || [],
-          );
-          const description = computed(
-            () =>
-              snippet.value?.metadata?.description ||
-              snippet.value?.description ||
-              "A version-controlled script, ready to run.",
-          );
-          const shortCommit = computed(
-            () => snippet.value?.commit?.slice(0, 12) || "—",
-          );
-          const command = computed(() => {
-            if (!snippet.value) return "";
-            const target = `run ${snippet.value.owner}/${snippet.value.repo}@${snippet.value.commit}`;
-            const args = inputs.value
-              .map((input) => {
-                const value =
-                  inputValues.value[input.name] ?? input.default ?? "";
-                return value === ""
-                  ? ""
-                  : ` --${input.name}='${String(value).replace(/'/g, "'\\''")}'`;
-              })
-              .filter(Boolean)
-              .join("");
-            return target + args;
-          });
-
-          function inputValue(name) {
-            return (
-              inputValues.value[name] ??
-              inputs.value.find((input) => input.name === name)?.default ??
-              ""
-            );
-          }
-
-          function commitLabel(commit) {
-            return commit.shortCommit || commit.commit.slice(0, 7);
-          }
-
-          function commitMeta(commit) {
-            return `${commitLabel(commit)} · ${commit.date}`;
-          }
-
-          function updateInput(name, event) {
-            inputValues.value[name] = event.currentTarget.value;
-          }
-
-          return {
-            command,
-            commitLabel,
-            commitMeta,
-            description,
-            history,
-            inputValue,
-            inputs,
-            lines,
-            script,
-            shortCommit,
-            snippet,
-            updateInput,
-          };
-        }
-      </script>
-
-      <style>
-        .detail-page {
-          min-height: calc(100vh - 5rem);
-          padding: 3rem 0 5rem;
-          background: #0d1420;
-          color: #e2e8f0;
-        }
-        .detail-container {
-          width: min(75rem, calc(100% - 3rem));
-          margin: 0 auto;
-        }
-        .detail-breadcrumbs {
-          display: flex;
-          gap: 0.55rem;
-          margin-bottom: 1rem;
-          color: #94a3b8;
-          font:
-            0.8rem "Fira Code",
-            monospace;
-        }
-        .detail-breadcrumbs span:first-child {
-          color: #a6e6f4;
-        }
-        .detail-hero {
-          padding: 1rem 0 2rem;
-          border-bottom: 1px solid #233246;
-        }
-        .detail-kicker,
-        .detail-overline {
-          margin: 0 0 0.6rem;
-          color: #94a3b8;
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-        .detail-hero h1 {
-          margin: 0;
-          color: #fff;
-          font-size: clamp(2rem, 5vw, 3rem);
-          line-height: 1.05;
-          overflow-wrap: anywhere;
-        }
-        .detail-description {
-          max-width: 52rem;
-          margin: 0.8rem 0 0;
-          color: #94a3b8;
-        }
-        .detail-command {
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          margin: 1.5rem 0 2rem;
-          padding: 0.5rem 0.75rem;
-          border: 1px solid #233246;
-          border-radius: 0.6rem;
-          background: #151e2e;
-          box-shadow: 0 4px 12px #0004;
-        }
-        .detail-prompt {
-          color: #94a3b8;
-          font-family: "Fira Code", monospace;
-        }
-        .detail-command-copy {
-          flex: 1;
-          min-width: 0;
-        }
-        .detail-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 7fr) minmax(17rem, 3fr);
-          gap: 1.5rem;
-          align-items: start;
-        }
-        .detail-sidebar {
-          display: grid;
-          gap: 1rem;
-        }
-        .detail-card {
-          overflow: hidden;
-          border: 1px solid #233246;
-          border-radius: 0.7rem;
-          background: #151e2e;
-        }
-        .detail-card-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          padding: 1rem 1.25rem;
-          border-bottom: 1px solid #233246;
-          background: #101927;
-        }
-        .detail-card-header h2 {
-          margin: 0;
-          color: #e2e8f0;
-          font:
-            500 0.9rem "Fira Code",
-            monospace;
-        }
-        .detail-code-copy {
-          width: auto;
-        }
-        .detail-card-body {
-          padding: 1.2rem;
-        }
-        .detail-card-title {
-          margin: 0 0 1rem;
-          color: #fff;
-          font-size: 0.8rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-        .detail-metadata {
-          display: grid;
-          gap: 0.9rem;
-          margin: 0;
-        }
-        .detail-metadata div {
-          display: flex;
-          justify-content: space-between;
-          gap: 0.7rem;
-        }
-        .detail-metadata dt {
-          color: #94a3b8;
-          font-size: 0.75rem;
-        }
-        .detail-metadata dd {
-          margin: 0;
-          color: #e2e8f0;
-          font:
-            0.75rem "Fira Code",
-            monospace;
-          text-align: right;
-          overflow-wrap: anywhere;
-        }
-        .detail-code {
-          display: flex;
-          max-height: 38rem;
-          overflow: auto;
-          padding: 1rem 0;
-          background: #0d1420;
-        }
-        .detail-line-numbers {
-          display: flex;
-          flex: 0 0 3rem;
-          flex-direction: column;
-          padding: 0 0.8rem;
-          border-right: 1px solid #233246;
-          color: #64748b;
-          font:
-            0.8rem/1.75 "Fira Code",
-            monospace;
-          text-align: right;
-          user-select: none;
-        }
-        .detail-code pre {
-          min-width: max-content;
-          margin: 0;
-          padding: 0 1rem;
-          color: #e2e8f0;
-          font:
-            0.8rem/1.75 "Fira Code",
-            monospace;
-        }
-        .detail-input-group + .detail-input-group {
-          margin-top: 1rem;
-        }
-        .detail-input-label {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 0.45rem;
-          color: #a6e6f4;
-          font:
-            0.75rem "Fira Code",
-            monospace;
-        }
-        .detail-type {
-          padding: 0.1rem 0.35rem;
-          border: 1px solid #233246;
-          border-radius: 0.25rem;
-          color: #94a3b8;
-          font-size: 0.65rem;
-        }
-        .detail-input {
-          width: 100%;
-          padding: 0.6rem 0.7rem;
-          border: 1px solid #233246;
-          border-radius: 0.35rem;
-          outline: none;
-          background: #0d1420;
-          color: #e2e8f0;
-          font:
-            0.8rem "Fira Code",
-            monospace;
-        }
-        .detail-input:focus {
-          border-color: #8bd6e9;
-        }
-        .detail-empty {
-          margin: 0;
-          color: #94a3b8;
-          font-size: 0.8rem;
-          line-height: 1.6;
-        }
-        .detail-timeline {
-          display: grid;
-          gap: 1rem;
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-        .detail-timeline-item {
-          display: grid;
-          grid-template-columns: 0.75rem 1fr;
-          gap: 0.75rem;
-        }
-        .detail-timeline-dot {
-          width: 0.7rem;
-          height: 0.7rem;
-          margin-top: 0.2rem;
-          border: 2px solid #151e2e;
-          border-radius: 50%;
-          background: #a6e6f4;
-          box-shadow: 0 0 0 1px #233246;
-        }
-        .detail-timeline-item p {
-          margin: 0 0 0.25rem;
-          color: #e2e8f0;
-          font-size: 0.8rem;
-        }
-        .detail-timeline-item small {
-          color: #94a3b8;
-          font:
-            0.68rem "Fira Code",
-            monospace;
-        }
-        .dark-navbar {
-          width: 100% !important;
-          max-width: none !important;
-          padding: 0 max(1.25rem, calc((100vw - 77.5rem) / 2));
-          border-color: #233246 !important;
-          background: #0d1420;
-          color: #e2e8f0;
-        }
-        .dark-navbar a {
-          color: inherit;
-        }
-        .dark-navbar img {
-          filter: brightness(0) invert(1);
-        }
-        .dark-navbar nav a:hover {
-          background: #151e2e;
-        }
-        .dark-navbar nav a[href="/editor"],
-        .dark-navbar nav a[href="/mine"] {
-          border-color: #24465b;
-          background: #0d1d2c;
-          color: #c3f3ff;
-        }
-        .dark-navbar nav a.detail-sign-in {
-          border: 1px solid #8bd6e9;
-          background: #a6e6f4;
-          color: #092030;
-        }
-        .dark-footer {
-          width: 100% !important;
-          max-width: none !important;
-          padding: 0 max(1.25rem, calc((100vw - 77.5rem) / 2));
-          border-color: #233246 !important;
-          background: #0d1420;
-          color: #94a3b8;
-        }
-        .dark-footer a {
-          color: #e2e8f0;
-        }
-        .dark-footer img {
-          filter: brightness(0) invert(1);
-        }
-        .detail-code-copy code {
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background: #0d1420;
+        color: #e2e8f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        min-width: 20rem;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .topbar {
+        display: flex;
+        min-height: 4.5rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem max(1rem, calc((100vw - 76rem) / 2));
+        border-bottom: 1px solid #233246;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        color: #e2e8f0;
+        font:
+          700 0.8rem ui-monospace,
+          monospace;
+        letter-spacing: 0.12em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+      .brand img {
+        width: 2rem;
+        height: 2rem;
+        filter: brightness(0) invert(1);
+      }
+      .account {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+      }
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+        padding: 0.4rem 0.7rem;
+        border: 1px solid #233246;
+        border-radius: 0.55rem;
+        background: #151e2e;
+      }
+      .avatar {
+        display: grid;
+        width: 2rem;
+        height: 2rem;
+        flex: 0 0 auto;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 50%;
+        background: #24465b;
+        color: #c3f3ff;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .identity {
+        min-width: 0;
+      }
+      .identity strong,
+      .identity small {
+        display: block;
+        overflow: hidden;
+        max-width: 14rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .identity strong {
+        color: #e2e8f0;
+        font-size: 0.75rem;
+      }
+      .identity small {
+        margin-top: 0.15rem;
+        color: #94a3b8;
+        font-size: 0.68rem;
+      }
+      .auth-link {
+        padding: 0.62rem 0.9rem;
+        border: 1px solid #8bd6e9;
+        border-radius: 0.4rem;
+        background: #a6e6f4;
+        color: #092030;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      main {
+        width: min(76rem, calc(100% - 2rem));
+        margin: 2rem auto 4rem;
+      }
+      .breadcrumbs {
+        margin: 0 0 0.8rem;
+        color: #94a3b8;
+        font:
+          0.75rem ui-monospace,
+          monospace;
+      }
+      .breadcrumbs span {
+        color: #a6e6f4;
+      }
+      h1 {
+        margin: 0;
+        color: #fff;
+        font-size: clamp(1.6rem, 4vw, 2.3rem);
+        line-height: 1.1;
+        overflow-wrap: anywhere;
+      }
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.2rem;
+        margin: 0.85rem 0 1.25rem;
+        color: #94a3b8;
+        font:
+          0.72rem ui-monospace,
+          monospace;
+      }
+      .source {
+        overflow: auto;
+        max-height: calc(100vh - 14rem);
+        min-height: 10rem;
+        margin: 0;
+        padding: 1rem 1.1rem;
+        border: 1px solid #233246;
+        border-radius: 0.6rem;
+        background: #101927;
+        color: #e2e8f0;
+        font:
+          0.8rem/1.7 ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+        tab-size: 2;
+      }
+      .message {
+        padding: 1rem;
+        border: 1px solid #233246;
+        border-radius: 0.5rem;
+        color: #94a3b8;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 36rem) {
+        .identity small {
           display: none;
         }
-        @media (max-width: 900px) {
-          .detail-layout {
-            grid-template-columns: 1fr;
-          }
-          .detail-container {
-            width: min(100% - 2rem, 75rem);
-          }
+        .identity strong {
+          max-width: 8rem;
         }
-        .detail-empty-state {
-          padding: 5rem 0;
+        main {
+          margin-top: 1.5rem;
         }
-        .detail-empty-state h1 {
-          max-width: 42rem;
-          margin: 0 0 1.5rem;
-          color: #fff;
-          font-size: clamp(2rem, 5vw, 3rem);
+        .source {
+          max-height: none;
         }
-        .detail-empty-state a {
-          display: inline-block;
-          padding: 0.7rem 1rem;
-          border: 1px solid #8bd6e9;
-          border-radius: 0.4rem;
-          background: #a6e6f4;
-          color: #092030;
-          font-weight: 700;
-          text-decoration: none;
-        }
-      </style>
-    </template>
-
+      }
+    </style>
+  </head>
+  <body>
+    <script state type="application/json" id="snippet-state">
+      __SNIPPET_STATE__
+    </script>
     <template app>
-      <header
-        class-dark-navbar="page === 'snippet'"
-        class="mx-auto flex h-20 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-b border-[#c8c7bd] max-sm:h-[4.5rem] max-sm:w-[calc(100%_-_1.75rem)]">
-        <a
-          class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
-          href="/"
-          aria-label="snippets.run home">
-          <img class="size-9 max-sm:size-8" src="./assets/icon.svg" alt="" />
-          <span class="max-sm:hidden">snippets.run</span>
-        </a>
-        <nav class="flex items-center gap-1" aria-label="Main navigation">
-          <a
-            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
-            href="/"
-            >Home</a
-          >
-          <a
-            class="rounded-full px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-black/8"
-            href="/search"
-            >Registry</a
-          >
-          <template if="user"
-            ><a
-              class="ml-1 rounded-full border border-[#182019] bg-[#d7f34a] px-3.5 py-2.5 text-sm font-black no-underline hover:bg-[#182019] hover:text-white"
-              href="/editor"
-              >Publish</a
-            ></template
-          >
-          <template if="user"
-            ><a
-              class="ml-1 rounded-full border border-[#c8c7bd] px-3.5 py-2.5 text-sm font-bold no-underline hover:bg-[#e7e5dd]"
-              href="/mine"
-              >My Snippets</a
-            ></template
-          >
-          <template if="!user"
-            ><a
-              class-detail-sign-in="page === 'snippet'"
-              class="ml-1 rounded-full bg-[#d7f34a] px-3.5 py-2.5 text-sm font-bold no-underline"
-              bind-href="loginHref()"
-              >Sign in</a
-            ></template
-          >
-        </nav>
-      </header>
-
-      <main class="min-h-screen">
-        <template if="page === 'snippet'">
-          <section class="detail-page detail-state">
-            <div class="detail-container">
-              <template if="loading">
-                <p class="detail-empty" role="status">
-                  Fetching snippet source…
-                </p>
-              </template>
-              <template if="error">
-                <div class="detail-card detail-card-body" role="alert">
-                  <b>Could not load this snippet</b>
-                  <p class="detail-empty">{{ error }}</p>
-                </div>
-              </template>
-              <template if="!loading && snippet">
-                <snippet-details bind-snippet="snippet"></snippet-details>
-              </template>
-              <template if="!loading && !error && !snippet">
-                <div class="detail-empty-state">
-                  <p class="detail-kicker">Snippet details</p>
-                  <h1>Open a snippet to inspect its source.</h1>
-                  <a href="/search">Browse snippets</a>
-                </div>
-              </template>
-            </div>
-          </section>
-        </template>
-
-        <template if="page === 'editor'">
-          <section
-            class="mx-auto w-[calc(100%_-_2.5rem)] max-w-[90rem] py-10 max-md:w-[calc(100%_-_1.75rem)]">
-            <template if="loading"
-              ><div
-                class="flex items-center gap-3 border border-[#c8c7bd] bg-[#fffdf7] p-5">
-                <span
-                  class="size-5 animate-spin rounded-full border-2 border-[#c8c7bd] border-t-[#182019]"></span>
-                <p class="m-0 text-[#697069]">Opening workspace...</p>
-              </div></template
-            >
-            <template if="error"
-              ><div class="border border-[#ff7146] bg-[#fffdf7] p-5">
-                <b>Could not open the editor</b>
-                <p class="mt-2 mb-0 text-[#697069]">{{ error }}</p>
-              </div></template
-            >
-            <template if="!loading && editor">
-              <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p class="mb-2 text-xs font-black tracking-[.15em] uppercase">
-                    Private staging workspace
-                  </p>
-                  <h1
-                    class="m-0 font-serif text-4xl font-medium tracking-[-.05em] max-md:text-3xl">
-                    {{ editor.owner }}<i class="text-[#ff7146] not-italic">/</i
-                    >{{ editor.repo }}
-                  </h1>
-                </div>
-                <span
-                  class="rounded-full border border-[#182019] px-3 py-1.5 font-mono text-xs font-bold"
-                  >{{ editorStatus }}</span
-                >
-              </div>
-              <div
-                class="grid min-h-[42rem] grid-cols-[15rem_minmax(0,1fr)_17rem] overflow-hidden rounded-sm border border-[#182019] bg-[#fffdf7] shadow-[8px_8px_0_#d7f34a] max-lg:grid-cols-[13rem_minmax(0,1fr)] max-md:block">
-                <aside
-                  class="border-r border-[#c8c7bd] bg-[#f7f5ef] max-md:border-r-0 max-md:border-b">
-                  <div class="border-b border-[#c8c7bd] px-4 py-4">
-                    <b class="text-xs font-black tracking-[.12em] uppercase"
-                      >Files</b
-                    >
-                  </div>
-                  <nav class="p-2" aria-label="Snippet files">
-                    <template for="file of editor.files"
-                      ><button
-                        class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left font-mono text-xs hover:bg-[#e7e5dd]"
-                        bind-class="fileClass(file)"
-                        type="button"
-                        on-click="selectFile(file)">
-                        <span
-                          class="overflow-hidden text-ellipsis whitespace-nowrap"
-                          >{{ file.path }}</span
-                        ><span
-                          class="size-1.5 shrink-0 rounded-full bg-[#ff7146]"
-                          attr-hidden="!file.staged"></span></button
-                    ></template>
-                  </nav>
-                </aside>
-                <div class="flex min-w-0 flex-col bg-[#1a211b] text-[#e7ede6]">
-                  <template if="!activeFile.path">
-                    <form
-                      class="flex flex-1 flex-col gap-4 p-6"
-                      on-submit.prevent="stageNewFile($event)">
-                      <div>
-                        <p class="mb-2 font-serif text-2xl">
-                          Your repository is empty.
-                        </p>
-                        <p class="m-0 text-sm text-[#aab4aa]">
-                          Add the first entrypoint to start your snippet.
-                        </p>
-                      </div>
-                      <input
-                        class="border border-[#566057] bg-[#252d26] px-3 py-3 font-mono text-sm text-[#e7ede6] outline-none focus:border-[#d7f34a]"
-                        bind-value="newFilePath"
-                        placeholder="main.sh"
-                        required />
-                      <textarea
-                        class="min-h-64 flex-1 resize-y border border-[#566057] bg-[#252d26] p-4 font-mono text-sm leading-6 text-[#e7ede6] outline-none focus:border-[#d7f34a]"
-                        bind-value="newFileContent"
-                        placeholder="Write your snippet..."
-                        required
-                        spellcheck="false"></textarea>
-                      <button
-                        class="self-start cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-4 py-3 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
-                        type="submit"
-                        attr-disabled="saving">
-                        {{ saving ? 'Staging...' : 'Stage first file' }}
-                      </button>
-                    </form>
-                  </template>
-                  <template if="activeFile.path">
-                    <div
-                      class="flex items-center justify-between border-b border-[#3d473e] bg-[#252d26] px-5 py-3 font-mono text-xs text-[#aab4aa]">
-                      <span>{{ activeFile.path }}</span
-                      ><span
-                        >{{ activeFile.staged ? 'staged' : 'working copy'
-                        }}</span
-                      >
-                    </div>
-                    <code-editor
-                      class="min-h-0 flex-1"
-                      bind-value="editorContent"
-                      bind-language="editorLanguage"
-                      status="Editing staged source"
-                      on-change="markDirty()"></code-editor>
-                    <div
-                      class="flex items-center justify-between gap-3 border-t border-[#3d473e] bg-[#252d26] px-5 py-3">
-                      <span class="font-mono text-xs text-[#aab4aa]"
-                        >{{ editorContent.split('\n').length }} lines</span
-                      ><button
-                        class="cursor-pointer rounded-sm border border-[#d7f34a] bg-[#d7f34a] px-3 py-2 text-xs font-black text-[#182019] uppercase disabled:cursor-not-allowed disabled:opacity-40"
-                        type="button"
-                        on-click="stageActiveFile()"
-                        attr-disabled="!editorDirty || saving">
-                        {{ saving ? 'Staging...' : 'Stage file' }}
-                      </button>
-                    </div>
-                  </template>
-                </div>
-                <aside
-                  class="border-l border-[#c8c7bd] bg-[#f7f5ef] max-lg:col-span-2 max-lg:border-t max-lg:border-l-0">
-                  <div class="border-b border-[#c8c7bd] px-4 py-4">
-                    <b class="text-xs font-black tracking-[.12em] uppercase"
-                      >Change history</b
-                    >
-                  </div>
-                  <ol class="m-0 max-h-72 list-none overflow-auto p-0">
-                    <template for="entry of editor.history"
-                      ><li class="border-b border-[#dedbd2] px-4 py-3">
-                        <b
-                          class="block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap"
-                          >{{ entry.message }}</b
-                        ><span
-                          class="mt-1 block font-mono text-[.65rem] text-[#697069]"
-                          >{{ entry.shortCommit }} · {{ entry.date.slice(0, 10)
-                          }}</span
-                        >
-                      </li></template
-                    >
-                  </ol>
-                  <form
-                    class="border-t border-[#c8c7bd] p-4"
-                    on-submit.prevent="commitChanges($event)">
-                    <label
-                      class="mb-2 block text-[.65rem] font-black tracking-[.12em] uppercase"
-                      for="summary"
-                      >Change summary
-                      <span class="normal-case text-[#697069]"
-                        >optional</span
-                      ></label
-                    ><textarea
-                      class="h-20 w-full resize-none border border-[#c8c7bd] bg-[#fffdf7] p-2.5 text-sm outline-none focus:border-[#182019]"
-                      id="summary"
-                      bind-value="commitMessage"
-                      placeholder="Explain this update"></textarea
-                    ><button
-                      class="mt-3 w-full cursor-pointer rounded-sm border border-[#182019] bg-[#182019] px-3 py-3 text-xs font-black text-white uppercase disabled:cursor-not-allowed disabled:opacity-40"
-                      type="submit"
-                      attr-disabled="!hasStagedFiles || committing">
-                      {{ committing ? 'Committing...' : 'Commit staged changes'
-                      }}
-                    </button>
-                  </form>
-                </aside>
-              </div>
-            </template>
-          </section>
-        </template>
-      </main>
-
-      <footer
-        class-dark-footer="page === 'snippet'"
-        class="mx-auto flex min-h-36 w-[calc(100%_-_2.5rem)] max-w-[77.5rem] items-center justify-between border-t border-[#c8c7bd] max-sm:w-[calc(100%_-_1.75rem)]">
-        <a
-          class="inline-flex items-center gap-2.5 font-black tracking-[-.04em] no-underline"
-          href="/"
-          ><img class="size-9" src="./assets/icon.svg" alt="" /><span
-            >snippets.run</span
-          ></a
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="snippets.run"
+          ><img src="/assets/icon.svg" alt="" />snippets.run</a
         >
-        <p class="font-serif text-[#697069] italic max-sm:hidden">
-          Small scripts. Long memory.
-        </p>
-        <nav class="flex gap-4">
-          <a class="text-xs font-extrabold" href="/search">Registry</a
-          ><template if="user"
-            ><a class="text-xs font-extrabold" href="/editor"
-              >Publish</a
-            ></template
+        <div class="account">
+          <template if="user">
+            <div class="profile" aria-label="Signed-in user">
+              <span class="avatar">
+                <template if="userPicture"
+                  ><img bind-src="userPicture" alt=""
+                /></template>
+                <template if="!userPicture">{{ userInitials }}</template>
+              </span>
+              <span class="identity"
+                ><strong>{{ userName }}</strong
+                ><small>{{ userEmail }}</small></span
+              >
+            </div>
+          </template>
+          <template if="!user && !authLoading"
+            ><a class="auth-link" bind-href="loginHref">Sign in</a></template
           >
-        </nav>
-      </footer>
-
+        </div>
+      </header>
+      <main>
+        <template if="snippet">
+          <p class="breadcrumbs">
+            <span>{{ snippet.owner }}</span> / {{ snippet.repo }}
+          </p>
+          <h1>{{ snippet.repo }}</h1>
+          <p class="summary">
+            <span>{{ snippet.type }}</span>
+            <span>{{ snippet.entrypoint }}</span>
+            <span>{{ shortCommit }}</span>
+          </p>
+          <pre class="source"><code>{{ snippet.script }}</code></pre>
+        </template>
+        <template if="error"
+          ><p class="message" role="alert">{{ error }}</p></template
+        >
+      </main>
       <script setup>
-        import { computed, onDestroy, onInit, ref } from "@li3/web";
+        import { computed, onInit, ref } from "@li3/web";
 
         const registry = "https://registry.snippets.run";
 
-        export default function app() {
-          const page = ref("snippet");
+        export default function snippetPage() {
+          const stateElement = document.getElementById("snippet-state");
+          const snippet = ref(JSON.parse(stateElement?.textContent || "null"));
           const user = ref(null);
-          const owner = ref("");
-          const ownerQuery = ref("");
-          const snippets = ref([]);
-          const mine = ref([]);
-          const snippet = ref(null);
-          const editor = ref(null);
-          const activeFile = ref({ path: "", content: "", staged: false });
-          const editorContent = ref("");
-          const newFilePath = ref("");
-          const newFileContent = ref("");
-          const editorDirty = ref(false);
-          const saving = ref(false);
-          const committing = ref(false);
-          const commitMessage = ref("");
-          const createOwner = ref("");
-          const createName = ref("");
-          const createType = ref("sh");
-          const createMessage = ref("");
-          const creating = ref(false);
-          const createError = ref("");
-          const loading = ref(false);
+          const authLoading = ref(true);
           const error = ref("");
-          let requestId = 0;
-
-          const registryTitle = computed(() =>
-            owner.value ? `Snippets by ${owner.value}` : "Find runnable code.",
-          );
-          const resultCount = computed(
+          const userName = computed(
             () =>
-              `${snippets.value.length} snippet${snippets.value.length === 1 ? "" : "s"}`,
+              user.value?.name ||
+              user.value?.preferred_username ||
+              user.value?.email ||
+              "Account",
           );
-          const runCommand = computed(() =>
-            snippet.value
-              ? `run ${snippet.value.owner}/${snippet.value.repo}@${snippet.value.commit}`
-              : "",
+          const userEmail = computed(() => user.value?.email || "Signed in");
+          const userPicture = computed(
+            () => user.value?.picture || user.value?.avatar || "",
+          );
+          const userInitials = computed(() =>
+            userName.value.slice(0, 2).toUpperCase(),
           );
           const shortCommit = computed(
-            () => snippet.value?.commit.slice(0, 12) || "",
+            () => snippet.value?.commit?.slice(0, 12) || "",
           );
-          const hasStagedFiles = computed(
-            () => editor.value?.files.some((file) => file.staged) || false,
-          );
-          const editorStatus = computed(() =>
-            editorDirty.value
-              ? "Unstaged edits"
-              : hasStagedFiles.value
-                ? "Changes staged"
-                : "All changes saved",
-          );
+          const loginHref = `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
 
-          const editorLanguage = computed(
-            () =>
-              ({
-                sh: "bash",
-                js: "javascript",
-                mjs: "javascript",
-                py: "python",
-                json: "json",
-                md: "markdown",
-              })[activeFile.value.path.split(".").at(-1)] || "",
-          );
-
-          async function request(path) {
-            const response = await fetch(registry + path, {
-              headers: { Accept: "application/json" },
-              credentials: "include",
-            });
-            if (!response.ok) {
-              const body = await response.json().catch(() => ({}));
-              throw new Error(
-                body.error || `Registry request failed (${response.status})`,
-              );
+          onInit(async () => {
+            if (!snippet.value) {
+              error.value = "This snippet could not be found.";
             }
-            return response.json();
-          }
-
-          async function editorRequest(path, options = {}) {
-            const response = await fetch(registry + path, {
-              headers: { Accept: "application/json", ...options.headers },
-              ...options,
-              credentials: "include",
-            });
-            const body = await response.json().catch(() => ({}));
-            if (!response.ok)
-              throw new Error(
-                body.error || `Editor request failed (${response.status})`,
-              );
-            return body;
-          }
-
-          async function createSnippet(event) {
-            creating.value = true;
-            createError.value = "";
-            const form = new FormData(event.currentTarget);
-            const owner = form.get("owner")?.toString().trim() || "";
-            const name = form.get("name")?.toString().trim() || "";
-            const type = form.get("type")?.toString() || "sh";
-            const message = form.get("message")?.toString() || "";
             try {
-              await editorRequest(
-                `/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ message }),
-                },
-              );
-              newFilePath.value =
-                type === "js"
-                  ? "index.mjs"
-                  : type === "py"
-                    ? "main.py"
-                    : "main.sh";
-              location.hash = `/edit/${encodeURIComponent(owner)}/${encodeURIComponent(name)}.${type}`;
-            } catch (reason) {
-              createError.value = reason.message;
-            } finally {
-              creating.value = false;
-            }
-          }
-
-          function decode(value) {
-            try {
-              return decodeURIComponent(value);
+              const response = await fetch(`${registry}/auth/me`, {
+                credentials: "include",
+                headers: { Accept: "application/json" },
+                signal: AbortSignal.timeout(4000),
+              });
+              if (response.ok) {
+                user.value = await response.json();
+              }
             } catch {
-              return value;
-            }
-          }
-
-          async function showOwner(selectedOwner) {
-            const id = ++requestId;
-            owner.value = selectedOwner;
-            ownerQuery.value = selectedOwner;
-            snippets.value = [];
-            error.value = "";
-            loading.value = true;
-            try {
-              const result = await request(
-                `/api/snippets/${encodeURIComponent(selectedOwner)}`,
-              );
-              if (id === requestId) snippets.value = result;
-            } catch (reason) {
-              if (id === requestId) error.value = reason.message;
+              // The public snippet view remains available when authentication is unreachable.
             } finally {
-              if (id === requestId) loading.value = false;
+              authLoading.value = false;
             }
-          }
-
-          async function showMine() {
-            loading.value = true;
-            mine.value = [];
-            error.value = "";
-            try {
-              mine.value = await request("/api/snippets/mine");
-            } catch (reason) {
-              error.value = reason.message;
-            } finally {
-              loading.value = false;
-            }
-          }
-
-          async function showSnippet(selectedOwner, name) {
-            const id = ++requestId;
-            owner.value = selectedOwner;
-            snippet.value = null;
-            error.value = "";
-            loading.value = true;
-            try {
-              const result = await request(
-                `/api/snippets/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`,
-              );
-              if (id === requestId) snippet.value = result;
-            } catch (reason) {
-              if (id === requestId) error.value = reason.message;
-            } finally {
-              if (id === requestId) loading.value = false;
-            }
-          }
-
-          async function showEditor(selectedOwner, name) {
-            const id = ++requestId;
-            editor.value = null;
-            error.value = "";
-            loading.value = true;
-            try {
-              const result = await editorRequest(
-                `/api/editor/${encodeURIComponent(selectedOwner)}/${encodeURIComponent(name)}`,
-              );
-              if (id !== requestId) return;
-              editor.value = result;
-              selectFile(
-                result.files[0] || { path: "", content: "", staged: false },
-              );
-            } catch (reason) {
-              if (id === requestId) error.value = reason.message;
-            } finally {
-              if (id === requestId) loading.value = false;
-            }
-          }
-
-          function selectFile(file) {
-            activeFile.value = file;
-            editorContent.value = file.content;
-            editorDirty.value = false;
-          }
-          function markDirty() {
-            editorDirty.value =
-              editorContent.value !== activeFile.value.content;
-          }
-          function fileClass(file) {
-            return file.path === activeFile.value.path
-              ? "bg-[#d7f34a] font-bold"
-              : "";
-          }
-
-          async function stageActiveFile() {
-            saving.value = true;
-            error.value = "";
-            try {
-              await editorRequest(
-                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(activeFile.value.path)}`,
-                {
-                  method: "PUT",
-                  headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                  body: editorContent.value,
-                },
-              );
-              activeFile.value.content = editorContent.value;
-              activeFile.value.staged = true;
-              const file = editor.value.files.find(
-                (item) => item.path === activeFile.value.path,
-              );
-              file.content = editorContent.value;
-              file.staged = true;
-              editorDirty.value = false;
-            } catch (reason) {
-              error.value = reason.message;
-            } finally {
-              saving.value = false;
-            }
-          }
-
-          async function loadUser() {
-            try {
-              user.value = await request("/auth/me");
-            } catch {
-              user.value = null;
-            }
-          }
-
-          function loginHref() {
-            return `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
-          }
-
-          async function signOut() {
-            await fetch(`${registry}/auth/logout`, {
-              method: "POST",
-              credentials: "include",
-            });
-            user.value = null;
-          }
-
-          async function stageNewFile() {
-            saving.value = true;
-            error.value = "";
-            try {
-              await editorRequest(
-                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/file?path=${encodeURIComponent(newFilePath.value.trim())}`,
-                {
-                  method: "PUT",
-                  headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                  body: newFileContent.value,
-                },
-              );
-              await showEditor(editor.value.owner, editor.value.repo);
-              newFilePath.value = "";
-              newFileContent.value = "";
-            } catch (reason) {
-              error.value = reason.message;
-            } finally {
-              saving.value = false;
-            }
-          }
-          async function commitChanges() {
-            committing.value = true;
-            error.value = "";
-            try {
-              await editorRequest(
-                `/api/editor/${encodeURIComponent(editor.value.owner)}/${encodeURIComponent(editor.value.repo)}/commit`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ message: commitMessage.value }),
-                },
-              );
-              commitMessage.value = "";
-              const owner = editor.value.owner;
-              const repo = editor.value.repo;
-              await showEditor(owner, repo);
-            } catch (reason) {
-              error.value = reason.message;
-            } finally {
-              committing.value = false;
-            }
-          }
-
-          function route() {
-            requestId++;
-            loading.value = false;
-            error.value = "";
-            const parts = (location.hash.slice(1) || "/")
-              .split("/")
-              .filter(Boolean)
-              .map(decode);
-            if (parts.length === 0) {
-              page.value = "snippet";
-              showSnippet("docker", "remove-dead-containers.sh");
-            } else if (parts[0] === "s" && parts.length === 3) {
-              page.value = "snippet";
-              showSnippet(parts[1], parts[2]);
-            } else if (parts[0] === "edit" && parts.length === 3) {
-              page.value = "editor";
-              showEditor(parts[1], parts[2]);
-            } else page.value = "snippet";
-            window.scrollTo({ top: 0, behavior: "instant" });
-            document.title = `${parts.at(-1) || "Remove Dead Containers"} - snippets.run`;
-          }
-
-          function browseOwner(event) {
-            const value = new FormData(event.currentTarget)
-              .get("owner")
-              ?.toString()
-              .trim();
-            if (value) location.hash = `/s/${encodeURIComponent(value)}`;
-          }
-
-          function snippetHref(item) {
-            return `#/s/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
-          }
-          function mineHref(item) {
-            return `#/edit/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`;
-          }
-          function ownerHref() {
-            return `#/s/${encodeURIComponent(owner.value)}`;
-          }
-          function runtimeLabel(type) {
-            return (
-              { bash: "SH", node: "JS", python: "PY" }[type] ||
-              type.slice(0, 2).toUpperCase()
-            );
-          }
-
-          onInit(() => {
-            window.addEventListener("hashchange", route);
-            loadUser();
-            route();
           });
-          onDestroy(() => window.removeEventListener("hashchange", route));
 
           return {
-            browseOwner,
-            activeFile,
-            commitChanges,
-            commitMessage,
-            committing,
-            createError,
-            createMessage,
-            createName,
-            createOwner,
-            createSnippet,
-            createType,
-            creating,
-            editor,
-            editorContent,
-            editorDirty,
-            editorLanguage,
-            editorStatus,
+            authLoading,
             error,
-            fileClass,
-            hasStagedFiles,
-            loading,
-            mine,
-            mineHref,
             loginHref,
-            markDirty,
-            owner,
-            ownerHref,
-            ownerQuery,
-            page,
-            registryTitle,
-            resultCount,
-            runCommand,
-            runtimeLabel,
-            signOut,
             shortCommit,
-            saving,
-            newFileContent,
-            newFilePath,
-            selectFile,
             snippet,
-            snippetHref,
-            snippets,
-            stageActiveFile,
-            stageNewFile,
             user,
+            userEmail,
+            userInitials,
+            userName,
+            userPicture,
           };
         }
       </script>

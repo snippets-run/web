@@ -1,11 +1,10 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 
-const root = "/home/app/dist";
+const root = process.env.WEB_ROOT || "/home/app/dist";
+const indexPath = join(root, "index.html");
 const types = {
-  ".css": "text/css",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
   ".mjs": "text/javascript",
@@ -13,33 +12,132 @@ const types = {
   ".png": "image/png",
 };
 
+function validPart(value, pattern) {
+  return pattern.test(value) && value !== "." && value !== "..";
+}
+
+async function loadSnippet(owner, repo) {
+  const endpoint = new URL(
+    `/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+    "https://registry.snippets.run",
+  );
+  const response = await fetch(endpoint, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const snippet = await response.json();
+  if (
+    !snippet ||
+    snippet.owner !== owner ||
+    snippet.repo !== repo ||
+    typeof snippet.script !== "string" ||
+    typeof snippet.entrypoint !== "string"
+  ) {
+    return null;
+  }
+  return snippet;
+}
+
+function inlineJSON(value) {
+  return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (character) => {
+    const escapes = {
+      "<": "\\u003c",
+      ">": "\\u003e",
+      "&": "\\u0026",
+      "\u2028": "\\u2028",
+      "\u2029": "\\u2029",
+    };
+    return escapes[character];
+  });
+}
+
+async function snippetPage(owner, repo) {
+  const [template, snippet] = await Promise.all([
+    readFile(indexPath, "utf8"),
+    loadSnippet(owner, repo).catch(() => null),
+  ]);
+  const html = template.replace("__SNIPPET_STATE__", inlineJSON(snippet));
+  return { html, found: Boolean(snippet) };
+}
+
 createServer(async (request, response) => {
   try {
-    const pathname = decodeURIComponent(
-      new URL(request.url, "http://localhost").pathname,
-    );
-    const relative =
-      pathname === "/"
-        ? "index.html"
-        : pathname.endsWith("/")
-          ? `${pathname.slice(1)}index.html`
-          : pathname.slice(1);
-    let file = normalize(join(root, relative));
-    if (!file.startsWith(`${root}/`)) return response.writeHead(403).end();
-    let info = await stat(file);
-    if (info.isDirectory()) {
-      file = join(file, "index.html");
-      info = await stat(file);
+    const url = new URL(request.url, "http://localhost");
+    const pathname = decodeURIComponent(url.pathname);
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      response.writeHead(405, { Allow: "GET, HEAD" }).end();
+      return;
     }
-    if (!info.isFile()) return response.writeHead(404).end();
+    if (url.pathname === "/mine" || url.pathname === "/mine/") {
+      response.writeHead(308, { Location: "/editor" }).end();
+      return;
+    }
+
+    let owner;
+    let repo;
+    if (pathname === "/") {
+      owner = "docker";
+      repo = "remove-dead-containers.sh";
+    } else if (pathname.startsWith("/s/")) {
+      const parts = pathname.slice(3).split("/");
+      if (
+        parts.length !== 2 ||
+        !validPart(parts[0], /^[A-Za-z0-9_-]+$/) ||
+        !validPart(parts[1], /^[A-Za-z0-9._-]+$/)
+      ) {
+        response.writeHead(404).end();
+        return;
+      }
+      [owner, repo] = parts;
+    }
+
+    if (owner && repo) {
+      const { html, found } = await snippetPage(owner, repo);
+      response.writeHead(found ? 200 : 404, {
+        "Cache-Control": "no-cache",
+        "Content-Type": "text/html; charset=utf-8",
+        "Cross-Origin-Embedder-Policy": "credentialless",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+      });
+      response.end(request.method === "HEAD" ? undefined : html);
+      return;
+    }
+
+    if (
+      !pathname.startsWith("/editor/") &&
+      pathname !== "/editor" &&
+      !pathname.startsWith("/assets/")
+    ) {
+      response.writeHead(404).end();
+      return;
+    }
+    const isEditor = pathname === "/editor" || pathname.startsWith("/editor/");
+    const allowedRoot = join(root, isEditor ? "editor" : "assets");
+    const relative =
+      pathname === "/editor" ? "editor/index.html" : pathname.slice(1);
+    const file = normalize(join(root, relative));
+    if (!file.startsWith(`${allowedRoot}/`)) {
+      response.writeHead(403).end();
+      return;
+    }
+    const info = await stat(file);
+    if (!info.isFile()) {
+      response.writeHead(404).end();
+      return;
+    }
+    const content = await readFile(file);
     response.writeHead(200, {
-      "Cache-Control": pathname === "/" ? "no-cache" : "public, max-age=7200",
+      "Cache-Control": "public, max-age=7200",
       "Content-Type": types[extname(file)] || "application/octet-stream",
       "Cross-Origin-Embedder-Policy": "credentialless",
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Resource-Policy": "cross-origin",
     });
-    createReadStream(file).pipe(response);
+    response.end(request.method === "HEAD" ? undefined : content);
   } catch {
     response.writeHead(404).end();
   }
