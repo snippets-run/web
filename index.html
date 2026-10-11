@@ -3,9 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="A fast, read-only view of a runnable snippet." />
+    <meta name="description" content="A fast, read-only view of a runnable snippet." />
     <title>Snippet · snippets.run</title>
     <link rel="icon" href="/assets/icon.svg" />
     <script type="importmap">
@@ -119,6 +117,12 @@
         font-weight: 700;
         text-decoration: none;
       }
+      .editor-link {
+        color: #a6e6f4;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
       main {
         width: min(76rem, calc(100% - 2rem));
         margin: 2rem auto 4rem;
@@ -173,6 +177,39 @@
         border-radius: 0.5rem;
         color: #94a3b8;
       }
+      .snippet-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+        gap: 0.75rem;
+        margin: 1.5rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .snippet-list a {
+        display: block;
+        padding: 1rem;
+        border: 1px solid #233246;
+        border-radius: 0.6rem;
+        background: #101927;
+        color: #e2e8f0;
+        text-decoration: none;
+      }
+      .snippet-list a:hover,
+      .snippet-list a:focus-visible {
+        border-color: #8bd6e9;
+      }
+      .snippet-list strong,
+      .snippet-list small {
+        display: block;
+        overflow-wrap: anywhere;
+      }
+      .snippet-list small {
+        margin-top: 0.45rem;
+        color: #94a3b8;
+        font:
+          0.72rem ui-monospace,
+          monospace;
+      }
       [hidden] {
         display: none !important;
       }
@@ -198,34 +235,40 @@
     </script>
     <template app>
       <header class="topbar">
-        <a class="brand" href="/" aria-label="snippets.run"
-          ><img src="/assets/icon.svg" alt="" />snippets.run</a
-        >
+        <a class="brand" href="/" aria-label="snippets.run"><img src="/assets/icon.svg" alt="" />snippets.run</a>
         <div class="account">
+          <a class="editor-link" href="/editor">Publish</a>
           <template if="user">
             <div class="profile" aria-label="Signed-in user">
               <span class="avatar">
-                <template if="userPicture"
-                  ><img bind-src="userPicture" alt=""
-                /></template>
+                <template if="userPicture"><img bind-src="userPicture" alt="" /></template>
                 <template if="!userPicture">{{ userInitials }}</template>
               </span>
-              <span class="identity"
-                ><strong>{{ userName }}</strong
-                ><small>{{ userEmail }}</small></span
-              >
+              <span class="identity"><strong>{{ userName }}</strong><small>{{ userEmail }}</small></span>
             </div>
           </template>
-          <template if="!user && !authLoading"
-            ><a class="auth-link" bind-href="loginHref">Sign in</a></template
-          >
+          <template if="!user && !authLoading"><a class="auth-link" bind-href="loginHref">Sign in</a></template>
         </div>
       </header>
       <main>
+        <template if="listing">
+          <h1>Snippets</h1>
+          <template if="snippets.length">
+            <ul class="snippet-list">
+              <template for="snippet of snippets"
+                ><li>
+                  <a bind-href="snippet.href">
+                    <strong>{{ snippet.repo }}</strong>
+                    <small>{{ snippet.owner }} / {{ snippet.type }}</small>
+                  </a>
+                </li></template
+              >
+            </ul>
+          </template>
+          <template if="!snippets.length"><p class="message">No snippets found.</p></template>
+        </template>
         <template if="snippet">
-          <p class="breadcrumbs">
-            <span>{{ snippet.owner }}</span> / {{ snippet.repo }}
-          </p>
+          <p class="breadcrumbs"><span>{{ snippet.owner }}</span> / {{ snippet.repo }}</p>
           <h1>{{ snippet.repo }}</h1>
           <p class="summary">
             <span>{{ snippet.type }}</span>
@@ -234,9 +277,7 @@
           </p>
           <pre class="source"><code>{{ snippet.script }}</code></pre>
         </template>
-        <template if="error"
-          ><p class="message" role="alert">{{ error }}</p></template
-        >
+        <template if="error"><p class="message" role="alert">{{ error }}</p></template>
       </main>
       <script setup>
         import { computed, onInit, ref } from "@li3/web";
@@ -245,31 +286,29 @@
 
         export default function snippetPage() {
           const stateElement = document.getElementById("snippet-state");
-          const snippet = ref(JSON.parse(stateElement?.textContent || "null"));
+          const state = JSON.parse(stateElement?.textContent || "null");
+          const snippet = ref(state && !state.listing ? state : null);
+          const listing = ref(Boolean(state?.listing));
+          const snippets = ref(
+            (state?.snippets || []).map((item) => ({
+              ...item,
+              href: `/s/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`,
+            })),
+          );
           const user = ref(null);
           const authLoading = ref(true);
           const error = ref("");
           const userName = computed(
-            () =>
-              user.value?.name ||
-              user.value?.preferred_username ||
-              user.value?.email ||
-              "Account",
+            () => user.value?.name || user.value?.preferred_username || user.value?.email || "Account",
           );
           const userEmail = computed(() => user.value?.email || "Signed in");
-          const userPicture = computed(
-            () => user.value?.picture || user.value?.avatar || "",
-          );
-          const userInitials = computed(() =>
-            userName.value.slice(0, 2).toUpperCase(),
-          );
-          const shortCommit = computed(
-            () => snippet.value?.commit?.slice(0, 12) || "",
-          );
+          const userPicture = computed(() => user.value?.picture || user.value?.avatar || "");
+          const userInitials = computed(() => userName.value.slice(0, 2).toUpperCase());
+          const shortCommit = computed(() => snippet.value?.commit?.slice(0, 12) || "");
           const loginHref = `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
 
           onInit(async () => {
-            if (!snippet.value) {
+            if (!snippet.value && !listing.value) {
               error.value = "This snippet could not be found.";
             }
             try {
@@ -291,9 +330,11 @@
           return {
             authLoading,
             error,
+            listing,
             loginHref,
             shortCommit,
             snippet,
+            snippets,
             user,
             userEmail,
             userInitials,

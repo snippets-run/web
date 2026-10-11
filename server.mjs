@@ -63,6 +63,28 @@ async function snippetPage(owner, repo) {
   return { html, found: Boolean(snippet) };
 }
 
+async function listingPage() {
+  const [template, response] = await Promise.all([
+    readFile(indexPath, "utf8"),
+    fetch("https://registry.snippets.run/api/snippets", {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+    }),
+  ]);
+  const data = response.ok ? await response.json() : [];
+  const snippets = Array.isArray(data)
+    ? data.filter(
+        (item) =>
+          item &&
+          typeof item.owner === "string" &&
+          typeof item.repo === "string" &&
+          validPart(item.owner, /^[A-Za-z0-9_-]+$/) &&
+          validPart(item.repo, /^[A-Za-z0-9._-]+$/),
+      )
+    : [];
+  return template.replace("__SNIPPET_STATE__", inlineJSON({ listing: true, snippets }));
+}
+
 createServer(async (request, response) => {
   try {
     const url = new URL(request.url, "http://localhost");
@@ -79,15 +101,22 @@ createServer(async (request, response) => {
     let owner;
     let repo;
     if (pathname === "/") {
-      owner = "docker";
-      repo = "remove-dead-containers.sh";
+      const html = await listingPage().catch(async () => {
+        const template = await readFile(indexPath, "utf8");
+        return template.replace("__SNIPPET_STATE__", inlineJSON({ listing: true, snippets: [] }));
+      });
+      response.writeHead(200, {
+        "Cache-Control": "no-cache",
+        "Content-Type": "text/html; charset=utf-8",
+        "Cross-Origin-Embedder-Policy": "credentialless",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+      });
+      response.end(request.method === "HEAD" ? undefined : html);
+      return;
     } else if (pathname.startsWith("/s/")) {
       const parts = pathname.slice(3).split("/");
-      if (
-        parts.length !== 2 ||
-        !validPart(parts[0], /^[A-Za-z0-9_-]+$/) ||
-        !validPart(parts[1], /^[A-Za-z0-9._-]+$/)
-      ) {
+      if (parts.length !== 2 || !validPart(parts[0], /^[A-Za-z0-9_-]+$/) || !validPart(parts[1], /^[A-Za-z0-9._-]+$/)) {
         response.writeHead(404).end();
         return;
       }
@@ -107,18 +136,13 @@ createServer(async (request, response) => {
       return;
     }
 
-    if (
-      !pathname.startsWith("/editor/") &&
-      pathname !== "/editor" &&
-      !pathname.startsWith("/assets/")
-    ) {
+    if (!pathname.startsWith("/editor/") && pathname !== "/editor" && !pathname.startsWith("/assets/")) {
       response.writeHead(404).end();
       return;
     }
     const isEditor = pathname === "/editor" || pathname.startsWith("/editor/");
     const allowedRoot = join(root, isEditor ? "editor" : "assets");
-    const relative =
-      pathname === "/editor" ? "editor/index.html" : pathname.slice(1);
+    const relative = pathname === "/editor" ? "editor/index.html" : pathname.slice(1);
     const file = normalize(join(root, relative));
     if (!file.startsWith(`${allowedRoot}/`)) {
       response.writeHead(403).end();
