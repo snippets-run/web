@@ -3,10 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="A fast, read-only view of a runnable snippet." />
+    <meta
+      name="description"
+      content="A fast, read-only view of a runnable snippet." />
     <title>Snippet · snippets.run</title>
     <link rel="icon" href="/assets/icon.svg" />
-    <link rel="component" href="https://sodium.static.apphor.de/code-block.html" />
+    <link
+      rel="component"
+      href="https://sodium.static.apphor.de/code-block.html" />
     <script type="importmap">
       { "imports": { "@li3/": "https://at-li3.static.apphor.de/" } }
     </script>
@@ -118,12 +122,6 @@
         font-weight: 700;
         text-decoration: none;
       }
-      .editor-link {
-        color: #a6e6f4;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-decoration: none;
-      }
       main {
         width: min(76rem, calc(100% - 2rem));
         margin: 2rem auto 4rem;
@@ -170,47 +168,51 @@
         color: #94a3b8;
       }
       .snippet-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-        gap: 0.75rem;
+        border-top: 1px solid #233246;
         margin: 1.5rem 0 0;
         padding: 0;
         list-style: none;
       }
+      .snippet-list li + li {
+        border-top: 1px solid #233246;
+      }
       .snippet-list a {
-        display: block;
-        padding: 1rem;
-        border: 1px solid #233246;
-        border-radius: 0.6rem;
-        background: #101927;
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+        min-width: 0;
+        padding: 0.9rem 0.25rem;
         color: #e2e8f0;
+        font:
+          0.85rem ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
         text-decoration: none;
       }
       .snippet-list a:hover,
       .snippet-list a:focus-visible {
         border-color: #8bd6e9;
       }
-      .snippet-list strong,
-      .snippet-list small {
-        display: block;
-        overflow-wrap: anywhere;
+      .run-prefix {
+        flex: 0 0 auto;
+        color: #64748b;
       }
-      .snippet-list small {
-        margin-top: 0.45rem;
-        color: #94a3b8;
-        font:
-          0.72rem ui-monospace,
-          monospace;
+      .run-target {
+        overflow: hidden;
+        color: inherit;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       [hidden] {
         display: none !important;
       }
       @media (max-width: 36rem) {
-        .identity small {
+        .identity {
           display: none;
         }
-        .identity strong {
-          max-width: 8rem;
+        .profile {
+          padding: 0.35rem;
         }
         main {
           margin-top: 1.5rem;
@@ -225,54 +227,132 @@
     <script state type="application/json" id="snippet-state">
       __SNIPPET_STATE__
     </script>
+    <template component="snippet-list">
+      <ul class="snippet-list">
+        <template for="snippet of snippets">
+          <li>
+            <a
+              bind-href="snippetHref(snippet)"
+              on-click.prevent="selectSnippet(snippet)">
+              <span class="run-prefix">run</span>
+              <code class="run-target"
+                >{{ snippet.owner }}/{{ snippet.repo }}</code
+              >
+            </a>
+          </li>
+        </template>
+      </ul>
+      <script setup>
+        import { defineProp } from "@li3/web";
+
+        export default function snippetList() {
+          const snippets = defineProp("snippets", { default: [] });
+          const onSelect = defineProp("onSelect", { default: null });
+
+          function snippetHref(snippet) {
+            return `/s/${encodeURIComponent(snippet.owner)}/${encodeURIComponent(snippet.repo)}`;
+          }
+
+          function selectSnippet(snippet) {
+            if (typeof onSelect.value === "function") {
+              onSelect.value(snippet);
+            }
+          }
+
+          return { selectSnippet, snippetHref, snippets };
+        }
+      </script>
+    </template>
+
+    <template component="snippet-details">
+      <section class="snippet-details">
+        <p class="breadcrumbs">
+          <span>{{ snippet.owner }}</span> / {{ snippet.repo }}
+        </p>
+        <h1>{{ snippet.repo }}</h1>
+        <p class="summary">
+          <span>{{ snippet.entrypoint }}</span><span>{{ shortCommit }}</span>
+        </p>
+        <code-block
+          bind-source="snippet.script"
+          bind-language="snippetLanguage"
+          theme="a11y-dark"></code-block>
+      </section>
+      <script setup>
+        import { computed, defineProp } from "@li3/web";
+
+        export default function snippetDetails() {
+          const snippet = defineProp("snippet", { default: null });
+          const shortCommit = computed(
+            () => snippet.value?.commit?.slice(0, 12) || "",
+          );
+          const snippetLanguage = computed(() => {
+            const languages = {
+              bash: "bash",
+              node: "javascript",
+              python: "python",
+            };
+            return languages[snippet.value?.type] || "plaintext";
+          });
+
+          return { shortCommit, snippet, snippetLanguage };
+        }
+      </script>
+    </template>
+
     <template app>
       <header class="topbar">
-        <a class="brand" href="/" aria-label="snippets.run"><img src="/assets/icon.svg" alt="" />snippets.run</a>
+        <a
+          class="brand"
+          href="/"
+          aria-label="snippets.run"
+          on-click.prevent="goHome()"
+          ><img src="/assets/icon.svg" alt="" />snippets.run</a
+        >
         <div class="account">
-          <a class="editor-link" href="/editor">Publish</a>
           <template if="user">
             <div class="profile" aria-label="Signed-in user">
               <span class="avatar">
-                <template if="userPicture"><img bind-src="userPicture" alt="" /></template>
+                <template if="userPicture"
+                  ><img bind-src="userPicture" alt=""
+                /></template>
                 <template if="!userPicture">{{ userInitials }}</template>
               </span>
-              <span class="identity"><strong>{{ userName }}</strong><small>{{ userEmail }}</small></span>
+              <span class="identity"
+                ><strong>{{ userName }}</strong
+                ><small>{{ userEmail }}</small></span
+              >
             </div>
           </template>
-          <template if="!user && !authLoading"><a class="auth-link" bind-href="loginHref">Sign in</a></template>
+          <template if="!user && !authLoading"
+            ><a class="auth-link" bind-href="loginHref">Sign in</a></template
+          >
         </div>
       </header>
       <main>
+        <template if="loading"
+          ><p class="message" role="status">Loading snippet…</p></template
+        >
         <template if="listing">
           <h1>Snippets</h1>
           <template if="snippets.length">
-            <ul class="snippet-list">
-              <template for="snippet of snippets"
-                ><li>
-                  <a bind-href="snippet.href">
-                    <strong>{{ snippet.repo }}</strong>
-                    <small>{{ snippet.owner }} / {{ snippet.type }}</small>
-                  </a>
-                </li></template
-              >
-            </ul>
+            <snippet-list
+              bind-snippets="snippets"
+              bind-on-select="openSnippet"></snippet-list>
           </template>
-          <template if="!snippets.length"><p class="message">No snippets found.</p></template>
+          <template if="!snippets.length"
+            ><p class="message">No snippets found.</p></template
+          >
         </template>
         <template if="snippet">
-          <p class="breadcrumbs"><span>{{ snippet.owner }}</span> / {{ snippet.repo }}</p>
-          <h1>{{ snippet.repo }}</h1>
-          <p class="summary">
-            <span>{{ snippet.type }}</span>
-            <span>{{ snippet.entrypoint }}</span>
-            <span>{{ shortCommit }}</span>
-          </p>
-          <code-block bind-source="snippet.script" bind-language="snippetLanguage" theme="a11y-dark"></code-block>
+          <snippet-details bind-snippet="snippet"></snippet-details>
         </template>
-        <template if="error"><p class="message" role="alert">{{ error }}</p></template>
+        <template if="error"
+          ><p class="message" role="alert">{{ error }}</p></template
+        >
       </main>
       <script setup>
-        import { computed, onInit, ref } from "@li3/web";
+        import { computed, onDestroy, onInit, ref } from "@li3/web";
 
         const registry = "https://registry.snippets.run";
 
@@ -281,32 +361,145 @@
           const state = JSON.parse(stateElement?.textContent || "null");
           const snippet = ref(state && !state.listing ? state : null);
           const listing = ref(Boolean(state?.listing));
-          const snippets = ref(
-            (state?.snippets || []).map((item) => ({
-              ...item,
-              href: `/s/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.repo)}`,
-            })),
-          );
+          const snippets = ref(state?.snippets || []);
           const user = ref(null);
           const authLoading = ref(true);
+          const loading = ref(false);
           const error = ref("");
+          let requestId = 0;
           const userName = computed(
-            () => user.value?.name || user.value?.preferred_username || user.value?.email || "Account",
+            () =>
+              user.value?.name ||
+              user.value?.preferred_username ||
+              user.value?.email?.split("@")[0] ||
+              "Signed in",
           );
           const userEmail = computed(() => user.value?.email || "Signed in");
-          const userPicture = computed(() => user.value?.picture || user.value?.avatar || "");
-          const userInitials = computed(() => userName.value.slice(0, 2).toUpperCase());
-          const shortCommit = computed(() => snippet.value?.commit?.slice(0, 12) || "");
-          const snippetLanguage = computed(() => {
-            const languages = { bash: "bash", node: "javascript", python: "python" };
-            return languages[snippet.value?.type] || "plaintext";
-          });
+          const userPicture = computed(
+            () => user.value?.picture || user.value?.avatar || "",
+          );
+          const userInitials = computed(() =>
+            userName.value.slice(0, 2).toUpperCase(),
+          );
           const loginHref = `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
 
-          onInit(async () => {
-            if (!snippet.value && !listing.value) {
-              error.value = "This snippet could not be found.";
+          async function loadListing() {
+            const id = ++requestId;
+            listing.value = true;
+            snippet.value = null;
+            error.value = "";
+            if (snippets.value.length) {
+              loading.value = false;
+              return;
             }
+            loading.value = true;
+            try {
+              const response = await fetch(`${registry}/api/snippets`, {
+                headers: { Accept: "application/json" },
+              });
+              if (!response.ok) {
+                throw new Error(`Could not load snippets (${response.status})`);
+              }
+              const data = await response.json();
+              if (id === requestId) {
+                snippets.value = Array.isArray(data) ? data : [];
+              }
+            } catch (reason) {
+              if (id === requestId) {
+                error.value = reason.message;
+              }
+            } finally {
+              if (id === requestId) {
+                loading.value = false;
+              }
+            }
+          }
+
+          async function loadSnippet(owner, repo) {
+            const id = ++requestId;
+            listing.value = false;
+            snippet.value = null;
+            error.value = "";
+            loading.value = true;
+            try {
+              const response = await fetch(
+                `${registry}/api/snippets/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+                { headers: { Accept: "application/json" } },
+              );
+              if (!response.ok) {
+                throw new Error(`Snippet not found (${response.status})`);
+              }
+              const data = await response.json();
+              if (id === requestId) {
+                snippet.value = data;
+              }
+            } catch (reason) {
+              if (id === requestId) {
+                error.value = reason.message;
+              }
+            } finally {
+              if (id === requestId) {
+                loading.value = false;
+              }
+            }
+          }
+
+          function pathFor(owner, repo) {
+            return `/s/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+          }
+
+          function openSnippet(item) {
+            history.pushState(null, "", pathFor(item.owner, item.repo));
+            void loadSnippet(item.owner, item.repo);
+          }
+
+          function goHome() {
+            if (location.pathname !== "/") {
+              history.pushState(null, "", "/");
+            }
+            void loadListing();
+          }
+
+          function routeFromURL() {
+            let parts;
+            try {
+              parts = location.pathname
+                .split("/")
+                .filter(Boolean)
+                .map(decodeURIComponent);
+            } catch {
+              requestId += 1;
+              listing.value = false;
+              snippet.value = null;
+              error.value = "Page not found.";
+              loading.value = false;
+              return;
+            }
+            if (!parts.length) {
+              void loadListing();
+            } else if (parts.length === 3 && parts[0] === "s") {
+              if (
+                snippet.value?.owner === parts[1] &&
+                snippet.value?.repo === parts[2]
+              ) {
+                listing.value = false;
+                error.value = "";
+                loading.value = false;
+              } else {
+                void loadSnippet(parts[1], parts[2]);
+              }
+            } else {
+              requestId += 1;
+              listing.value = false;
+              snippet.value = null;
+              error.value = "Page not found.";
+              loading.value = false;
+            }
+          }
+
+          onInit(async () => {
+            window.addEventListener("popstate", routeFromURL);
+            routeFromURL();
             try {
               const response = await fetch(`${registry}/auth/me`, {
                 credentials: "include",
@@ -322,15 +515,17 @@
               authLoading.value = false;
             }
           });
+          onDestroy(() => window.removeEventListener("popstate", routeFromURL));
 
           return {
             authLoading,
             error,
+            goHome,
+            loading,
+            openSnippet,
             listing,
             loginHref,
-            shortCommit,
             snippet,
-            snippetLanguage,
             snippets,
             user,
             userEmail,
