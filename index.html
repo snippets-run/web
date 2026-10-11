@@ -6,6 +6,7 @@
     <meta name="description" content="A fast, read-only view of a runnable snippet." />
     <title>Snippet · snippets.run</title>
     <link rel="icon" href="/assets/icon.svg" />
+    <link rel="component" href="https://sodium.static.apphor.de/code-block.html" />
     <script type="importmap">
       { "imports": { "@li3/": "https://at-li3.static.apphor.de/" } }
     </script>
@@ -154,22 +155,13 @@
           0.72rem ui-monospace,
           monospace;
       }
-      .source {
+      code-block {
+        display: block;
         overflow: auto;
         max-height: calc(100vh - 14rem);
         min-height: 10rem;
-        margin: 0;
-        padding: 1rem 1.1rem;
         border: 1px solid #233246;
         border-radius: 0.6rem;
-        background: #101927;
-        color: #e2e8f0;
-        font:
-          0.8rem/1.7 ui-monospace,
-          SFMono-Regular,
-          Consolas,
-          monospace;
-        tab-size: 2;
       }
       .message {
         padding: 1rem;
@@ -223,7 +215,7 @@
         main {
           margin-top: 1.5rem;
         }
-        .source {
+        code-block {
           max-height: none;
         }
       }
@@ -275,7 +267,7 @@
             <span>{{ snippet.entrypoint }}</span>
             <span>{{ shortCommit }}</span>
           </p>
-          <pre class="source"><code>{{ snippet.script }}</code></pre>
+          <code-block bind-source="snippet.script" bind-language="snippetLanguage" theme="a11y-dark"></code-block>
         </template>
         <template if="error"><p class="message" role="alert">{{ error }}</p></template>
       </main>
@@ -305,6 +297,10 @@
           const userPicture = computed(() => user.value?.picture || user.value?.avatar || "");
           const userInitials = computed(() => userName.value.slice(0, 2).toUpperCase());
           const shortCommit = computed(() => snippet.value?.commit?.slice(0, 12) || "");
+          const snippetLanguage = computed(() => {
+            const languages = { bash: "bash", node: "javascript", python: "python" };
+            return languages[snippet.value?.type] || "plaintext";
+          });
           const loginHref = `${registry}/auth/login?return_to=${encodeURIComponent(location.href)}`;
 
           onInit(async () => {
@@ -334,6 +330,7 @@
             loginHref,
             shortCommit,
             snippet,
+            snippetLanguage,
             snippets,
             user,
             userEmail,
